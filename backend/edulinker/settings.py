@@ -10,6 +10,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'change-me')
 DEBUG = os.getenv('DEBUG', '0') == '1'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Next.js
+    "http://localhost:19006", # Expo web (si aplica)
+]
+CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -62,14 +67,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'edulinker.wsgi.application'
 
+# Celery (dev)
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+
+EVENT_REMINDER_HOURS_AHEAD = int(os.getenv("EVENT_REMINDER_HOURS_AHEAD", "24"))
+SURVEY_REMINDER_HOURS_AHEAD = int(os.getenv("SURVEY_REMINDER_HOURS_AHEAD", "24"))
+COMPLAINT_ESCALATION_DAYS = int(os.getenv("COMPLAINT_ESCALATION_DAYS", "5"))
+
+from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     "event-reminders-every-hour": {
         "task": "core.tasks.send_event_reminders",
         "schedule": 3600.0,
-    }
+    },
+    "complaints-escalation-daily": {
+        "task": "core.tasks.escalate_stale_complaints",
+        "schedule": crontab(hour=7, minute=0),
+    },
+    "surveys-reminder-every-3h": {
+        "task": "core.tasks.remind_surveys_to_close",
+        "schedule": 10800.0,
+    },
 }
+
 
 DATABASES = {
     'default': {
@@ -112,5 +133,3 @@ USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [origin for origin in os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if origin]
-CORS_ALLOW_CREDENTIALS = True

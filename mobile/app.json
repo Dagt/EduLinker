@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "EduLinker",
+    "slug": "edulinker",
+    "scheme": "edulinker",
+    "android": { "package": "com.edulinker.app" },
+    "ios": { "bundleIdentifier": "com.edulinker.app" }
+  }
+}

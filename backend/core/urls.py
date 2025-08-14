@@ -1,5 +1,6 @@
 # backend/core/urls.py
 from django.urls import path
+from .storage_views import PresignUploadView
 from .views import (
     ComplaintCreateView, ComplaintDetailView, ComplaintMessageCreateView, ComplaintStatusUpdateView,
     EventAttachmentCreateView, EventCancelView, EventPhotoCreateView, EventListCreateView,
@@ -21,5 +22,6 @@ urlpatterns = [
     path("events/<int:pk>/attachments/", EventAttachmentCreateView.as_view(), name="event-attachment-create"),
     path("events/<int:pk>/photos/", EventPhotoCreateView.as_view(), name="event-photo-create"),
     path("activity-photos/", ActivityPhotoCreateView.as_view(), name="activity-photo-create"),
+    path("storage/presign-upload/", PresignUploadView.as_view(), name="presign-upload"),
 ]
 

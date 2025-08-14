@@ -1,0 +1,7 @@
+# S3/MinIO
+AWS_ACCESS_KEY_ID=minio
+AWS_SECRET_ACCESS_KEY=minio123
+AWS_STORAGE_BUCKET_NAME=edulinker
+S3_ENDPOINT_URL=http://localhost:9000
+S3_PUBLIC_URL_PREFIX=http://localhost:9000/edulinker
+AWS_REGION=us-east-1
