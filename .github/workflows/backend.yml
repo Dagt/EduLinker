@@ -1,0 +1,33 @@
+name: Backend CI
+on: [push, pull_request]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: edulinker
+          POSTGRES_USER: edulinker
+          POSTGRES_PASSWORD: edulinker
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U edulinker -d edulinker"
+          --health-interval=10s --health-timeout=5s --health-retries=5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    env:
+      DATABASE_URL: postgres://edulinker:edulinker@localhost:5432/edulinker
+      REDIS_URL: redis://localhost:6379/0
+      DJANGO_SETTINGS_MODULE: edulinker.settings
+      SECRET_KEY: ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r backend/requirements.txt
+      - run: |
+          cd backend
+          python manage.py migrate --noinput
+          pytest -q

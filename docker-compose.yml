@@ -1,0 +1,96 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: edulinker
+      POSTGRES_USER: edulinker
+      POSTGRES_PASSWORD: edulinker
+    ports: ["5432:5432"]
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data --console-address ":9001"
+    ports: ["9000:9000", "9001:9001"]
+    volumes:
+      - minio_data:/data
+
+  create-bucket:
+    image: minio/mc
+    depends_on: [minio]
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minio minio123 &&
+      mc mb -p local/edulinker || true &&
+      mc anonymous set download local/edulinker || true
+      "
+
+  api:
+    build: ./backend
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        gunicorn edulinker.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+      "
+    environment:
+      DATABASE_URL: postgres://edulinker:edulinker@db:5432/edulinker
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SETTINGS_MODULE: edulinker.settings
+      SECRET_KEY: devsecret
+      ALLOWED_HOSTS: "*"
+      CORS_ALLOWED_ORIGINS: "http://web:3000,http://localhost:3000"
+      # S3/MinIO
+      AWS_ACCESS_KEY_ID: minio
+      AWS_SECRET_ACCESS_KEY: minio123
+      AWS_STORAGE_BUCKET_NAME: edulinker
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_PUBLIC_URL_PREFIX: http://localhost:9000/edulinker
+      AWS_REGION: us-east-1
+      # Celery config
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on: [db, redis, minio, create-bucket]
+    ports: ["8000:8000"]
+
+  celery:
+    build: ./backend
+    command: celery -A edulinker worker -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: edulinker.settings
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on: [api, redis]
+
+  celery-beat:
+    build: ./backend
+    command: celery -A edulinker beat -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: edulinker.settings
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on: [api, redis]
+
+  web:
+    build: ./web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      NEXT_PUBLIC_SCHOOL_ID: "1"
+    ports: ["3000:3000"]
+    command: npm run dev
+    volumes:
+      - ./web:/app
+    depends_on: [api]
+
+volumes:
+  db_data:
+  minio_data:

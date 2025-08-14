@@ -1,0 +1,28 @@
+import pytest
+from django.urls import reverse
+from rest_framework.test import APIClient
+from core.models import School, SchoolYear, User, Group
+
+@pytest.mark.django_db
+def test_parent_can_create_private_complaint():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(school=school, name="cy", start_date="2025-08-01", end_date="2026-07-01", is_current=True)
+    teacher = User.objects.create_user(email="t@x.com", password="p", role="MAESTRO_TITULAR", school=school)
+    group = Group.objects.create(school=school, school_year=sy, name="5A", grade_level=5, homeroom_teacher=teacher)
+    parent = User.objects.create_user(email="p@x.com", password="p", role="PADRE", school=school)
+
+    client = APIClient()
+    client.credentials(HTTP_X_SCHOOL_ID=str(school.id))
+    # Login
+    res = client.post("/api/v1/auth/login/", {"username":"p@x.com","password":"p"}, format="json")
+    assert res.status_code == 200
+    token = res.data["access"]
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id))
+
+    # Crear queja
+    res = client.post("/api/v1/complaints/", {
+        "group_id": group.id,
+        "target_teacher_id": teacher.id,
+        "description": "Prueba"
+    }, format="json")
+    assert res.status_code in (200,201)
