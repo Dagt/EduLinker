@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../BibliotecaNovohispana/.idea/BibliotecaNovohispana.iml" filepath="$PROJECT_DIR$/../BibliotecaNovohispana/.idea/BibliotecaNovohispana.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/EduLinker.iml" filepath="$PROJECT_DIR$/.idea/EduLinker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../TradeBot/.idea/TradeBot.iml" filepath="$PROJECT_DIR$/../TradeBot/.idea/TradeBot.iml" />
+    </modules>
+  </component>
+</project>

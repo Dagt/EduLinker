@@ -3,7 +3,11 @@ from django.utils.dateparse import parse_datetime
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-
+from rest_framework import generics, permissions
+from rest_framework.exceptions import PermissionDenied
+from .models import Event
+from .serializers import EventSerializer
+from .permissions import can_view_event, is_director
 from .models import Group, Complaint, ComplaintMessage, Event, SchoolYear
 from .permissions import (
     CanAccessComplaint,
@@ -187,3 +191,23 @@ class ActivityPhotoCreateView(generics.CreateAPIView):
         serializer.save(
             school_id=self.request.school_id, uploaded_by=self.request.user
         )
+
+class EventDetailView(generics.RetrieveAPIView):
+    serializer_class = EventSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Event.objects.filter(school_id=self.request.school_id)
+
+class EventUpdateView(generics.UpdateAPIView):
+    serializer_class = EventSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Event.objects.filter(school_id=self.request.school_id)
+
+    def update(self, request, *args, **kwargs):
+        event = self.get_object()
+        if not (is_director(request.user) or event.created_by_id == request.user.id):
+            raise PermissionDenied("Only the creator or director may edit this event")
+        return super().update(request, *args, **kwargs)

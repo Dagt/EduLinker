@@ -23,6 +23,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_spectacular',
     'core',
+    'surveys',
+    'fundraising',
+    'analytics',
+    'chat',
+    'suggestions',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +61,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'edulinker.wsgi.application'
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+CELERY_BEAT_SCHEDULE = {
+    "event-reminders-every-hour": {
+        "task": "core.tasks.send_event_reminders",
+        "schedule": 3600.0,
+    }
+}
 
 DATABASES = {
     'default': {
