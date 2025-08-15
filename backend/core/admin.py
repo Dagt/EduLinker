@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     School, SchoolYear, User, Student, Group, GroupMembership,
     SpecialistAssignment, VocalAssignment,
-    Complaint, ComplaintMessage, ComplaintParticipant,
+    Complaint, ComplaintMessage,
     Event, EventGroupAudience, EventAttachment, EventPhoto,
     Homework, ActivityPhoto
 )
@@ -63,9 +63,6 @@ class ComplaintAdmin(admin.ModelAdmin):
     search_fields = ("description",)
     inlines = [ComplaintMessageInline]
 
-@admin.register(ComplaintParticipant)
-class ComplaintParticipantAdmin(admin.ModelAdmin):
-    list_display = ("id","complaint","user","role_in_thread","added_by","added_at")
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
@@ -79,11 +76,11 @@ class EventGroupAudienceAdmin(admin.ModelAdmin):
 
 @admin.register(EventAttachment)
 class EventAttachmentAdmin(admin.ModelAdmin):
-    list_display = ("id","event","uploader","filename","mime_type","created_at")
+    list_display = ("id","event","file_url","filename","mime")
 
 @admin.register(EventPhoto)
 class EventPhotoAdmin(admin.ModelAdmin):
-    list_display = ("id","event","uploader","caption","created_at")
+    list_display = ("id","event","photo_url","caption","created_at")
 
 @admin.register(Homework)
 class HomeworkAdmin(admin.ModelAdmin):
