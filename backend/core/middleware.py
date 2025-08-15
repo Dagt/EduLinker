@@ -9,5 +9,8 @@ class SchoolMiddleware:
         school_id = request.META.get('HTTP_X_SCHOOL_ID')
         if not school_id:
             return JsonResponse({'detail': 'X-School-ID header missing'}, status=400)
-        request.school_id = school_id
+        try:
+            request.school_id = int(school_id)
+        except (TypeError, ValueError):
+            return JsonResponse({'detail': 'Invalid X-School-ID'}, status=400)
         return self.get_response(request)

@@ -1,5 +1,8 @@
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from django.db.models import Sum
+from decimal import Decimal
 from core.permissions import is_director, is_maestro_titular, is_vocal
 from .models import FundraisingEvent, FundraisingGroupLedger, ExpenseEvidence
 from .serializers import FundraisingEventSerializer, FundraisingGroupLedgerSerializer, ExpenseEvidenceSerializer
@@ -18,6 +21,33 @@ class FundraisingEventListCreateView(generics.ListCreateAPIView):
             raise PermissionDenied("Only directors can create fundraising events")
         school_year = SchoolYear.objects.filter(school_id=self.request.school_id, is_current=True).first()
         serializer.save(school_id=self.request.school_id, school_year=school_year)
+
+
+class FundraisingEventSummaryView(generics.RetrieveAPIView):
+    queryset = FundraisingEvent.objects.all()
+    serializer_class = FundraisingEventSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return FundraisingEvent.objects.filter(school_id=self.request.school_id)
+
+    def retrieve(self, request, *args, **kwargs):
+        event = self.get_object()
+        ledgers = (
+            FundraisingGroupLedger.objects.filter(event=event)
+            .values("group_id", "group__name")
+            .annotate(total=Sum("amount_collected"))
+        )
+        expenses = ExpenseEvidence.objects.filter(ledger__event=event)
+        total = sum(l["total"] for l in ledgers)
+        total = Decimal(total).quantize(Decimal("0.00"))
+        data = {
+            "event": FundraisingEventSerializer(event).data,
+            "ledgers": list(ledgers),
+            "total_collected": str(total),
+            "expenses": ExpenseEvidenceSerializer(expenses, many=True).data,
+        }
+        return Response(data)
 
 class FundraisingLedgerCreateView(generics.CreateAPIView):
     serializer_class = FundraisingGroupLedgerSerializer

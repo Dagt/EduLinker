@@ -1,7 +1,8 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
-from .models import DeviceToken
-from .serializers import DeviceTokenSerializer
+
+from .models import DeviceToken, NotificationPreference
+from .serializers import DeviceTokenSerializer, NotificationPreferenceSerializer
 
 class DeviceTokenRegisterView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -31,3 +32,27 @@ class DeviceTokenDeactivateView(generics.DestroyAPIView):
         obj.active = False
         obj.save(update_fields=["active"])
         return Response(status=204)
+
+
+class NotificationPreferenceListCreateView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = NotificationPreferenceSerializer
+
+    def get_queryset(self):
+        return NotificationPreference.objects.filter(
+            school_id=self.request.school_id, user=self.request.user
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(school_id=self.request.school_id, user=self.request.user)
+
+
+class NotificationPreferenceDetailView(generics.RetrieveUpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = NotificationPreferenceSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        return NotificationPreference.objects.filter(
+            school_id=self.request.school_id, user=self.request.user
+        )

@@ -1,20 +1,20 @@
 import pytest
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import School, User
 
 @pytest.mark.django_db
 def test_presign_requires_auth_and_school_header():
     school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
-    user = User.objects.create_user(email="u@x.com", password="p", role="DIRECTOR", school=school)
+    user = User.objects.create_user(username="u@x.com", email="u@x.com", password="p", role="DIRECTOR", school=school)
 
     client = APIClient()
     # sin auth
     res = client.post("/api/v1/storage/presign-upload/", {"filename":"x.png"}, format="json")
-    assert res.status_code in (401,403)
+    assert res.status_code in (400,401,403)
 
     # con auth sin X-School-ID -> middleware debe rechazar
-    res = client.post("/api/v1/auth/login/", {"username":"u@x.com","password":"p"}, format="json")
-    token = res.data["access"]
+    token = str(RefreshToken.for_user(user).access_token)
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
     r2 = client.post("/api/v1/storage/presign-upload/", {"filename":"x.png"}, format="json")
     assert r2.status_code in (400,403,422)

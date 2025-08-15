@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from core.models import Complaint, ComplaintMessage, User
+from django.conf import settings
 from notifications.tasks import push_to_users
 
 def _director_ids(school_id):
@@ -13,13 +14,17 @@ def notify_new_complaint(sender, instance: Complaint, created, **kwargs):
     school_id = instance.school_id
     # Destinatarios: maestro objetivo + directores (en copia)
     user_ids = [instance.target_teacher_id] + _director_ids(school_id)
-    push_to_users.delay(
+    params = dict(
         school_id=school_id,
         user_ids=user_ids,
         title="Nueva queja",
         body=f"Queja #{instance.id}: {instance.description[:80]}",
         data={"type": "complaint", "complaint_id": instance.id}
     )
+    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+        push_to_users(**params)
+    else:
+        push_to_users.delay(**params)
 
 @receiver(post_save, sender=ComplaintMessage)
 def notify_new_complaint_message(sender, instance: ComplaintMessage, created, **kwargs):
@@ -31,10 +36,14 @@ def notify_new_complaint_message(sender, instance: ComplaintMessage, created, **
     targets = set([c.created_by_id, c.target_teacher_id] + _director_ids(school_id))
     if instance.author_id in targets: targets.remove(instance.author_id)
     if targets:
-        push_to_users.delay(
+        params = dict(
             school_id=school_id,
             user_ids=list(targets),
             title="Nuevo mensaje en queja",
             body=instance.message[:80],
             data={"type": "complaint_message", "complaint_id": c.id}
         )
+        if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+            push_to_users(**params)
+        else:
+            push_to_users.delay(**params)

@@ -1,10 +1,15 @@
 # backend/notifications/tasks.py
 from celery import shared_task
-from .models import DeviceToken
-from .providers.expo import ExpoProvider
+
+from ..models import DeviceToken, ExpoTicket
+from .expo import ExpoProvider
 
 def _active_tokens_for_users(user_ids, school_id):
-    return list(DeviceToken.objects.filter(active=True, school_id=school_id, user_id__in=user_ids).values_list("token", flat=True))
+    return list(
+        DeviceToken.objects.filter(
+            active=True, school_id=school_id, user_id__in=user_ids
+        ).values_list("token", flat=True)
+    )
 
 @shared_task
 def push_to_users(school_id: int, user_ids: list[int], title: str, body: str, data: dict | None = None):
@@ -12,24 +17,36 @@ def push_to_users(school_id: int, user_ids: list[int], title: str, body: str, da
     if not tokens:
         return {"sent": 0}
     provider = ExpoProvider()
-    tickets, receipts = provider.send_and_get_receipts(tokens, title=title, body=body, data=data or {})
-    # analizar receipts y desactivar tokens inválidos
+    token_ticket_pairs, receipts = provider.send_and_get_receipts(
+        tokens, title=title, body=body, data=data or {}
+    )
+
+    # store ticket -> token mapping
+    ExpoTicket.objects.bulk_create(
+        [ExpoTicket(ticket_id=ticket, token=token) for token, ticket in token_ticket_pairs]
+    )
+
+    # analyse receipts and deactivate invalid tokens
     try:
         data_obj = receipts.get("data", {})
-        invalid_tokens = []
-        # receipts data: { ticket_id: { status: 'ok'|'error', details: { error: 'DeviceNotRegistered' | ... } } }
-        for _, info in data_obj.items():
-            if info.get("status") == "error":
-                err = (info.get("details") or {}).get("error")
-                if err in {"DeviceNotRegistered", "MessageTooBig", "MessageRateExceeded"}:
-                    # en DeviceNotRegistered podemos marcar inactivos; en otros quizá solo loggear
-                    # aquí no tenemos el token directo, pero Expo no devuelve token por receipt.
-                    # Estrategia: si recibimos "DeviceNotRegistered" en lote grande, hacer un garbage-collect opcional por /validate endpoint (no existe) o limpiar manualmente a demanda.
-                    pass
-        # alternativa pragmática: si recibimos "DeviceNotRegistered", marcar todos tokens que dieron 410/‘error’ como inactivos en un flujo más avanzado (no expuesto por tickets aquí).
-        # Para simplificar, omitimos desactivación automática exacta por token (Expo no mapea receipt->token sin guardar ticket-token mapping). Si quieres exactitud, guarda un mapping ticket->token al enviar.
-
+        invalid_ticket_ids = [
+            tid
+            for tid, info in data_obj.items()
+            if info.get("status") == "error"
+            and (info.get("details") or {}).get("error") == "DeviceNotRegistered"
+        ]
+        if invalid_ticket_ids:
+            tokens_to_deactivate = list(
+                ExpoTicket.objects.filter(ticket_id__in=invalid_ticket_ids).values_list(
+                    "token", flat=True
+                )
+            )
+            if tokens_to_deactivate:
+                DeviceToken.objects.filter(token__in=tokens_to_deactivate).update(active=False)
+            ExpoTicket.objects.filter(ticket_id__in=invalid_ticket_ids).delete()
+        # cleanup processed tickets
+        ExpoTicket.objects.filter(ticket_id__in=data_obj.keys()).delete()
     except Exception:
         pass
 
-    return {"sent": len(tokens), "tickets": len(tickets)}
+    return {"sent": len(tokens), "tickets": len(token_ticket_pairs)}

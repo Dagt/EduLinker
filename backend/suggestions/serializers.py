@@ -33,3 +33,9 @@ class SuggestionSerializer(serializers.ModelSerializer):
         if target_teacher and target_teacher.school_id != school_id:
             raise serializers.ValidationError("Teacher mismatch for school")
         return attrs
+
+
+class SuggestionStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Suggestion
+        fields = ["status"]
