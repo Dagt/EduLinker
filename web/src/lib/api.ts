@@ -20,3 +20,23 @@ export async function apiPost<T>(path: string, body: any, token?: string): Promi
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
   return res.json();
 }
+
+// Suggestion status update
+export async function updateSuggestionStatus(id: number, status: string, token?: string) {
+  return apiPost(`/suggestions/${id}/status`, { status }, token);
+}
+
+// Fundraising summaries
+export async function getFundraisingSummary(token?: string) {
+  return apiGet(`/fundraising/summary`, token);
+}
+
+// Analytics dashboard
+export async function getAnalytics(token?: string) {
+  return apiGet(`/analytics`, token);
+}
+
+// Survey voting
+export async function voteSurvey(id: number, choiceId: number, token?: string) {
+  return apiPost(`/surveys/${id}/vote`, { choiceId }, token);
+}
