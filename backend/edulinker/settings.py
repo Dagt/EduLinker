@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_spectacular',
     'core',
-    'core.apps.CoreConfig',
     'surveys',
     'fundraising',
     'analytics',
@@ -49,7 +48,7 @@ MIDDLEWARE = [
     'core.middleware.SchoolMiddleware',
 ]
 
-ROOT_URLCONF = 'edulinker.urls.py'
+ROOT_URLCONF = 'edulinker.urls'
 
 TEMPLATES = [
     {
@@ -72,6 +71,7 @@ WSGI_APPLICATION = 'edulinker.wsgi.application'
 # Celery (dev)
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER") == "1"
 
 EVENT_REMINDER_HOURS_AHEAD = int(os.getenv("EVENT_REMINDER_HOURS_AHEAD", "24"))
 SURVEY_REMINDER_HOURS_AHEAD = int(os.getenv("SURVEY_REMINDER_HOURS_AHEAD", "24"))
@@ -94,16 +94,24 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'edulinker'),
-        'USER': os.getenv('POSTGRES_USER', 'edulinker'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'edulinker'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+if os.getenv('USE_SQLITE') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'edulinker'),
+            'USER': os.getenv('POSTGRES_USER', 'edulinker'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'edulinker'),
+            'HOST': os.getenv('POSTGRES_HOST', 'db'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        }
+    }
 
 AUTH_USER_MODEL = 'core.User'
 
@@ -133,5 +141,5 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-DEFAULT_AUTO_FIELD = 'django.db.models.py.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
