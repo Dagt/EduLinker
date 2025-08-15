@@ -4,8 +4,8 @@ const BASE = "http://10.0.2.2:8000/api/v1"; // Android emu
 export async function getToken(){ return await SecureStore.getItemAsync("tk"); }
 export async function setToken(t: string){ await SecureStore.setItemAsync("tk", t); }
 
-function headers(t?: string){
-  const h: any = { "Content-Type":"application/json", "X-School-ID":"1" };
+export function headers(t?: string){
+  const h: any = { "Content-Type":"application/json", "X-School-ID": process.env.EXPO_PUBLIC_SCHOOL_ID || "1" };
   if (t) h.Authorization = `Bearer ${t}`;
   return h;
 }
