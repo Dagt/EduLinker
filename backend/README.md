@@ -45,6 +45,15 @@ Populate the database with sample objects:
 python manage.py seed_demo
 ```
 
+### Default Credentials
+
+The demo seeding command creates users with these credentials:
+
+- Director: `director@demo.com` / `demo123`
+- Homeroom teachers: `5A@demo.com`, `5B@demo.com`, `3A@demo.com`, `3B@demo.com` / `demo123`
+- Specialist teachers: `ingles@demo.com`, `computación@demo.com`, `ef@demo.com` / `demo123`
+- Parents: `<enrollment_code>@familia.com` / `demo123`
+
 ## Authentication
 
 Use JWT endpoints:
