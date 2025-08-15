@@ -61,4 +61,13 @@ class ChatMessageListCreateView(generics.ListCreateAPIView):
         if not can_post_chat(self.request.user, group):
             raise PermissionDenied("Cannot send message")
         chat, _ = GroupChat.objects.get_or_create(group=group)
-        serializer.save(chat=chat, author=self.request.user)
+        message = serializer.save(chat=chat, author=self.request.user)
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="chat_message",
+            entity_id=message.id,
+            metadata={"group_id": group.id},
+        )

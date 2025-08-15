@@ -85,6 +85,23 @@ class ComplaintStatusUpdateView(generics.UpdateAPIView):
     def get_queryset(self):
         return Complaint.objects.filter(school_id=self.request.school_id)
 
+    def perform_update(self, serializer):
+        complaint = self.get_object()
+        user = self.request.user
+        if not (is_director(user) or user == complaint.target_teacher):
+            raise PermissionDenied("Cannot change status")
+        prev_status = complaint.status
+        serializer.save()
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="status_change",
+            entity_type="complaint",
+            entity_id=complaint.id,
+            metadata={"from": prev_status, "to": serializer.instance.status},
+        )
+
 
 class EventListCreateView(generics.ListCreateAPIView):
     serializer_class = EventSerializer
@@ -124,10 +141,19 @@ class EventListCreateView(generics.ListCreateAPIView):
         school_year = SchoolYear.objects.filter(
             school_id=self.request.school_id, is_current=True
         ).first()
-        serializer.save(
+        event = serializer.save(
             school_id=self.request.school_id,
             school_year=school_year,
             created_by=user,
+        )
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="create",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={"scope": event.scope},
         )
 
 
