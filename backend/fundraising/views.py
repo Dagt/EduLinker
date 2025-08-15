@@ -62,7 +62,16 @@ class FundraisingLedgerCreateView(generics.CreateAPIView):
             or (is_vocal(user) and VocalAssignment.objects.filter(group=group, parent=user, active=True).exists())
         ):
             raise PermissionDenied("Not allowed to record ledger for this group")
-        serializer.save(created_by=user)
+        ledger = serializer.save(created_by=user)
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="create",
+            entity_type="fundraising_ledger",
+            entity_id=ledger.id,
+            metadata={"amount_collected": str(ledger.amount_collected)},
+        )
 
 class ExpenseEvidenceCreateView(generics.CreateAPIView):
     serializer_class = ExpenseEvidenceSerializer

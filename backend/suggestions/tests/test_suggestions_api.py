@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import School, SchoolYear, Group, User
+from audit.models import AuditLog
 
 
 @pytest.mark.django_db
@@ -68,3 +69,4 @@ def test_parent_can_create_suggestion_and_teacher_updates_status():
     )
     assert res.status_code == 200
     assert res.json()["status"] == "IN_REVIEW"
+    assert AuditLog.objects.filter(action="status_change", entity_type="suggestion", entity_id=suggestion_id).exists()

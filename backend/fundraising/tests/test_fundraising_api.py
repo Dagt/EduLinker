@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import School, SchoolYear, Group, User, VocalAssignment
 from fundraising.models import FundraisingGroupLedger
+from audit.models import AuditLog
 
 
 @pytest.mark.django_db
@@ -73,6 +74,7 @@ def test_director_event_and_vocal_ledger_and_summary():
     )
     assert res.status_code in (200, 201)
     assert FundraisingGroupLedger.objects.filter(event_id=event_id).count() == 1
+    assert AuditLog.objects.filter(action="create", entity_type="fundraising_ledger").exists()
 
     # summary endpoint
     token = str(RefreshToken.for_user(director).access_token)

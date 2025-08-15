@@ -60,4 +60,14 @@ class SuggestionStatusUpdateView(generics.UpdateAPIView):
         user = self.request.user
         if not (is_director(user) or user == suggestion.target_teacher):
             raise PermissionDenied("Cannot change status")
+        prev_status = suggestion.status
         serializer.save()
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="status_change",
+            entity_type="suggestion",
+            entity_id=suggestion.id,
+            metadata={"from": prev_status, "to": serializer.instance.status},
+        )
