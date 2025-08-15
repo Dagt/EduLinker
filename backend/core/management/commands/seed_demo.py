@@ -93,7 +93,7 @@ class Command(BaseCommand):
                     email=f"{student.enrollment_code.lower()}@familia.com", school=school,
                     defaults=dict(first_name=pf, last_name=pl, role="PADRE", password=make_password("demo123"))
                 )
-                # ParentStudent relación ya está en models; se maneja dentro de core (si tienes el modelo, crea aquí)
+                # ParentStudent relación ya está en models.py; se maneja dentro de core (si tienes el modelo, crea aquí)
                 from core.models import ParentStudent
                 ParentStudent.objects.get_or_create(school=school, parent=parent, student=student, defaults={"relationship":"tutor"})
                 parents.append(parent)

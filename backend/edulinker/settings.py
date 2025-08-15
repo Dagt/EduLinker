@@ -28,11 +28,13 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_spectacular',
     'core',
+    'core.apps.CoreConfig',
     'surveys',
     'fundraising',
     'analytics',
     'chat',
     'suggestions',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -47,7 +49,7 @@ MIDDLEWARE = [
     'core.middleware.SchoolMiddleware',
 ]
 
-ROOT_URLCONF = 'edulinker.urls'
+ROOT_URLCONF = 'edulinker.urls.py'
 
 TEMPLATES = [
     {
@@ -131,5 +133,5 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.py.BigAutoField'
 

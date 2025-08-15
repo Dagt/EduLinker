@@ -1,9 +1,16 @@
 {
   "expo": {
-    "name": "EduLinker",
-    "slug": "edulinker",
-    "scheme": "edulinker",
-    "android": { "package": "com.edulinker.app" },
-    "ios": { "bundleIdentifier": "com.edulinker.app" }
+    "plugins": [
+      [
+        "expo-notifications",
+        { "icon": "./assets/notification-icon.png" }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "useNextNotificationsApi": true
+    }
   }
 }

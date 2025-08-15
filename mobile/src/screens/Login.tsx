@@ -1,6 +1,9 @@
-import { useState } from "react";
+
+import { registerForPushNotificationsAsync } from "../notifications";
 import { View, Text, TextInput, Button, Alert } from "react-native";
+import { useState } from "react";
 import { setToken } from "../api";
+import { apiPostAuth } from "../api";
 
 export default function Login({ onLoggedIn }: { onLoggedIn: ()=>void }){
   const [email,setEmail]=useState(""); const [password,setPassword]=useState("");
@@ -13,6 +16,12 @@ export default function Login({ onLoggedIn }: { onLoggedIn: ()=>void }){
     if(!r.ok){ Alert.alert("Error","Credenciales inválidas"); return; }
     const data = await r.json();
     await setToken(data.access);
+    const expoToken = await registerForPushNotificationsAsync();
+        if (expoToken) {
+            try {
+                await apiPostAuth("/devices/register/", { token: expoToken, platform: "android" }); // o "ios"
+            } catch(e){}
+        }
     onLoggedIn();
   }
   return (

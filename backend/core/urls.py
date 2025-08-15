@@ -1,4 +1,4 @@
-# backend/core/urls.py
+# backend/core/urls.py.py
 from django.urls import path
 from .storage_views import PresignUploadView
 from .views import (
