@@ -1,24 +1,27 @@
-from rest_framework import serializers
-from .models import DeviceToken
-
-class DeviceTokenSerializer(serializers.ModelSerializer):
+# backend/notifications/serializers.py (añade)
+from .models import NotificationPreference
+class NotificationPreferenceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DeviceToken
-        fields = ["id", "token", "platform", "active", "created_at", "updated_at"]
-        read_only_fields = ["id", "active", "created_at", "updated_at"]
+        model = NotificationPreference
+        fields = ["id","kind","enabled"]
 
-    def create(self, validated_data):
-        request = self.context["request"]
-        school_id = request.school_id
-        user = request.user
-        token = validated_data["token"]
-        obj, _ = DeviceToken.objects.update_or_create(
-            token=token,
-            defaults={
-                "school_id": school_id,
-                "user": user,
-                "platform": validated_data.get("platform", "android"),
-                "active": True,
-            },
-        )
-        return obj
+# backend/notifications/views.py (añade)
+from .models import NotificationPreference
+from .serializers import NotificationPreferenceSerializer
+from rest_framework import generics, permissions
+
+class NotificationPreferenceListCreateView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = NotificationPreferenceSerializer
+    def get_queryset(self):
+        return NotificationPreference.objects.filter(school_id=self.request.school_id, user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(school_id=self.request.school_id, user=self.request.user)
+
+class NotificationPreferenceDetailView(generics.RetrieveUpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = NotificationPreferenceSerializer
+    lookup_field = "pk"
+    def get_queryset(self):
+        return NotificationPreference.objects.filter(school_id=self.request.school_id, user=self.request.user)

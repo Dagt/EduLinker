@@ -14,3 +14,25 @@ class DeviceToken(models.Model):
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+# backend/notifications/models.py (añade)
+class ExpoTicket(models.Model):
+    ticket_id = models.CharField(max_length=128, unique=True)
+    token = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+# backend/notifications/models.py (añade al final)
+class NotificationPreference(models.Model):
+    class Kind(models.TextChoices):
+        EVENT = "event", "Eventos"
+        SURVEY = "survey", "Encuestas"
+        COMPLAINT = "complaint", "Quejas"
+        COMPLAINT_MESSAGE = "complaint_message", "Mensajes de queja"
+
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="notif_prefs")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notif_prefs")
+    kind = models.CharField(max_length=32, choices=Kind.choices)
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("school", "user", "kind")

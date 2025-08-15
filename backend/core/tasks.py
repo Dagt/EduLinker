@@ -1,10 +1,11 @@
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
-
-from core.models import Event, Complaint
-from surveys.models import Survey
 from django.conf import settings
+
+from core.models import Event, Complaint, User, Group, GroupMembership, ParentStudent, SpecialistAssignment, VocalAssignment
+from surveys.models import Survey
+from notifications.tasks import push_to_users
 
 def notify_users(user_qs, subject, body):
     # Punto de integración: aquí puedes:
@@ -15,40 +16,33 @@ def notify_users(user_qs, subject, body):
         # reemplaza por integración real
         pass
 
-def event_audience_users(event):
-    from core.models import Group, GroupMembership, ParentStudent, VocalAssignment, User
+def _event_audience_user_ids(event):
     if event.scope == "GLOBAL":
-        return User.objects.filter(school_id=event.school_id, is_active=True)
-    # scope GROUP: juntar director, titular, itinerantes, vocales y padres del/los grupo(s)
-    from django.db.models import Q
+        # Todos activos de la escuela (si quieres limitar a roles/familias, puedes hacerlo)
+        return list(User.objects.filter(school_id=event.school_id, is_active=True).values_list("id", flat=True))
+    # scope GROUP: director + titular + itinerantes + vocales + padres
     group_ids = list(event.group_audiences.values_list("group_id", flat=True))
-    users = User.objects.none()
-    # Director
-    users = users | User.objects.filter(school_id=event.school_id, role="DIRECTOR")
-    # Titulares de esos grupos
-    users = users | User.objects.filter(role="MAESTRO_TITULAR", school_id=event.school_id, id__in=Group.objects.filter(id__in=group_ids).values("homeroom_teacher_id"))
-    # Itinerantes asignados
-    from core.models import SpecialistAssignment
-    users = users | User.objects.filter(id__in=SpecialistAssignment.objects.filter(group_id__in=group_ids).values("teacher_id"))
-    # Vocales activos
-    users = users | User.objects.filter(id__in=VocalAssignment.objects.filter(group_id__in=group_ids, active=True).values("parent_id"))
-    # Padres del grupo
-    student_ids = ParentStudent.objects.filter(parent__school_id=event.school_id).values_list("student_id", flat=True)
-    parent_ids = ParentStudent.objects.filter(student_id__in=GroupMembership.objects.filter(group_id__in=group_ids).values("student_id")).values("parent_id")
-    users = users | User.objects.filter(id__in=parent_ids)
-    return users.distinct()
+    ids = set()
+    ids.update(User.objects.filter(school_id=event.school_id, role="DIRECTOR").values_list("id", flat=True))
+    ids.update(User.objects.filter(role="MAESTRO_TITULAR", school_id=event.school_id, id__in=Group.objects.filter(id__in=group_ids).values("homeroom_teacher_id")).values_list("id", flat=True))
+    ids.update(SpecialistAssignment.objects.filter(group_id__in=group_ids).values_list("teacher_id", flat=True))
+    ids.update(VocalAssignment.objects.filter(group_id__in=group_ids, active=True).values_list("parent_id", flat=True))
+    parent_ids = ParentStudent.objects.filter(student_id__in=GroupMembership.objects.filter(group_id__in=group_ids).values("student_id")).values_list("parent_id", flat=True)
+    ids.update(parent_ids)
+    return list(ids)
 
 @shared_task
 def send_event_reminders():
     now = timezone.now()
     soon = now + timedelta(hours=getattr(settings, "EVENT_REMINDER_HOURS_AHEAD", 24))
     events = Event.objects.filter(status="ACTIVE", start_at__range=(now, soon))
-    total = 0
+    total_push = 0
     for ev in events:
-        users = event_audience_users(ev)
-        notify_users(users, f"Recordatorio: {ev.title}", f"Empieza el {ev.start_at}")
-        total += users.count()
-    return {"events": events.count(), "notifications": total}
+        user_ids = _event_audience_user_ids(ev)
+        if user_ids:
+            push_to_users.delay(ev.school_id, user_ids, f"Recordatorio: {ev.title}", f"Inicia {ev.start_at:%Y-%m-%d %H:%M}", {"type": "event", "event_id": ev.id})
+            total_push += len(user_ids)
+    return {"events": events.count(), "recipients": total_push}
 
 @shared_task
 def escalate_stale_complaints():
@@ -68,19 +62,21 @@ def remind_surveys_to_close():
     now = timezone.now()
     soon = now + timedelta(hours=getattr(settings, "SURVEY_REMINDER_HOURS_AHEAD", 24))
     surveys = Survey.objects.filter(status="ACTIVE", end_at__range=(now, soon))
+    total_push = 0
     for s in surveys:
-        # audiencias similares a event_audience_users si es GROUP; si es SCHOOL, todos en la escuela
-        from core.models import User, GroupMembership, ParentStudent, SpecialistAssignment, VocalAssignment
         if s.scope == "SCHOOL":
-            users = User.objects.filter(school_id=s.school_id, is_active=True)
+            user_ids = list(User.objects.filter(school_id=s.school_id, is_active=True).values_list("id", flat=True))
         else:
             g = s.group
-            users = User.objects.filter(role="DIRECTOR", school_id=s.school_id)
-            users = users | User.objects.filter(role="MAESTRO_TITULAR", id=g.homeroom_teacher_id)
-            users = users | User.objects.filter(id__in=SpecialistAssignment.objects.filter(group=g).values("teacher_id"))
-            users = users | User.objects.filter(id__in=VocalAssignment.objects.filter(group=g, active=True).values("parent_id"))
-            parent_ids = ParentStudent.objects.filter(student_id__in=GroupMembership.objects.filter(group=g).values("student_id")).values("parent_id")
-            users = users | User.objects.filter(id__in=parent_ids)
-            users = users.distinct()
-        notify_users(users, f"Encuesta por cerrar: {s.title}", f"Cierra el {s.end_at}")
-    return surveys.count()
+            ids = set()
+            ids.update(User.objects.filter(school_id=s.school_id, role="DIRECTOR").values_list("id", flat=True))
+            ids.update([g.homeroom_teacher_id] if g.homeroom_teacher_id else [])
+            ids.update(SpecialistAssignment.objects.filter(group=g).values_list("teacher_id", flat=True))
+            ids.update(VocalAssignment.objects.filter(group=g, active=True).values_list("parent_id", flat=True))
+            parent_ids = ParentStudent.objects.filter(student_id__in=GroupMembership.objects.filter(group=g).values("student_id")).values_list("parent_id", flat=True)
+            ids.update(parent_ids)
+            user_ids = list(ids)
+        if user_ids:
+            push_to_users.delay(s.school_id, user_ids, f"Encuesta por cerrar: {s.title}", f"Cierra el {s.end_at:%Y-%m-%d %H:%M}", {"type": "survey", "survey_id": s.id})
+            total_push += len(user_ids)
+    return {"surveys": surveys.count(), "recipients": total_push}
