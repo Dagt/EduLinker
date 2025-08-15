@@ -3,7 +3,13 @@ from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from .models import GroupChat, ChatMessage
 from .serializers import ChatMessageSerializer
-from core.models import Group, GroupMembership, ParentStudent, VocalAssignment, SpecialistAssignment
+from core.models import (
+    Group,
+    GroupMembership,
+    ParentStudent,
+    VocalAssignment,
+    SpecialistAssignment,
+)
 from core.permissions import (
     is_director,
     is_maestro_titular,
@@ -12,8 +18,9 @@ from core.permissions import (
     is_padre,
 )
 
-def can_participate_in_chat(user, group):
-    """Determina si el usuario pertenece al chat del grupo."""
+
+def can_view_chat(user, group):
+    """Determina si el usuario puede ver el chat del grupo."""
     if user.school_id != group.school_id:
         return False
     if is_director(user):
@@ -29,20 +36,29 @@ def can_participate_in_chat(user, group):
         return GroupMembership.objects.filter(group=group, student_id__in=student_ids).exists()
     return False
 
+
+def can_post_chat(user, group):
+    """Determina si el usuario puede escribir en el chat del grupo."""
+    if not can_view_chat(user, group):
+        return False
+    if is_director(user):
+        return False
+    return True
+
 class ChatMessageListCreateView(generics.ListCreateAPIView):
     serializer_class = ChatMessageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         group = get_object_or_404(Group, pk=self.kwargs["group_id"], school_id=self.request.school_id)
-        if not can_participate_in_chat(self.request.user, group):
+        if not can_view_chat(self.request.user, group):
             raise PermissionDenied("Cannot view messages")
         chat, _ = GroupChat.objects.get_or_create(group=group)
         return chat.messages.order_by("created_at")
 
     def perform_create(self, serializer):
         group = get_object_or_404(Group, pk=self.kwargs["group_id"], school_id=self.request.school_id)
-        if not can_participate_in_chat(self.request.user, group):
+        if not can_post_chat(self.request.user, group):
             raise PermissionDenied("Cannot send message")
         chat, _ = GroupChat.objects.get_or_create(group=group)
         serializer.save(chat=chat, author=self.request.user)
