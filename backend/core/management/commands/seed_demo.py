@@ -1,5 +1,6 @@
 import random
 from datetime import timedelta, date, datetime, timezone as dt_tz
+from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
@@ -11,6 +12,10 @@ from core.models import (
     Complaint, ComplaintMessage,
     Event, EventGroupAudience, Homework, ActivityPhoto
 )
+from chat.models import GroupChat, ChatMessage
+from suggestions.models import Suggestion, SuggestionMessage
+from fundraising.models import FundraisingEvent, FundraisingGroupLedger, ExpenseEvidence
+from notifications.models import NotificationPreference
 
 FIRST_NAMES = ["Ana","Luis","María","Jorge","Sofía","Carlos","Lucía","Pedro","Daniela","Héctor","Irene","Valeria"]
 LAST_NAMES = ["García","López","Martínez","Hernández","González","Pérez","Sánchez","Ramírez","Cruz","Flores"]
@@ -81,11 +86,13 @@ class Command(BaseCommand):
 
         # Alumnos y Padres (User con role=PADRE)
         parents = []
+        group_parents = {g: [] for g in groups}
         for g in groups:
             for _ in range(6):
                 fn, ln = rname()
                 student = Student.objects.create(
-                    school=school, first_name=fn, last_name=ln, grade_level=g.grade_level, enrollment_code=f"ENR{random.randint(1000,9999)}"
+                    school=school, first_name=fn, last_name=ln, grade_level=g.grade_level,
+                    enrollment_code=f"ENR{random.randint(1000,9999)}"
                 )
                 GroupMembership.objects.create(school=school, group=g, student=student)
                 pf, pl = rname()
@@ -93,10 +100,12 @@ class Command(BaseCommand):
                     email=f"{student.enrollment_code.lower()}@familia.com", school=school,
                     defaults=dict(first_name=pf, last_name=pl, role="PADRE", password=make_password("demo123"))
                 )
-                # ParentStudent relación ya está en models.py; se maneja dentro de core (si tienes el modelo, crea aquí)
                 from core.models import ParentStudent
-                ParentStudent.objects.get_or_create(school=school, parent=parent, student=student, defaults={"relationship":"tutor"})
+                ParentStudent.objects.get_or_create(
+                    school=school, parent=parent, student=student, defaults={"relationship": "tutor"}
+                )
                 parents.append(parent)
+                group_parents[g].append(parent)
 
         # Asignar un Vocal por grupo
         for g in groups:
@@ -135,6 +144,47 @@ class Command(BaseCommand):
             target_teacher=groups[0].homeroom_teacher, status="OPEN", description="Situación en el recreo",
         )
         ComplaintMessage.objects.create(complaint=c, author=groups[0].homeroom_teacher, message="Reviso el caso y doy seguimiento.")
+
+        # Chat de grupo
+        chat, _ = GroupChat.objects.get_or_create(group=groups[0])
+        ChatMessage.objects.create(chat=chat, author=groups[0].homeroom_teacher,
+                                   message_text="Bienvenidos al chat del grupo.")
+        ChatMessage.objects.create(chat=chat, author=group_parents[groups[0]][0],
+                                   message_text="Gracias por la bienvenida.")
+
+        # Sugerencias
+        sugg = Suggestion.objects.create(
+            school=school, group=groups[1], created_by=group_parents[groups[1]][0],
+            target_teacher=groups[1].homeroom_teacher, title="Material adicional",
+            description="Sería útil contar con más libros en el aula."
+        )
+        SuggestionMessage.objects.create(
+            suggestion=sugg, author=groups[1].homeroom_teacher, message="Lo revisaremos."
+        )
+
+        # Recaudación y gastos
+        fr_event = FundraisingEvent.objects.create(
+            school=school, school_year=sy, name="Venta de postres",
+            date=today, description="Apoyo para excursión"
+        )
+        ledger = FundraisingGroupLedger.objects.create(
+            event=fr_event, group=groups[0], amount_collected=Decimal("500.00"),
+            notes="Recaudado por padres", created_by=groups[0].homeroom_teacher
+        )
+        ExpenseEvidence.objects.create(
+            ledger=ledger, group=groups[0], uploader=groups[0].homeroom_teacher,
+            file_url="https://via.placeholder.com/200", amount=Decimal("150.00"),
+            concept="Compra de materiales"
+        )
+
+        # Preferencias de notificación
+        NotificationPreference.objects.get_or_create(
+            school=school, user=director, kind=NotificationPreference.Kind.EVENT
+        )
+        NotificationPreference.objects.get_or_create(
+            school=school, user=group_parents[groups[0]][0],
+            kind=NotificationPreference.Kind.COMPLAINT, defaults={"enabled": False}
+        )
 
         self.stdout.write(self.style.SUCCESS("Seed demo creada. Credenciales:"))
         self.stdout.write("Director: director@demo.com / demo123")
