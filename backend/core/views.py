@@ -273,9 +273,18 @@ class ComplaintStatusUpdateView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         complaint = self.get_object()
         user = self.request.user
-        if not (is_director(user) or user == complaint.target_teacher):
-            raise PermissionDenied("Cannot change status")
         prev_status = complaint.status
+        new_status = serializer.validated_data["status"]
+        if is_director(user) or user == complaint.target_teacher:
+            pass
+        elif user == complaint.created_by:
+            if not (
+                prev_status == Complaint.Status.OPEN
+                and new_status == Complaint.Status.ESCALATED
+            ):
+                raise PermissionDenied("Cannot change status")
+        else:
+            raise PermissionDenied("Cannot change status")
         serializer.save()
         from audit.models import AuditLog
         AuditLog.objects.create(
