@@ -28,3 +28,17 @@ class SchoolMiddleware:
                 return JsonResponse({"detail": "Invalid X-School-ID"}, status=400)
 
         return self.get_response(request)
+
+
+from .logging import set_context, clear_context
+
+
+class RequestLogMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        set_context(request)
+        response = self.get_response(request)
+        clear_context()
+        return response

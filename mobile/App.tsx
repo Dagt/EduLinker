@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as Sentry from "sentry-expo";
 import Login from "./src/screens/Login";
 import Feed from "./src/screens/Feed";
 import GroupChat from "./src/screens/GroupChat";
@@ -9,6 +10,12 @@ import Surveys from "./src/screens/Surveys";
 import EventCalendar from "./src/screens/EventCalendar";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  enableInExpoDevelopment: true,
+  tracesSampleRate: 1.0,
+});
 
 export default function App(){
   const [logged,setLogged]=useState(false);

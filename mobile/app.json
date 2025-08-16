@@ -4,7 +4,8 @@
       [
         "expo-notifications",
         { "icon": "./assets/notification-icon.png" }
-      ]
+      ],
+      "sentry-expo"
     ],
     "ios": {
       "supportsTablet": true
