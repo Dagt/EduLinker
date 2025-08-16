@@ -17,6 +17,7 @@ from .models import (
     EventGroupAudience,
     EventAttachment,
     EventPhoto,
+    Announcement,
     Homework,
     ActivityPhoto,
 )
@@ -244,6 +245,38 @@ class EventPhotoSerializer(serializers.ModelSerializer):
         model = EventPhoto
         fields = ["id", "photo_url", "caption", "created_at"]
         read_only_fields = ["created_at"]
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Announcement
+        fields = [
+            "id",
+            "group",
+            "teacher",
+            "title",
+            "message",
+            "attachments",
+            "created_at",
+        ]
+        read_only_fields = ["teacher", "created_at"]
+
+
+class HomeworkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Homework
+        fields = [
+            "id",
+            "group",
+            "subject",
+            "teacher",
+            "title",
+            "description",
+            "due_date",
+            "attachments",
+            "created_at",
+        ]
+        read_only_fields = ["teacher", "created_at"]
 
 
 class ActivityPhotoSerializer(serializers.ModelSerializer):

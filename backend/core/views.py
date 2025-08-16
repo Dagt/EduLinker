@@ -8,7 +8,19 @@ from rest_framework.exceptions import PermissionDenied
 from .models import Event
 from .serializers import EventSerializer
 from .permissions import can_view_event, is_director
-from .models import Group, Complaint, ComplaintMessage, Event, SchoolYear, SpecialistAssignment
+from .models import (
+    Group,
+    Complaint,
+    ComplaintMessage,
+    Event,
+    SchoolYear,
+    SpecialistAssignment,
+    Announcement,
+    Homework,
+    VocalAssignment,
+    GroupMembership,
+    ParentStudent,
+)
 from .permissions import (
     CanAccessComplaint,
     can_post_activity_photo,
@@ -16,6 +28,8 @@ from .permissions import (
     is_director,
     is_maestro_itinerante,
     is_maestro_titular,
+    is_vocal,
+    is_padre,
 )
 from .serializers import (
     ComplaintMessageSerializer,
@@ -25,9 +39,41 @@ from .serializers import (
     EventPhotoSerializer,
     EventSerializer,
     ActivityPhotoSerializer,
+    AnnouncementSerializer,
+    HomeworkSerializer,
     GroupSerializer,
     UserSerializer,
 )
+
+
+def _visible_group_ids(user):
+    qs = Group.objects.filter(school_id=user.school_id)
+    if is_director(user):
+        return list(qs.values_list("id", flat=True))
+    if is_maestro_titular(user):
+        return list(qs.filter(homeroom_teacher=user).values_list("id", flat=True))
+    if is_maestro_itinerante(user):
+        return list(
+            SpecialistAssignment.objects.filter(
+                school_id=user.school_id, teacher=user
+            ).values_list("group_id", flat=True)
+        )
+    if is_vocal(user):
+        return list(
+            VocalAssignment.objects.filter(
+                school_id=user.school_id, parent=user, active=True
+            ).values_list("group_id", flat=True)
+        )
+    if is_padre(user):
+        student_ids = ParentStudent.objects.filter(
+            school_id=user.school_id, parent=user
+        ).values_list("student_id", flat=True)
+        return list(
+            GroupMembership.objects.filter(
+                school_id=user.school_id, student_id__in=student_ids
+            ).values_list("group_id", flat=True)
+        )
+    return []
 
 
 class MeView(generics.RetrieveAPIView):
@@ -255,3 +301,103 @@ class EventUpdateView(generics.UpdateAPIView):
         if not (is_director(request.user) or event.created_by_id == request.user.id):
             raise PermissionDenied("Only the creator or director may edit this event")
         return super().update(request, *args, **kwargs)
+
+
+class AnnouncementListCreateView(generics.ListCreateAPIView):
+    serializer_class = AnnouncementSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_ids = _visible_group_ids(self.request.user)
+        qs = Announcement.objects.filter(
+            school_id=self.request.school_id, group_id__in=group_ids
+        )
+        group_id = self.request.query_params.get("group_id")
+        if group_id:
+            qs = qs.filter(group_id=group_id)
+        return qs
+
+    def perform_create(self, serializer):
+        group = serializer.validated_data.get("group")
+        if group.school_id != self.request.school_id:
+            raise PermissionDenied("Group mismatch for school")
+        user = self.request.user
+        if is_director(user):
+            pass
+        elif is_maestro_titular(user):
+            if group.homeroom_teacher_id != user.id:
+                raise PermissionDenied("Cannot create announcement for this group")
+        elif is_maestro_itinerante(user):
+            if not SpecialistAssignment.objects.filter(
+                group=group, teacher=user
+            ).exists():
+                raise PermissionDenied("Cannot create announcement for this group")
+        else:
+            raise PermissionDenied("Not allowed to create announcement")
+        serializer.save(school_id=self.request.school_id, teacher=user)
+
+
+class HomeworkListCreateView(generics.ListCreateAPIView):
+    serializer_class = HomeworkSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_ids = _visible_group_ids(self.request.user)
+        qs = Homework.objects.filter(
+            school_id=self.request.school_id, group_id__in=group_ids
+        )
+        group_id = self.request.query_params.get("group_id")
+        if group_id:
+            qs = qs.filter(group_id=group_id)
+        return qs
+
+    def perform_create(self, serializer):
+        group = serializer.validated_data.get("group")
+        if group.school_id != self.request.school_id:
+            raise PermissionDenied("Group mismatch for school")
+        user = self.request.user
+        if is_director(user):
+            pass
+        elif is_maestro_titular(user):
+            if group.homeroom_teacher_id != user.id:
+                raise PermissionDenied("Cannot create homework for this group")
+        elif is_maestro_itinerante(user):
+            if not SpecialistAssignment.objects.filter(
+                group=group, teacher=user
+            ).exists():
+                raise PermissionDenied("Cannot create homework for this group")
+        else:
+            raise PermissionDenied("Not allowed to create homework")
+        serializer.save(school_id=self.request.school_id, teacher=user)
+
+
+class FeedView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        group_ids = _visible_group_ids(request.user)
+        announcements = Announcement.objects.filter(
+            school_id=request.school_id, group_id__in=group_ids
+        )
+        homeworks = Homework.objects.filter(
+            school_id=request.school_id, group_id__in=group_ids
+        )
+        items = []
+        for ann in announcements:
+            items.append(
+                {
+                    "type": "announcement",
+                    "created_at": ann.created_at,
+                    "announcement": AnnouncementSerializer(ann).data,
+                }
+            )
+        for hw in homeworks:
+            items.append(
+                {
+                    "type": "homework",
+                    "created_at": hw.created_at,
+                    "homework": HomeworkSerializer(hw).data,
+                }
+            )
+        items.sort(key=lambda x: x["created_at"], reverse=True)
+        return Response(items)
