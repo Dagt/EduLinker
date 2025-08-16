@@ -1,57 +1,93 @@
 "use client";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
 import { apiPost } from "@/lib/api";
 import { useTranslations } from "next-intl";
 
+type FormData = {
+  scope: "GROUP" | "SCHOOL";
+  groupId?: string;
+  title: string;
+  options: string;
+  startAt: string;
+  endAt: string;
+};
+
 export default function CreateSurvey(){
-  const [scope,setScope]=useState<"GROUP"|"SCHOOL">("GROUP");
-  const [groupId,setGroupId]=useState<string>("");
-  const [title,setTitle]=useState("");
-  const [options,setOptions]=useState("Sí,No");
-  const [startAt,setStartAt]=useState("");
-  const [endAt,setEndAt]=useState("");
+  const { register, handleSubmit, watch, reset, formState:{ errors } } = useForm<FormData>({ defaultValues:{ scope:"GROUP" } });
   const [msg,setMsg]=useState("");
   const t = useTranslations("SurveyCreate");
 
-  async function submit(e:React.FormEvent){
-    e.preventDefault(); setMsg("");
+  const scope = watch("scope");
+
+  async function onSubmit(data: FormData){
+    setMsg("");
     const tk = getToken();
-    const opts = options.split(",").map(s=>s.trim()).filter(Boolean);
+    const opts = data.options.split(",").map(s=>s.trim()).filter(Boolean);
     await apiPost("/surveys/", {
-      scope, group: scope==="GROUP" ? Number(groupId) : null,
-      title, description: "", options: opts,
+      scope: data.scope,
+      group: data.scope === "GROUP" ? Number(data.groupId) : null,
+      title: data.title,
+      description: "",
+      options: opts,
       is_anonymous: true,
-      start_at: startAt, end_at: endAt
+      start_at: data.startAt,
+      end_at: data.endAt
     }, tk);
     setMsg(t("created"));
+    reset({ scope:"GROUP", groupId:"", title:"", options:"", startAt:"", endAt:"" });
   }
 
-  return (<>
-    <Nav/>
-    <main style={{padding:16, maxWidth:680}}>
-      <h2>{t("header")}</h2>
-      <form onSubmit={submit}>
-        <select value={scope} onChange={e=>setScope(e.target.value as any)} style={{display:"block",margin:"8px 0",padding:8}}>
-          <option value="GROUP">{t("byGroup")}</option>
-          <option value="SCHOOL">{t("wholeSchool")}</option>
-        </select>
-        {scope==="GROUP" && (
-          <input placeholder={t("groupId")} value={groupId} onChange={e=>setGroupId(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        )}
-        <input placeholder={t("title")} value={title} onChange={e=>setTitle(e.target.value)}
-               style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <input placeholder={t("start")} value={startAt} onChange={e=>setStartAt(e.target.value)}
-               style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <input placeholder={t("end")} value={endAt} onChange={e=>setEndAt(e.target.value)}
-               style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <input placeholder={t("options")} value={options} onChange={e=>setOptions(e.target.value)}
-               style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <button>{t("create")}</button>
-      </form>
-      {msg && <p>{msg}</p>}
-    </main>
-  </>);
+  return (
+    <>
+      <Nav/>
+      <main style={{padding:16, maxWidth:680}}>
+        <h2>{t("header")}</h2>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <select {...register("scope")} style={{display:"block",margin:"8px 0",padding:8}}>
+            <option value="GROUP">{t("byGroup")}</option>
+            <option value="SCHOOL">{t("wholeSchool")}</option>
+          </select>
+          {scope === "GROUP" && (
+            <>
+              <input
+                placeholder={t("groupId")}
+                {...register("groupId", { required: scope === "GROUP" })}
+                style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
+              />
+              {errors.groupId && <p style={{color:"red"}}>Required</p>}
+            </>
+          )}
+          <input
+            placeholder={t("title")}
+            {...register("title", { required: true })}
+            style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
+          />
+          {errors.title && <p style={{color:"red"}}>Required</p>}
+          <input
+            placeholder={t("start")}
+            {...register("startAt", { required: true })}
+            style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
+          />
+          {errors.startAt && <p style={{color:"red"}}>Required</p>}
+          <input
+            placeholder={t("end")}
+            {...register("endAt", { required: true })}
+            style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
+          />
+          {errors.endAt && <p style={{color:"red"}}>Required</p>}
+          <input
+            placeholder={t("options")}
+            {...register("options", { required: true })}
+            style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
+          />
+          {errors.options && <p style={{color:"red"}}>Required</p>}
+          <button>{t("create")}</button>
+        </form>
+        {msg && <p>{msg}</p>}
+      </main>
+    </>
+  );
 }

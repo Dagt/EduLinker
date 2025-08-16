@@ -107,7 +107,9 @@
     "title": "Título",
     "description": "Descripción",
     "send": "Enviar",
-    "createLink": "Crear sugerencia"
+    "createLink": "Crear sugerencia",
+    "delete": "Eliminar",
+    "deleteConfirm": "¿Eliminar esta sugerencia?"
   },
   "ComplaintCreate": {
     "header": "Crear queja privada",

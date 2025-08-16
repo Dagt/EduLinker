@@ -45,13 +45,13 @@ describe('api helpers', () => {
   });
 
   it('apiGet throws on error status', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500, statusText: 'err' });
-    await expect(api.apiGet('/x')).rejects.toThrow('500 err');
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500, statusText: 'err', json: async () => ({ detail: 'boom' }) });
+    await expect(api.apiGet('/x')).rejects.toThrow('boom');
   });
 
   it('apiPost throws on error status', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 400, statusText: 'bad' });
-    await expect(api.apiPost('/y', {})).rejects.toThrow('400 bad');
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 400, statusText: 'bad', json: async () => ({ detail: 'fail' }) });
+    await expect(api.apiPost('/y', {})).rejects.toThrow('fail');
   });
   it('apiPatch sends body and returns json', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({ c: 3 }) });
@@ -60,8 +60,30 @@ describe('api helpers', () => {
     expect(global.fetch).toHaveBeenCalledWith('http://api/z', expect.objectContaining({ method: 'PATCH' }));
   });
   it('apiPatch throws on error status', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 404, statusText: 'missing' });
-    await expect(api.apiPatch('/z', {})).rejects.toThrow('404 missing');
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 404, statusText: 'missing', json: async () => ({ detail: 'oops' }) });
+    await expect(api.apiPatch('/z', {})).rejects.toThrow('oops');
+  });
+
+  it('apiDelete sends delete and returns json', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.apiDelete('/w');
+    expect(global.fetch).toHaveBeenCalledWith('http://api/w', expect.objectContaining({ method: 'DELETE' }));
+  });
+
+  it('apiDelete throws on error status', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500, statusText: 'err', json: async () => ({ detail: 'bad' }) });
+    await expect(api.apiDelete('/w')).rejects.toThrow('bad');
+  });
+
+  it('apiDelete returns undefined on 204', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, status: 204, json: async () => ({}) });
+    const data = await api.apiDelete('/w');
+    expect(data).toBeUndefined();
+  });
+
+  it('apiGet falls back to status text when no detail', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500, statusText: 'err', json: async () => { throw new Error('x'); } });
+    await expect(api.apiGet('/x')).rejects.toThrow('500 err');
   });
   it('updateSuggestionStatus posts', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
