@@ -157,3 +157,54 @@ def test_events_ics_filters_events_by_user():
     assert "SUMMARY:Global" in content
     assert "SUMMARY:G1 Event" in content
     assert "SUMMARY:G2 Event" not in content
+
+
+@pytest.mark.django_db
+def test_events_ics_rejects_other_school_events():
+    school1 = School.objects.create(name="S1", slug="s1", subdomain="s1", active=True)
+    sy1 = SchoolYear.objects.create(
+        school=school1,
+        name="2025",
+        start_date="2025-01-01",
+        end_date="2025-12-31",
+        is_current=True,
+    )
+    teacher1 = User.objects.create_user(
+        username="t1@x.com",
+        email="t1@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school1,
+    )
+    school2 = School.objects.create(name="S2", slug="s2", subdomain="s2", active=True)
+    sy2 = SchoolYear.objects.create(
+        school=school2,
+        name="2025",
+        start_date="2025-01-01",
+        end_date="2025-12-31",
+        is_current=True,
+    )
+    teacher2 = User.objects.create_user(
+        username="t2@x.com",
+        email="t2@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school2,
+    )
+    Event.objects.create(
+        school=school2,
+        school_year=sy2,
+        scope="GLOBAL",
+        title="Other",
+        start_at=timezone.now(),
+        end_at=timezone.now() + timedelta(hours=1),
+        created_by=teacher2,
+    )
+    token = str(RefreshToken.for_user(teacher1).access_token)
+    client = APIClient()
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school2.id)
+    )
+    res = client.get("/api/v1/events/ics/")
+    assert res.status_code == 200
+    assert b"SUMMARY:Other" not in res.content

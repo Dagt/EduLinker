@@ -106,6 +106,32 @@ def test_teacher_without_group_cannot_record_ledger(setup_entities):
 
 
 @pytest.mark.django_db
+def test_parent_without_assignment_cannot_record_ledger(setup_entities):
+    school, director, parent, group = setup_entities
+    other_parent = User.objects.create_user(
+        username="q@x.com",
+        email="q@x.com",
+        password="p",
+        role="VOCAL",
+        school=school,
+    )
+    client = _client_for(director, school)
+    res = client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    event_id = res.json()["id"]
+    client = _client_for(other_parent, school)
+    res = client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event_id, "group": group.id, "amount_collected": "50.00"},
+        format="json",
+    )
+    assert res.status_code == 403
+
+
+@pytest.mark.django_db
 def test_vocal_can_upload_expense_evidence(setup_entities):
     school, director, parent, group = setup_entities
     client = _client_for(director, school)

@@ -21,9 +21,14 @@ escuela (`school_id`) enviado mediante el encabezado `X-SCHOOL-ID`.
 
 - Todas las consultas de la API filtran por `school_id`.
 - La exportación ICS de eventos exige el encabezado `X-SCHOOL-ID` y sólo
-  devuelve eventos de la escuela indicada.
+  devuelve eventos de la escuela indicada y filtrados según la audiencia del
+  usuario; intentar usar el encabezado de otra escuela no expone eventos.
 - Los registros de recaudación y las evidencias de gasto requieren que el
-  evento, el grupo y el usuario pertenezcan a la misma escuela.
+  evento, el grupo y el usuario pertenezcan a la misma escuela, y sólo pueden
+  ser registrados por directores, maestros de grupo o vocals asignados.
+- Las quejas privadas sólo están disponibles para su creador, el maestro
+  involucrado, el director y los participantes autorizados; cualquier otro
+  usuario recibe un error de permiso.
 - Las sugerencias sólo pueden ser creadas por padres, vocals o maestros
   titulares; los directores quedan excluidos.
 
