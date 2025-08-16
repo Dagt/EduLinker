@@ -92,6 +92,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "core.tasks.remind_surveys_to_close",
         "schedule": 10800.0,
     },
+    "fundraising-weekly-summary": {
+        "task": "fundraising.tasks.weekly_fundraising_summary",
+        "schedule": crontab(day_of_week="monday", hour=7, minute=0),
+    },
 }
 
 
