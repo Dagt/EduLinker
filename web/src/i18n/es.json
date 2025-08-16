@@ -63,7 +63,8 @@
     "name": "Nombre",
     "date": "Fecha",
     "description": "Descripción",
-    "create": "Crear"
+    "create": "Crear",
+    "unauthorized": "No autorizado"
   },
   "FundraisingLedger": {
     "header": "Registrar recaudación por grupo",
@@ -73,7 +74,8 @@
     "notes": "Notas",
     "save": "Guardar",
     "success": "Registro agregado #{id}",
-    "error": "Error al registrar"
+    "error": "Error al registrar",
+    "unauthorized": "No autorizado"
   },
   "FundraisingExpense": {
     "header": "Registrar evidencia de gasto",
@@ -85,7 +87,8 @@
     "uploadFirst": "Sube el archivo primero",
     "fileReady": "Archivo listo: {url}",
     "success": "Evidencia registrada #{id}",
-    "error": "Error al registrar evidencia"
+    "error": "Error al registrar evidencia",
+    "unauthorized": "No autorizado"
   },
   "FundraisingSummary": {
     "header": "Resumen de recaudación",

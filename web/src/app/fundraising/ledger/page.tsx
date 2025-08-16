@@ -2,8 +2,9 @@
 import { useState } from "react";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
-import { apiPost } from "@/lib/api";
+import { createFundraisingLedger } from "@/lib/api";
 import { useTranslations } from "next-intl";
+import { requireRole } from "@/lib/roles";
 
 export default function FundraisingLedger(){
   const t = useTranslations("FundraisingLedger");
@@ -12,12 +13,13 @@ export default function FundraisingLedger(){
   const [amount,setAmount]=useState("");
   const [notes,setNotes]=useState("");
   const [msg,setMsg]=useState("");
+  const allowed = requireRole(["admin","treasurer"]);
 
   async function submit(e:React.FormEvent){
     e.preventDefault(); setMsg("");
     try{
       const tk = getToken();
-      const res = await apiPost<any>("/fundraising-ledger/", {
+      const res = await createFundraisingLedger({
         event_id: Number(eventId),
         group_id: Number(groupId),
         amount_collected: Number(amount),
@@ -27,6 +29,8 @@ export default function FundraisingLedger(){
       setAmount(""); setNotes("");
     }catch(e:any){ setMsg(e.message || t("error")); }
   }
+
+  if (!allowed) return <p>{t("unauthorized")}</p>;
 
   return (
     <>
