@@ -373,6 +373,8 @@ paths:
       description: |-
         Takes a set of user credentials and returns an access and refresh JSON web
         token pair to prove the authentication of those credentials.
+        
+        Rate limit: 5 requests per minute per IP.
       tags:
       - v1
       requestBody:
@@ -477,6 +479,10 @@ paths:
   /api/v1/complaints/:
     post:
       operationId: v1_complaints_create
+      description: |-
+        Creates a complaint.
+
+        Rate limit: 20 requests per day per user.
       tags:
       - v1
       requestBody:
