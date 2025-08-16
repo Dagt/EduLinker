@@ -2,10 +2,25 @@
 from django.urls import path
 from .storage_views import PresignUploadView
 from .views import (
-    ComplaintCreateView, ComplaintDetailView, ComplaintMessageCreateView, ComplaintParticipantCreateView, ComplaintStatusUpdateView,
-    EventAttachmentCreateView, EventCancelView, EventPhotoCreateView, EventListCreateView,
-    ActivityPhotoCreateView, GroupListView, MeView,
-    EventDetailView, EventUpdateView,  # <- añadidas en el paso calendario anterior
+    ComplaintCreateView,
+    ComplaintDetailView,
+    ComplaintMessageCreateView,
+    ComplaintParticipantCreateView,
+    ComplaintStatusUpdateView,
+    EventAttachmentCreateView,
+    EventCancelView,
+    EventPhotoCreateView,
+    EventListCreateView,
+    ActivityPhotoCreateView,
+    GroupListView,
+    MeView,
+    EventDetailView,
+    EventUpdateView,
+    AnnouncementListCreateView,
+    AnnouncementDetailView,
+    HomeworkListCreateView,
+    HomeworkDetailView,
+    FeedView,
 )
 
 urlpatterns = [
@@ -23,6 +38,11 @@ urlpatterns = [
     path("events/<int:pk>/attachments/", EventAttachmentCreateView.as_view(), name="event-attachment-create"),
     path("events/<int:pk>/photos/", EventPhotoCreateView.as_view(), name="event-photo-create"),
     path("activity-photos/", ActivityPhotoCreateView.as_view(), name="activity-photo-create"),
+    path("announcements/", AnnouncementListCreateView.as_view(), name="announcement-list-create"),
+    path("announcements/<int:pk>/", AnnouncementDetailView.as_view(), name="announcement-detail"),
+    path("homeworks/", HomeworkListCreateView.as_view(), name="homework-list-create"),
+    path("homeworks/<int:pk>/", HomeworkDetailView.as_view(), name="homework-detail"),
+    path("feed/", FeedView.as_view(), name="feed"),
     path("storage/presign-upload/", PresignUploadView.as_view(), name="presign-upload"),
 ]
 

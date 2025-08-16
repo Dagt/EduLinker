@@ -339,6 +339,22 @@ class EventPhoto(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class Announcement(models.Model):
+    school = models.ForeignKey(
+        School, on_delete=models.CASCADE, related_name="announcements"
+    )
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, related_name="announcements"
+    )
+    teacher = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="announcements"
+    )
+    title = models.CharField(max_length=255)
+    message = models.TextField(blank=True)
+    attachments = models.JSONField(blank=True, default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class Homework(models.Model):
     school = models.ForeignKey(
         School, on_delete=models.CASCADE, related_name="homeworks"

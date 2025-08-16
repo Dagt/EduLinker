@@ -4,7 +4,7 @@ from .models import (
     SpecialistAssignment, VocalAssignment,
     Complaint, ComplaintMessage,
     Event, EventGroupAudience, EventAttachment, EventPhoto,
-    Homework, ActivityPhoto
+    Announcement, Homework, ActivityPhoto
 )
 
 @admin.register(School)
@@ -81,6 +81,19 @@ class EventAttachmentAdmin(admin.ModelAdmin):
 @admin.register(EventPhoto)
 class EventPhotoAdmin(admin.ModelAdmin):
     list_display = ("id","event","photo_url","caption","created_at")
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "school",
+        "group",
+        "teacher",
+        "title",
+        "created_at",
+    )
+    list_filter = ("school", "group")
+    search_fields = ("title", "message")
 
 @admin.register(Homework)
 class HomeworkAdmin(admin.ModelAdmin):
