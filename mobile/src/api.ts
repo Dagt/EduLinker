@@ -82,6 +82,15 @@ export async function sendComplaintMessage(id: number, body: any){
   return apiPost(`/complaints/${id}/messages/`, body);
 }
 
+// Suggestions API helpers
+export async function createSuggestion(body: any){
+  return apiPost("/suggestions/", body);
+}
+
+export async function sendSuggestionMessage(id: number, body: any){
+  return apiPost(`/suggestions/${id}/messages/`, body);
+}
+
 // Photos API helpers
 export async function postActivityPhoto(body: any){
   return apiPost("/activity-photos/", body);
