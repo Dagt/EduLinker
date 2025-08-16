@@ -73,3 +73,12 @@ export async function getComplaintMessages(id: number){
 export async function sendComplaintMessage(id: number, body: any){
   return apiPost(`/complaints/${id}/messages/`, body);
 }
+
+// Photos API helpers
+export async function postActivityPhoto(body: any){
+  return apiPost("/activity-photos/", body);
+}
+
+export async function postEventPhoto(id: number, body: any){
+  return apiPost(`/events/${id}/photos/`, body);
+}
