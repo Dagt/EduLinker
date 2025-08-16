@@ -34,6 +34,7 @@ import {
   getComplaintsAnalytics,
   getFundraisingAnalytics,
   getEngagementAnalytics,
+  listFundraisingEvents,
 } from '@/lib/api';
 
 beforeAll(() => {
@@ -51,6 +52,7 @@ describe('internationalized pages render', () => {
     (getComplaintsAnalytics as jest.Mock).mockReset();
     (getFundraisingAnalytics as jest.Mock).mockReset();
     (getEngagementAnalytics as jest.Mock).mockReset();
+    (listFundraisingEvents as jest.Mock).mockReset();
   });
 
   it('renders ComplaintCreate', () => {
@@ -97,7 +99,7 @@ describe('internationalized pages render', () => {
   });
 
   it('renders FundraisingPage', async () => {
-    (apiGet as jest.Mock).mockResolvedValue([]);
+    (listFundraisingEvents as jest.Mock).mockResolvedValue([]);
     render(<FundraisingPage />);
     expect(await screen.findByRole('heading', { name: 'Recaudación' })).toBeInTheDocument();
   });

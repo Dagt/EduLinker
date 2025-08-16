@@ -2,7 +2,8 @@
 import { useState } from "react";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
-import { apiPost } from "@/lib/api";
+import { createFundraisingEvent } from "@/lib/api";
+import { requireRole } from "@/lib/roles";
 import { useTranslations } from "next-intl";
 
 export default function FundraisingCreateEvent(){
@@ -15,11 +16,13 @@ export default function FundraisingCreateEvent(){
     try{
       const tk = getToken();
       const body = { name, date, description }; // school_year se resuelve en backend si lo implementaste así; si no, añade el ID
-      const res = await apiPost<any>("/fundraising-events/", body, tk);
+      const res = await createFundraisingEvent(body, tk);
       setMsg(t("created", {id: res.id}));
       setName(""); setDate(""); setDescription("");
     }catch(e:any){ setMsg(e.message || t("error")); }
   }
+
+  if (!requireRole(["admin", "director"])) return <p>{t("unauthorized")}</p>;
 
   return (
     <>

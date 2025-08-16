@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import { useForm } from "react-hook-form";
-import { apiGet, apiPost } from "@/lib/api";
+import { listFundraisingEvents, createFundraisingEvent } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { requireRole } from "@/lib/roles";
 import { useTranslations } from "next-intl";
 
 type Event = { id: number; name: string; date: string; description: string };
@@ -19,8 +20,8 @@ export default function FundraisingPage(){
     (async () => {
       try {
         const tk = getToken();
-        const data = await apiGet<Event[]>("/fundraising-events/", tk);
-        setEvents(data);
+        const data = await listFundraisingEvents(tk);
+        setEvents(data as Event[]);
       } catch (e) {
         console.error(e);
       }
@@ -30,13 +31,15 @@ export default function FundraisingPage(){
   async function onSubmit(data: FormData){
     try {
       const tk = getToken();
-      const created = await apiPost<Event>("/fundraising-events/", data, tk);
-      setEvents([...events, created]);
+      const created = await createFundraisingEvent(data, tk);
+      setEvents([...events, created as Event]);
       reset();
     } catch (e) {
       console.error(e);
     }
   }
+
+  if (!requireRole(["admin", "director"])) return <p>{t("unauthorized")}</p>;
 
   return (
     <>
