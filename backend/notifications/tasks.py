@@ -4,9 +4,110 @@ import urllib.request
 
 from celery import shared_task
 
-from .models import DeviceToken, ExpoTicket
-from .providers.tasks import push_to_users  # re-export existing task
+from core.models import User
+
+from .models import DeviceToken, ExpoTicket, NotificationPreference
 from .providers import expo
+from .providers.expo import ExpoProvider
+from .providers.email import EmailProvider
+from .providers.whatsapp import WhatsAppProvider
+
+
+def _active_tokens_for_users(user_ids, school_id):
+    return list(
+        DeviceToken.objects.filter(
+            active=True, school_id=school_id, user_id__in=user_ids
+        ).values_list("token", flat=True)
+    )
+
+
+def _emails_for_users(user_ids, school_id):
+    return list(
+        User.objects.filter(id__in=user_ids, school_id=school_id).values_list(
+            "email", flat=True
+        )
+    )
+
+
+def _phones_for_users(user_ids, school_id):
+    return [
+        p
+        for p in User.objects.filter(id__in=user_ids, school_id=school_id).values_list(
+            "phone", flat=True
+        )
+        if p
+    ]
+
+
+def _filter_user_ids_by_pref(school_id, user_ids, kind):
+    if not kind:
+        return list(user_ids)
+    disabled = set(
+        NotificationPreference.objects.filter(
+            school_id=school_id, user_id__in=user_ids, kind=kind, enabled=False
+        ).values_list("user_id", flat=True)
+    )
+    return [uid for uid in user_ids if uid not in disabled]
+
+
+@shared_task
+def send_notification(
+    provider: str,
+    school_id: int,
+    user_ids: list[int],
+    title: str,
+    body: str,
+    data: dict | None = None,
+    kind: str | None = None,
+):
+    user_ids = _filter_user_ids_by_pref(school_id, user_ids, kind)
+    if not user_ids:
+        return {"sent": 0}
+
+    provider = provider.lower()
+
+    if provider == "expo":
+        tokens = _active_tokens_for_users(user_ids, school_id)
+        if not tokens:
+            return {"sent": 0}
+        provider_obj = ExpoProvider()
+        token_ticket_pairs, _, invalid_tokens = provider_obj.send_and_get_receipts(
+            tokens, title=title, body=body, data=data or {}
+        )
+        if invalid_tokens:
+            DeviceToken.objects.filter(token__in=invalid_tokens).delete()
+        return {
+            "sent": len(tokens),
+            "tickets": len(token_ticket_pairs),
+            "invalid": len(invalid_tokens),
+        }
+
+    elif provider == "email":
+        emails = _emails_for_users(user_ids, school_id)
+        provider_obj = EmailProvider()
+        provider_obj.send(emails, title, body, data or {})
+        return {"sent": len(emails)}
+
+    elif provider in ("sms", "whatsapp"):
+        numbers = _phones_for_users(user_ids, school_id)
+        provider_obj = WhatsAppProvider()
+        provider_obj.send(numbers, title, body, data or {})
+        return {"sent": len(numbers)}
+
+    else:
+        raise ValueError("Unknown provider")
+
+
+@shared_task
+def push_to_users(
+    school_id: int,
+    user_ids: list[int],
+    title: str,
+    body: str,
+    data: dict | None = None,
+    kind: str | None = None,
+):
+    return send_notification.run("expo", school_id, user_ids, title, body, data, kind)
 
 
 @shared_task
