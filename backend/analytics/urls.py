@@ -3,6 +3,7 @@ from .views import (
     OverviewAnalyticsView,
     ComplaintsAnalyticsView,
     FundraisingAnalyticsView,
+    EngagementAnalyticsView,
 )
 
 urlpatterns = [
@@ -20,5 +21,10 @@ urlpatterns = [
         "analytics/fundraising/",
         FundraisingAnalyticsView.as_view(),
         name="analytics-fundraising",
+    ),
+    path(
+        "analytics/engagement/",
+        EngagementAnalyticsView.as_view(),
+        name="analytics-engagement",
     ),
 ]
