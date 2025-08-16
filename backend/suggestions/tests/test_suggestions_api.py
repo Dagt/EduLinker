@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import School, SchoolYear, Group, User
 from audit.models import AuditLog
+from suggestions.models import Suggestion
 
 
 @pytest.mark.django_db
@@ -117,3 +118,52 @@ def test_director_cannot_create_suggestion():
         format="json",
     )
     assert res.status_code == 403
+
+
+@pytest.mark.django_db
+def test_cannot_access_suggestion_other_school():
+    school1 = School.objects.create(name="S1", slug="s1", subdomain="s1", active=True)
+    school2 = School.objects.create(name="S2", slug="s2", subdomain="s2", active=True)
+    sy = SchoolYear.objects.create(
+        school=school1,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school1,
+    )
+    parent = User.objects.create_user(
+        username="p@x.com",
+        email="p@x.com",
+        password="p",
+        role="PADRE",
+        school=school1,
+    )
+    group = Group.objects.create(
+        school=school1,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+    suggestion = Suggestion.objects.create(
+        school=school1,
+        group=group,
+        target_teacher=teacher,
+        title="Idea",
+        description="Mas excursiones",
+        created_by=parent,
+    )
+    client = APIClient()
+    token = str(RefreshToken.for_user(parent).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school2.id)
+    )
+    res = client.get(f"/api/v1/suggestions/{suggestion.id}/")
+    assert res.status_code == 404
