@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, Button } from "react-native";
-import { getSurvey, voteSurvey, getSurveyResults } from "../api";
+import { getSurvey, voteSurvey, getSurveyResults } from "../../api";
 
 type Props = { surveyId: number; onBack?: () => void };
 

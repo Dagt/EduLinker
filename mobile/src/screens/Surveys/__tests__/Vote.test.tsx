@@ -1,9 +1,9 @@
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import SurveyVote from '../SurveyVote';
-import { getSurvey, voteSurvey, getSurveyResults } from '../../api';
+import SurveyVote from '../Vote';
+import { getSurvey, voteSurvey, getSurveyResults } from '../../../api';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
-jest.mock('../../api', () => ({
+jest.mock('../../../api', () => ({
   getSurvey: jest.fn(),
   voteSurvey: jest.fn(),
   getSurveyResults: jest.fn(),

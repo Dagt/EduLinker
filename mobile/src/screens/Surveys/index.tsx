@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { getSurveys } from "../../api";
-import SurveyVote from "../SurveyVote";
+import SurveyVote from "./Vote";
 
 export default function Surveys(){
   const [items, setItems] = useState<any[]>([]);

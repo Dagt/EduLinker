@@ -33,6 +33,8 @@ test('navigates to survey and votes', async () => {
   await waitFor(() => getByText('Option 1'));
   fireEvent.press(getByText('Option 1'));
   await waitFor(() => getByText(/Voto registrado/));
+  await waitFor(() => getByText('Option 1: 1'));
   expect(voteSurvey).toHaveBeenCalledWith(1,0);
+  expect(getSurveyResults).toHaveBeenCalledTimes(2);
 });
 
