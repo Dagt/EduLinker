@@ -36,7 +36,7 @@ describe('FundraisingPage', () => {
 
     render(<FundraisingPage />);
 
-    expect(await screen.findByText('e1')).toBeInTheDocument();
+    expect(await screen.findByText('e1 - 2024-01-01')).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText('Nombre'), { target: { value: 'e2' } });
     fireEvent.change(screen.getByPlaceholderText('Fecha'), { target: { value: '2024-02-01' } });

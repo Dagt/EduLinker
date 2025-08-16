@@ -9,13 +9,25 @@ export const NextIntlClientProvider = ({children}: any) => React.createElement(R
 
 export function useTranslations(namespace: string) {
   const ns = messages[namespace] || {};
-  return (key: string, values?: Record<string, any>) => {
+  const t = (key: string, values?: Record<string, any>) => {
     let msg = ns[key] || '';
     if (values) {
       for (const [k, v] of Object.entries(values)) {
-        msg = msg.replace(`{${k}}`, String(v));
+        if (typeof v !== 'function') {
+          msg = msg.replace(`{${k}}`, String(v));
+        }
       }
     }
     return msg;
   };
+  t.rich = (key: string, values: Record<string, any>) => {
+    let msg = ns[key] || '';
+    for (const [k, v] of Object.entries(values)) {
+      if (typeof v !== 'function') {
+        msg = msg.replace(`{${k}}`, String(v));
+      }
+    }
+    return msg.replace(/<[^>]+>/g, '');
+  };
+  return t;
 }

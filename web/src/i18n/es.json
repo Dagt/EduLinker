@@ -64,6 +64,7 @@
     "date": "Fecha",
     "description": "Descripción",
     "create": "Crear",
+    "eventItem": "<b>{name}</b> - {date}",
     "unauthorized": "No autorizado"
   },
   "FundraisingLedger": {
