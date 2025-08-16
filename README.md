@@ -35,4 +35,9 @@ Repositorio monorepo con:
    npx expo start
    ```
 
+
+## Documentación API
+
+La especificación OpenAPI se puede obtener en `/api/schema` y una interfaz interactiva en `/api/docs`. También se incluye una copia en `docs/openapi.json`.
+
 Revisa la carpeta `docs/` para guías de despliegue, seeds y casos de uso.
