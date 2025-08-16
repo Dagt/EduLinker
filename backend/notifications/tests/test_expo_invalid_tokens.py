@@ -6,7 +6,7 @@ import pytest
 from core.models import School, User
 from notifications.models import DeviceToken
 from notifications.providers import expo
-from notifications.providers.tasks import push_to_users
+from notifications.tasks import push_to_users
 
 
 class FakeResponse:
@@ -55,6 +55,6 @@ def test_invalid_tokens_removed_after_receipt_error(error_code):
         result = push_to_users.run(school.id, [user1.id, user2.id], "T", "B")
 
     assert result["invalid"] == 1
-    assert DeviceToken.objects.filter(token="tok1").exists()
-    assert not DeviceToken.objects.filter(token="tok2").exists()
+    assert DeviceToken.objects.get(token="tok1").active is True
+    assert DeviceToken.objects.get(token="tok2").active is False
 

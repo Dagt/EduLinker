@@ -83,7 +83,7 @@ def send_notification(
                 ]
             )
         if invalid_tokens:
-            DeviceToken.objects.filter(token__in=invalid_tokens).delete()
+            DeviceToken.objects.filter(token__in=invalid_tokens).update(active=False)
         return {
             "sent": len(tokens),
             "tickets": len(token_ticket_pairs),
@@ -120,17 +120,17 @@ def push_to_users(
 
 @shared_task
 def cleanup_invalid_tokens():
-    """Remove device tokens reported as invalid by Expo.
+    """Deactivate device tokens reported as invalid by Expo.
 
     The task fetches stored Expo tickets, queries the Expo receipts API and
-    deletes any device tokens that are reported as invalid (for example
-    ``DeviceNotRegistered`` or ``InvalidCredentials``).  Processed tickets are
-    removed regardless of their status so that we do not query them again on
-    subsequent runs.
+    marks as inactive any device tokens that are reported as invalid (for
+    example ``DeviceNotRegistered`` or ``InvalidCredentials``).  Processed
+    tickets are removed regardless of their status so that we do not query them
+    again on subsequent runs.
     """
     tickets = list(ExpoTicket.objects.values_list("ticket_id", "token"))
     if not tickets:
-        return {"processed": 0, "deleted": 0}
+        return {"processed": 0, "disabled": 0}
 
     ticket_map = {tid: tok for tid, tok in tickets}
     invalid_tokens: list[str] = []
@@ -147,7 +147,7 @@ def cleanup_invalid_tokens():
         ) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
     except (urllib.error.HTTPError, urllib.error.URLError):
-        return {"processed": 0, "deleted": 0}
+        return {"processed": 0, "disabled": 0}
 
     for tid, info in (payload.get("data") or {}).items():
         status = info.get("status")
@@ -167,7 +167,7 @@ def cleanup_invalid_tokens():
     if failed:
         FailedExpoTicket.objects.bulk_create(failed)
     if invalid_tokens:
-        DeviceToken.objects.filter(token__in=set(invalid_tokens)).delete()
+        DeviceToken.objects.filter(token__in=set(invalid_tokens)).update(active=False)
 
-    return {"processed": len(ticket_map), "deleted": len(invalid_tokens)}
+    return {"processed": len(ticket_map), "disabled": len(invalid_tokens)}
 

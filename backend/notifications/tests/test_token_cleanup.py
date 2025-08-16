@@ -52,9 +52,9 @@ def test_cleanup_deletes_invalid_tokens(error_code):
     with patch("notifications.tasks.urllib.request.urlopen", side_effect=fake_urlopen):
         result = tasks.cleanup_invalid_tokens.run()
 
-    assert result["deleted"] == 1
-    assert DeviceToken.objects.filter(token="tok1").exists()
-    assert not DeviceToken.objects.filter(token="tok2").exists()
+    assert result["disabled"] == 1
+    assert DeviceToken.objects.get(token="tok1").active is True
+    assert DeviceToken.objects.get(token="tok2").active is False
     assert ExpoTicket.objects.count() == 0
     assert FailedExpoTicket.objects.filter(ticket_id="t2", token="tok2").exists()
 
@@ -74,8 +74,8 @@ def test_cleanup_handles_http_error():
     with patch("notifications.tasks.urllib.request.urlopen", side_effect=fake_urlopen):
         result = tasks.cleanup_invalid_tokens.run()
 
-    assert result == {"processed": 0, "deleted": 0}
-    assert DeviceToken.objects.filter(token="tok").exists()
+    assert result == {"processed": 0, "disabled": 0}
+    assert DeviceToken.objects.get(token="tok").active is True
     assert ExpoTicket.objects.filter(ticket_id="t1").exists()
 
 
@@ -122,9 +122,9 @@ def test_send_then_cleanup_cycle():
         cleanup_result = tasks.cleanup_invalid_tokens.run()
 
     assert cleanup_result["processed"] == 2
-    assert cleanup_result["deleted"] == 1
-    assert DeviceToken.objects.filter(token="tok1").exists()
-    assert not DeviceToken.objects.filter(token="tok2").exists()
+    assert cleanup_result["disabled"] == 1
+    assert DeviceToken.objects.get(token="tok1").active is True
+    assert DeviceToken.objects.get(token="tok2").active is False
     assert ExpoTicket.objects.count() == 0
     assert FailedExpoTicket.objects.filter(ticket_id="t2", token="tok2").exists()
 
