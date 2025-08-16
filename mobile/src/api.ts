@@ -57,6 +57,14 @@ export async function apiPutAuth(path: string, body: any){
   return r.json();
 }
 
+export async function getNotificationChannels(){
+  return apiGet("/notifications/channels/");
+}
+
+export async function updateNotificationChannels(body: {push: boolean; email: boolean}){
+  return apiPutAuth("/notifications/channels/", body);
+}
+
 // Complaints API helpers
 export async function getComplaints(){
   return apiGet("/complaints/");
