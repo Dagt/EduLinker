@@ -31,6 +31,12 @@ def test_chat_message_permissions():
     )
     assert res.status_code in (200, 201)
     assert ChatMessage.objects.count() == 1
+    msg = ChatMessage.objects.first()
+    assert msg.author_role == parent1.role
+    assert msg.message_type == "text"
+    assert msg.attachment_url == ""
+    assert res.data["author_role"] == parent1.role
+    assert res.data["message_type"] == "text"
 
     token2 = str(RefreshToken.for_user(parent2).access_token)
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {token2}", HTTP_X_SCHOOL_ID=str(school.id))
