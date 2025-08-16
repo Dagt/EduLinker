@@ -40,10 +40,10 @@ npx expo start
 
 ## Integración continua
 
-Este repositorio incluye pipelines de GitHub Actions para verificar el código automáticamente:
+La acción `ci.yml` se ejecuta en cada `push` y `pull_request` para validar los tres módulos principales:
 
-- **Backend CI** ejecuta `flake8` y `pytest` con reporte de cobertura.
-- **Web CI** corre `npm test` y `npm run build` para la aplicación web.
-- **Mobile CI** corre `npm test` y `npm run build` para la aplicación móvil.
+- **Backend**: corre `flake8`, construye con `python setup.py install` y ejecuta `pytest`.
+- **Web**: instala con `npm ci`, pasa `npm run lint`, corre `npm test` y genera `npm run build`.
+- **Mobile**: instala con `npm ci`, pasa `npm run lint`, corre `npm test` y genera `npm run build`.
 
-Cada flujo publica los reportes de cobertura y los artefactos de compilación en la pestaña *Actions* de GitHub, donde pueden descargarse para revisión.
+Los resultados y artefactos de cada job pueden consultarse en la pestaña *Actions* de GitHub.
