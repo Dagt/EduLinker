@@ -7,6 +7,7 @@ from core.permissions import (
     IsDirector,
     can_record_fundraising_ledger,
     can_upload_expense,
+    is_director,
 )
 from .models import FundraisingEvent, FundraisingGroupLedger, ExpenseEvidence
 from .serializers import FundraisingEventSerializer, FundraisingGroupLedgerSerializer, ExpenseEvidenceSerializer
@@ -83,8 +84,13 @@ class FundraisingLedgerCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        event = serializer.validated_data.get("event")
         group = serializer.validated_data.get("group")
         user = self.request.user
+        if event.school_id != self.request.school_id or group.school_id != self.request.school_id:
+            raise PermissionDenied("Event or group mismatch for school")
+        if event.school_id != group.school_id:
+            raise PermissionDenied("Event and group must belong to the same school")
         if not can_record_fundraising_ledger(user, group):
             raise PermissionDenied("Not allowed to record ledger for this group")
         ledger = serializer.save(created_by=user)
@@ -106,6 +112,10 @@ class ExpenseEvidenceCreateView(generics.CreateAPIView):
         ledger = serializer.validated_data.get("ledger")
         group = serializer.validated_data.get("group") or (ledger.group if ledger else None)
         user = self.request.user
+        if ledger and ledger.event.school_id != self.request.school_id:
+            raise PermissionDenied("Ledger mismatch for school")
+        if group and group.school_id != self.request.school_id:
+            raise PermissionDenied("Group mismatch for school")
         if not can_upload_expense(user, group):
             raise PermissionDenied("Not allowed to upload expenses for this group")
         serializer.save(uploader=user)

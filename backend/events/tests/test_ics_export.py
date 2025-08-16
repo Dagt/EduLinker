@@ -44,3 +44,10 @@ def test_ics_export_contains_event():
     events = [c for c in cal.walk("VEVENT")]
     assert len(events) == 1
     assert str(events[0].get("summary")) == "Fiesta"
+
+
+@pytest.mark.django_db
+def test_ics_export_requires_school_id():
+    client = APIClient()
+    res = client.get("/api/v1/events/ics/")
+    assert res.status_code == 400

@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from icalendar import Calendar, Event as ICalEvent
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
@@ -11,9 +11,10 @@ class EventsICSView(APIView):
 
     def get(self, request):
         school_id = request.headers.get("X-SCHOOL-ID")
-        events_qs = Event.objects.all()
-        if school_id:
-            events_qs = events_qs.filter(school_id=school_id)
+        if not school_id:
+            return HttpResponseBadRequest("Missing X-SCHOOL-ID header")
+
+        events_qs = Event.objects.filter(school_id=school_id)
 
         cal = Calendar()
         cal.add("prodid", "-//EduLinker//Events//ES")

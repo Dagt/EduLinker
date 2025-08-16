@@ -100,3 +100,53 @@ def test_full_suggestion_flow():
     )
     assert res.status_code == 200
     assert res.json()["title"] == "New title"
+
+
+@pytest.mark.django_db
+def test_director_cannot_create_suggestion():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    director = User.objects.create_user(
+        username="d@x.com",
+        email="d@x.com",
+        password="p",
+        role="DIRECTOR",
+        school=school,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    group = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+
+    client = APIClient()
+    token = str(RefreshToken.for_user(director).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+    res = client.post(
+        "/api/v1/suggestions/",
+        {
+            "group": group.id,
+            "target_teacher": teacher.id,
+            "title": "Idea",
+            "description": "Desc",
+        },
+        format="json",
+    )
+    assert res.status_code == 403

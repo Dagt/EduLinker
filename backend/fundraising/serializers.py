@@ -17,10 +17,26 @@ class FundraisingGroupLedgerSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         request = self.context.get("request")
         if request:
-            self.fields["group"].queryset = Group.objects.filter(school_id=request.school_id)
+            self.fields["group"].queryset = Group.objects.filter(
+                school_id=request.school_id
+            )
+            self.fields["event"].queryset = FundraisingEvent.objects.filter(
+                school_id=request.school_id
+            )
 
 class ExpenseEvidenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExpenseEvidence
         fields = ["id", "ledger", "group", "file_url", "amount", "concept", "created_at", "uploader"]
         read_only_fields = ["uploader", "created_at"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request:
+            self.fields["ledger"].queryset = FundraisingGroupLedger.objects.filter(
+                event__school_id=request.school_id
+            )
+            self.fields["group"].queryset = Group.objects.filter(
+                school_id=request.school_id
+            )
