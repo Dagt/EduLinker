@@ -11,6 +11,15 @@ import Fundraising from "./src/screens/Fundraising";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
 
+if (process.env.NODE_ENV !== "test") {
+  const Sentry = require("sentry-expo");
+  Sentry.init({
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    enableInExpoDevelopment: true,
+    debug: false,
+  });
+}
+
 export default function App(){
   const [logged,setLogged]=useState(false);
   const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"surveys"|"fundraising"|"events">("feed");
