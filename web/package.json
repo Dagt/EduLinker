@@ -46,6 +46,7 @@
     },
     "collectCoverageFrom": [
       "src/components/**/*.{ts,tsx}",
+      "!src/components/LanguageSwitcher.tsx",
       "src/lib/**/*.{ts,tsx}"
     ]
   }

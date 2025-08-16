@@ -7,6 +7,10 @@
     "surveys": "Encuestas",
     "fundraising": "Recaudación"
   },
+  "UploadButton": {
+    "presignError": "Error de presign",
+    "s3Error": "Error de S3"
+  },
   "Dashboard": {
     "welcome": "Bienvenido, {name}",
     "refresh": "Actualizar",
@@ -170,7 +174,8 @@
   },
   "GroupList": {
     "header": "Lista de grupos",
-    "unauthorized": "No autorizado"
+    "unauthorized": "No autorizado",
+    "error": "Error al cargar grupos"
   },
   "GroupCreate": {
     "unauthorized": "No autorizado",

@@ -18,7 +18,7 @@ export default function GroupList() {
         const data = await apiGet<any[]>("/groups/", tk);
         setGroups(data);
       } catch (err: any) {
-        setError(err.message || "error");
+        setError(err.message || t("error"));
       }
     }
     load();
