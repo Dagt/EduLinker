@@ -19,6 +19,8 @@ from .views import (
     VocalAssignmentCreateView,
     VocalAssignmentDeactivateView,
     MeView,
+    CurrentSchoolView,
+    SchoolYearRolloverView,
     EventDetailView,
     EventUpdateView,
     AnnouncementListCreateView,
@@ -30,6 +32,12 @@ from .views import (
 
 urlpatterns = [
     path("me/", MeView.as_view(), name="me"),
+    path("schools/current/", CurrentSchoolView.as_view(), name="current-school"),
+    path(
+        "school-years/rollover/",
+        SchoolYearRolloverView.as_view(),
+        name="school-year-rollover",
+    ),
     path("groups/", GroupListView.as_view(), name="group-list"),
     path("groups/create/", GroupCreateView.as_view(), name="group-create"),
     path(
