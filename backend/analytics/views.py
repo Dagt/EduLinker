@@ -3,7 +3,14 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from django.db.models import Count, Sum
 from django.utils import timezone
-from core.models import Complaint, User, Event, Homework, EventGroupAudience
+from core.models import (
+    Complaint,
+    User,
+    Event,
+    Homework,
+    EventGroupAudience,
+    ParentStudent,
+)
 from fundraising.models import FundraisingGroupLedger
 from surveys.models import SurveyVote
 from suggestions.models import Suggestion
@@ -106,11 +113,20 @@ class ComplaintsAnalyticsView(APIView):
             .annotate(total=Count("id"))
             .order_by("-total")
         )
+        top_parents = (
+            Complaint.objects.filter(
+                school_id=school_id, created_by__role=User.Roles.PADRE
+            )
+            .values("created_by")
+            .annotate(total=Count("id"))
+            .order_by("-total")[:5]
+        )
         return Response(
             {
                 "complaints_total": total_complaints,
                 "complaints_open": open_complaints,
                 "complaints_by_group": list(complaints_by_group),
+                "top_parents_by_complaints": list(top_parents),
             }
         )
 
@@ -146,6 +162,20 @@ class EngagementAnalyticsView(APIView):
             for item in survey_data
         ]
 
+        participation_rate = []
+        for item in survey_data:
+            group = item["group_id"]
+            parents = (
+                ParentStudent.objects.filter(
+                    school_id=school_id, student__memberships__group_id=group
+                )
+                .values("parent_id")
+                .distinct()
+                .count()
+            )
+            rate = item["total"] / parents if parents else 0
+            participation_rate.append({"group_id": group, "rate": rate})
+
         homework_qs = Homework.objects.filter(school_id=school_id)
         if group_id:
             homework_qs = homework_qs.filter(group_id=group_id)
@@ -161,6 +191,7 @@ class EngagementAnalyticsView(APIView):
                 "surveys_participation": survey_data,
                 "homework_participation": list(homework_data),
                 "events_participation": list(event_data),
+                "participation_rate_by_group": participation_rate,
             }
         )
 
