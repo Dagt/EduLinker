@@ -85,3 +85,24 @@ def test_director_event_and_vocal_ledger_and_summary():
     assert res.status_code == 200
     data = res.json()
     assert data["total_collected"] == "100.00"
+
+
+@pytest.mark.django_db
+def test_teacher_cannot_create_event():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    user = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    client = APIClient()
+    token = str(RefreshToken.for_user(user).access_token)
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id))
+    res = client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    assert res.status_code == 403

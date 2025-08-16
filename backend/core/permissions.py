@@ -12,6 +12,7 @@ from .models import (
     ParentStudent,
     ComplaintParticipant,
 )
+from suggestions.models import Suggestion
 
 
 # ---------------------------------------------------------------------------
@@ -97,6 +98,108 @@ def can_post_activity_photo(user: User, group: Group) -> bool:
         return True
 
     return False
+
+
+# ---------------------------------------------------------------------------
+# Action helper predicates
+# ---------------------------------------------------------------------------
+
+
+def can_view_chat(user: User, group: Group) -> bool:
+    """Return True if user may view the chat for the given group."""
+    if user.school_id != group.school_id:
+        return False
+    if is_director(user):
+        return True
+    if is_maestro_titular(user) and group.homeroom_teacher_id == user.id:
+        return True
+    if is_maestro_itinerante(user) and SpecialistAssignment.objects.filter(
+        group=group, teacher=user
+    ).exists():
+        return True
+    if is_vocal(user) and VocalAssignment.objects.filter(
+        group=group, parent=user, active=True
+    ).exists():
+        return True
+    if is_padre(user):
+        student_ids = ParentStudent.objects.filter(parent=user).values_list(
+            "student_id", flat=True
+        )
+        return GroupMembership.objects.filter(
+            group=group, student_id__in=student_ids
+        ).exists()
+    return False
+
+
+def can_post_chat(user: User, group: Group) -> bool:
+    """Return True if user may post in the chat for the group."""
+    if not can_view_chat(user, group):
+        return False
+    if is_director(user):
+        return False
+    return True
+
+
+def can_create_suggestion(user: User) -> bool:
+    """Return True if user can create a suggestion."""
+    return is_padre(user) or is_vocal(user) or is_maestro_titular(user)
+
+
+def can_update_suggestion_status(user: User, suggestion: Suggestion) -> bool:
+    """Return True if user may update the suggestion's status."""
+    return is_director(user) or user == suggestion.target_teacher
+
+
+def can_record_fundraising_ledger(user: User, group: Group) -> bool:
+    """Return True if user may record a fundraising ledger for the group."""
+    if user.school_id != group.school_id:
+        return False
+    if is_director(user):
+        return True
+    if is_maestro_titular(user) and group.homeroom_teacher_id == user.id:
+        return True
+    if is_vocal(user) and VocalAssignment.objects.filter(
+        group=group, parent=user, active=True
+    ).exists():
+        return True
+    return False
+
+
+def can_upload_expense(user: User, group: Group) -> bool:
+    """Return True if user may upload an expense for the group."""
+    return is_vocal(user) and VocalAssignment.objects.filter(
+        group=group, parent=user, active=True
+    ).exists()
+
+
+# ---------------------------------------------------------------------------
+# Permission classes
+# ---------------------------------------------------------------------------
+
+
+class IsDirector(BasePermission):
+    """Allow access only to director users."""
+
+    def has_permission(self, request, view):
+        return is_director(request.user)
+
+
+class CanAccessSuggestion(BasePermission):
+    """Allow authorized users to access a suggestion instance."""
+
+    def has_object_permission(self, request, view, obj: Suggestion):
+        user = request.user
+        if user.school_id != obj.school_id:
+            return False
+        if is_director(user) or user == obj.created_by or user == obj.target_teacher:
+            return True
+        if (
+            obj.group
+            and is_maestro_titular(user)
+            and obj.group.homeroom_teacher_id == user.id
+        ):
+            return True
+        return False
 
 
 # ---------------------------------------------------------------------------
