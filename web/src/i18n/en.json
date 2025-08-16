@@ -112,7 +112,7 @@
     "location": "Location",
     "start": "Start (ISO)",
     "end": "End (ISO)",
-    "groupIds": "Group IDs (comma)",
+    "groupIds": "Group IDs (comma-separated)",
     "description": "Description",
     "create": "Create",
     "created": "Event created"

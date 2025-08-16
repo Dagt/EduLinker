@@ -85,9 +85,9 @@
   },
   "ComplaintCreate": {
     "header": "Crear queja privada",
-    "groupId": "Group ID",
-    "teacherId": "Target Teacher ID",
-    "studentId": "About Student ID (opcional)",
+    "groupId": "ID de grupo",
+    "teacherId": "ID de maestro",
+    "studentId": "ID de estudiante (opcional)",
     "description": "Descripción",
     "create": "Crear queja",
     "created": "Queja creada #{id}",
@@ -95,7 +95,7 @@
   },
   "ComplaintThread": {
     "header": "Queja #{id}",
-    "status": "Status:",
+    "status": "Estado:",
     "description": "Descripción:",
     "messages": "Mensajes",
     "reply": "Escribe una respuesta",
@@ -112,7 +112,7 @@
     "location": "Lugar",
     "start": "Inicio (ISO)",
     "end": "Fin (ISO)",
-    "groupIds": "Group IDs (coma)",
+    "groupIds": "IDs de grupo (separados por coma)",
     "description": "Descripción",
     "create": "Crear",
     "created": "Evento creado"
@@ -134,7 +134,7 @@
     "header": "Crear encuesta",
     "byGroup": "Por grupo",
     "wholeSchool": "Toda la escuela",
-    "groupId": "Group ID",
+    "groupId": "ID de grupo",
     "title": "Título",
     "start": "Inicio (ISO)",
     "end": "Fin (ISO)",
@@ -147,8 +147,8 @@
     "voted": "Voto registrado",
     "error": "Error",
     "header": "Votar encuesta",
-    "surveyId": "ID encuesta",
-    "optionId": "ID opción",
+    "surveyId": "ID de encuesta",
+    "optionId": "ID de opción",
     "vote": "Votar"
   },
   "FundraisingCreateEvent": {

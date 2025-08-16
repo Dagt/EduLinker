@@ -30,4 +30,8 @@ describe('roles helpers', () => {
     localStorage.setItem('role', 'admin');
     expect(canAccessRoute('/groups')).toBe(true);
   });
+
+  it('allows access to unprotected routes', () => {
+    expect(canAccessRoute('/home', 'guest')).toBe(true);
+  });
 });
