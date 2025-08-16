@@ -1,17 +1,39 @@
 # Guía de despliegue
 
-## Docker
+## Docker Compose
 
-1. Copia `backend/.env.example` a `backend/.env` y ajusta las variables.
-2. Copia `web/env.example` a `web/.env` y define `NEXT_PUBLIC_API_URL` y `NEXT_PUBLIC_SCHOOL_ID`.
-3. Copia `mobile/env.example` a `mobile/.env` y define `EXPO_PUBLIC_API_URL` y `EXPO_PUBLIC_SCHOOL_ID`.
-4. Ejecuta:
+1. Copia los ejemplos de variables de entorno a cada módulo:
 
-```bash
-docker compose up --build
-```
+   ```bash
+   cp docs/backend.env.example backend/.env
+   cp docs/web.env.example web/.env
+   cp docs/mobile.env.example mobile/.env
+   ```
 
-El backend estará en `http://localhost:8000` y el front web en `http://localhost:3000`.
+2. El archivo `docker-compose.yml` levanta PostgreSQL, Redis y MinIO (S3).
+   El backend usa las siguientes variables para conectarse a estos servicios:
+
+   ```bash
+   # Redis
+   REDIS_URL=redis://redis:6379/0
+
+   # S3/MinIO
+   AWS_ACCESS_KEY_ID=minio
+   AWS_SECRET_ACCESS_KEY=minio123
+   AWS_STORAGE_BUCKET_NAME=edulinker
+   S3_ENDPOINT_URL=http://minio:9000
+   S3_PUBLIC_URL_PREFIX=http://localhost:9000/edulinker
+   AWS_REGION=us-east-1
+   ```
+
+3. Ejecuta la pila completa:
+
+   ```bash
+   docker compose up --build
+   ```
+
+El backend estará en `http://localhost:8000`, el front web en `http://localhost:3000`
+y la consola de MinIO en `http://localhost:9001`.
 
 ## Manual
 
