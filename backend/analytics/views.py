@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Count, Sum
 from django.utils import timezone
+
 from core.models import (
     Complaint,
     User,
@@ -10,10 +11,17 @@ from core.models import (
     EventGroupAudience,
     ParentStudent,
 )
+from core.permissions import IsDirector
 from fundraising.models import FundraisingGroupLedger
 from surveys.models import SurveyVote
 from suggestions.models import Suggestion
-from core.permissions import IsDirector
+
+from .serializers import (
+    OverviewAnalyticsSerializer,
+    ComplaintsAnalyticsSerializer,
+    FundraisingAnalyticsSerializer,
+    EngagementAnalyticsSerializer,
+)
 
 
 class OverviewAnalyticsView(APIView):
@@ -77,7 +85,7 @@ class OverviewAnalyticsView(APIView):
             .annotate(total=Count("id"))
         )
 
-        return Response(
+        serializer = OverviewAnalyticsSerializer(
             {
                 "complaints_total": total_complaints,
                 "complaints_open": open_complaints,
@@ -96,6 +104,7 @@ class OverviewAnalyticsView(APIView):
                 "events_by_scope": list(events_by_scope),
             }
         )
+        return Response(serializer.data)
 
 
 class ComplaintsAnalyticsView(APIView):
@@ -121,7 +130,7 @@ class ComplaintsAnalyticsView(APIView):
             .annotate(total=Count("id"))
             .order_by("-total")[:5]
         )
-        return Response(
+        serializer = ComplaintsAnalyticsSerializer(
             {
                 "complaints_total": total_complaints,
                 "complaints_open": open_complaints,
@@ -129,6 +138,7 @@ class ComplaintsAnalyticsView(APIView):
                 "top_parents_by_complaints": list(top_parents),
             }
         )
+        return Response(serializer.data)
 
 
 class FundraisingAnalyticsView(APIView):
@@ -149,12 +159,13 @@ class FundraisingAnalyticsView(APIView):
             total=Sum("amount_collected")
         )
 
-        return Response(
+        serializer = FundraisingAnalyticsSerializer(
             {
                 "fundraising_by_group": list(fundraising_by_group),
                 "fundraising_by_event": list(fundraising_by_event),
             }
         )
+        return Response(serializer.data)
 
 
 class EngagementAnalyticsView(APIView):
@@ -199,7 +210,7 @@ class EngagementAnalyticsView(APIView):
             event_qs = event_qs.filter(group_id=group_id)
         event_data = event_qs.values("group_id").annotate(total=Count("id"))
 
-        return Response(
+        serializer = EngagementAnalyticsSerializer(
             {
                 "surveys_participation": survey_data,
                 "homework_participation": list(homework_data),
@@ -207,4 +218,5 @@ class EngagementAnalyticsView(APIView):
                 "participation_rate_by_group": participation_rate,
             }
         )
+        return Response(serializer.data)
 

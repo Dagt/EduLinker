@@ -1,10 +1,13 @@
 from django.urls import path
+
 from .views import (
     OverviewAnalyticsView,
     ComplaintsAnalyticsView,
     FundraisingAnalyticsView,
     EngagementAnalyticsView,
 )
+
+app_name = "analytics"
 
 urlpatterns = [
     path(
