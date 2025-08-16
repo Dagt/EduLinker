@@ -12,6 +12,9 @@ from core.models import (
     Homework,
     Event,
     EventGroupAudience,
+    Student,
+    GroupMembership,
+    ParentStudent,
 )
 from surveys.models import Survey, SurveyVote
 
@@ -49,6 +52,21 @@ def test_engagement_analytics_filters_by_group():
         school=school,
     )
 
+    parent1 = User.objects.create_user(
+        username="p1@x.com",
+        email="p1@x.com",
+        password="p",
+        role="PADRE",
+        school=school,
+    )
+    parent2 = User.objects.create_user(
+        username="p2@x.com",
+        email="p2@x.com",
+        password="p",
+        role="PADRE",
+        school=school,
+    )
+
     group1 = Group.objects.create(
         school=school,
         school_year=sy,
@@ -62,6 +80,29 @@ def test_engagement_analytics_filters_by_group():
         name="G2",
         grade_level=1,
         homeroom_teacher=teacher2,
+    )
+
+    student1 = Student.objects.create(
+        school=school,
+        first_name="S1",
+        last_name="S1",
+        grade_level=1,
+        enrollment_code="S1",
+    )
+    student2 = Student.objects.create(
+        school=school,
+        first_name="S2",
+        last_name="S2",
+        grade_level=1,
+        enrollment_code="S2",
+    )
+    GroupMembership.objects.create(school=school, group=group1, student=student1)
+    GroupMembership.objects.create(school=school, group=group2, student=student2)
+    ParentStudent.objects.create(
+        school=school, parent=parent1, student=student1, relationship="P"
+    )
+    ParentStudent.objects.create(
+        school=school, parent=parent2, student=student2, relationship="P"
     )
 
     now = timezone.now()
@@ -78,7 +119,7 @@ def test_engagement_analytics_filters_by_group():
         end_at=now + timedelta(days=1),
         status="ACTIVE",
     )
-    SurveyVote.objects.create(survey=survey1, voter=teacher1, option_index=0)
+    SurveyVote.objects.create(survey=survey1, voter=parent1, option_index=0)
 
     survey2 = Survey.objects.create(
         school=school,
@@ -93,7 +134,7 @@ def test_engagement_analytics_filters_by_group():
         end_at=now + timedelta(days=1),
         status="ACTIVE",
     )
-    SurveyVote.objects.create(survey=survey2, voter=teacher2, option_index=0)
+    SurveyVote.objects.create(survey=survey2, voter=parent2, option_index=0)
 
     Homework.objects.create(
         school=school,
@@ -155,3 +196,6 @@ def test_engagement_analytics_filters_by_group():
     assert data["surveys_participation"] == [{"group_id": group1.id, "total": 1}]
     assert data["homework_participation"] == [{"group_id": group1.id, "total": 1}]
     assert data["events_participation"] == [{"group_id": group1.id, "total": 1}]
+    assert data["participation_rate_by_group"] == [
+        {"group_id": group1.id, "rate": 1.0}
+    ]

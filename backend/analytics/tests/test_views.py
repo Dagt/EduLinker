@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.models import School, SchoolYear, User, Group, Complaint
+from core.models import School, SchoolYear, User, Group, Complaint, Event
 from fundraising.models import FundraisingEvent, FundraisingGroupLedger
 from surveys.models import Survey, SurveyVote
 from suggestions.models import Suggestion
@@ -54,6 +54,21 @@ def test_director_accesses_analytics_endpoints():
         school=school2,
     )
 
+    parent1 = User.objects.create_user(
+        username="p1@x.com",
+        email="p1@x.com",
+        password="p",
+        role="PADRE",
+        school=school1,
+    )
+    parent2 = User.objects.create_user(
+        username="p2@x.com",
+        email="p2@x.com",
+        password="p",
+        role="PADRE",
+        school=school2,
+    )
+
     group1 = Group.objects.create(
         school=school1,
         school_year=sy1,
@@ -72,14 +87,21 @@ def test_director_accesses_analytics_endpoints():
     Complaint.objects.create(
         school=school1,
         group=group1,
-        created_by=teacher1,
+        created_by=parent1,
         target_teacher=teacher1,
         description="c1",
     )
     Complaint.objects.create(
+        school=school1,
+        group=group1,
+        created_by=parent1,
+        target_teacher=teacher1,
+        description="c1b",
+    )
+    Complaint.objects.create(
         school=school2,
         group=group2,
-        created_by=teacher2,
+        created_by=parent2,
         target_teacher=teacher2,
         description="c2",
     )
@@ -145,6 +167,31 @@ def test_director_accesses_analytics_endpoints():
     )
     SurveyVote.objects.create(survey=survey2, voter=teacher2, option_index=0)
 
+    start = now + timedelta(days=2)
+    end = start + timedelta(hours=1)
+    Event.objects.create(
+        school=school1,
+        school_year=sy1,
+        scope="GLOBAL",
+        title="EG",
+        description="",
+        location="",
+        start_at=start,
+        end_at=end,
+        created_by=teacher1,
+    )
+    Event.objects.create(
+        school=school1,
+        school_year=sy1,
+        scope="GROUP",
+        title="EG2",
+        description="",
+        location="",
+        start_at=start,
+        end_at=end,
+        created_by=teacher1,
+    )
+
     client = APIClient()
     token = str(RefreshToken.for_user(director).access_token)
     client.credentials(
@@ -154,13 +201,17 @@ def test_director_accesses_analytics_endpoints():
     res = client.get("/api/v1/analytics/overview/")
     assert res.status_code == 200
     data = res.json()
-    assert data["complaints_total"] == 1
+    assert data["complaints_total"] == 2
     assert float(data["fundraising_by_group"][0]["total"]) == 100.0
+    scopes = {item["scope"]: item["total"] for item in data["events_by_scope"]}
+    assert scopes == {"GLOBAL": 1, "GROUP": 1}
 
     res = client.get("/api/v1/analytics/complaints/")
     assert res.status_code == 200
     data = res.json()
-    assert data["complaints_total"] == 1
+    assert data["complaints_total"] == 2
+    assert data["top_parents_by_complaints"][0]["created_by"] == parent1.id
+    assert data["top_parents_by_complaints"][0]["total"] == 2
 
     res = client.get("/api/v1/analytics/fundraising/")
     assert res.status_code == 200
