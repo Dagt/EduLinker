@@ -17,16 +17,31 @@ test('loads complaints from API', async () => {
   expect(getComplaints).toHaveBeenCalled();
 });
 
-test('creates complaint', async () => {
+test('validates required fields', async () => {
+  (getComplaints as jest.Mock).mockResolvedValue([]);
+  const { getByPlaceholderText, getByText } = render(<Complaints />);
+  fireEvent.changeText(getByPlaceholderText('Escribe tu queja'), 'Hola');
+  fireEvent.press(getByText('Enviar'));
+  expect(createComplaint).not.toHaveBeenCalled();
+});
+
+test('creates complaint with fields', async () => {
   (getComplaints as jest.Mock)
     .mockResolvedValueOnce([])
-    .mockResolvedValueOnce([{ id:2, content:'Nueva queja' }]);
-  (createComplaint as jest.Mock).mockResolvedValue({ id:2, content:'Nueva queja' });
+    .mockResolvedValueOnce([{ id:2, description:'Nueva queja' }]);
+  (createComplaint as jest.Mock).mockResolvedValue({ id:2, description:'Nueva queja' });
   const { getByPlaceholderText, getByText } = render(<Complaints />);
-  const input = getByPlaceholderText('Escribe tu queja');
-  fireEvent.changeText(input, 'Nueva queja');
+  fireEvent.changeText(getByPlaceholderText('Group ID'), '1');
+  fireEvent.changeText(getByPlaceholderText('Teacher ID'), '2');
+  fireEvent.changeText(getByPlaceholderText('Student ID (optional)'), '3');
+  fireEvent.changeText(getByPlaceholderText('Escribe tu queja'), 'Nueva queja');
   fireEvent.press(getByText('Enviar'));
-  await waitFor(() => expect(createComplaint).toHaveBeenCalledWith({ content:'Nueva queja' }));
+  await waitFor(() => expect(createComplaint).toHaveBeenCalledWith({
+    group_id:1,
+    target_teacher_id:2,
+    description:'Nueva queja',
+    about_student_id:3,
+  }));
   await waitFor(() => getByText(/Nueva queja/));
 });
 

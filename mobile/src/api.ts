@@ -73,3 +73,12 @@ export async function getComplaintMessages(id: number){
 export async function sendComplaintMessage(id: number, body: any){
   return apiPost(`/complaints/${id}/messages/`, body);
 }
+
+// Suggestions API helpers
+export async function getSuggestions(){
+  return apiGet("/suggestions/");
+}
+
+export async function createSuggestion(body: any){
+  return apiPost("/suggestions/", body);
+}
