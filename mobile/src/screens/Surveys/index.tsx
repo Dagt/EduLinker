@@ -6,7 +6,26 @@ import SurveyVote from "../SurveyVote";
 export default function Surveys(){
   const [items, setItems] = useState<any[]>([]);
   const [selected, setSelected] = useState<number|null>(null);
-  useEffect(()=>{ (async()=>{ try{ const data = await getSurveys(); setItems(data); }catch{ setItems([]);} })(); },[]);
+
+  useEffect(()=>{
+    (async()=>{
+      try{
+        const data = await getSurveys();
+        setItems(data);
+      }catch{
+        setItems([]);
+      }
+    })();
+  },[]);
+
+  function isActive(item: any){
+    const now = new Date();
+    return (
+      item.status === "ACTIVE" &&
+      new Date(item.start_at) <= now &&
+      new Date(item.end_at) >= now
+    );
+  }
   if(selected!==null){
     return <SurveyVote surveyId={selected} onBack={()=>setSelected(null)} />;
   }
@@ -15,11 +34,17 @@ export default function Surveys(){
       <Text style={{fontSize:18, marginBottom:8}}>Encuestas</Text>
       <FlatList data={items} keyExtractor={(x)=>String(x.id)}
         ListEmptyComponent={<Text>No hay encuestas</Text>}
-        renderItem={({item})=> (
-          <TouchableOpacity onPress={()=>setSelected(item.id)}>
-            <Text>- {item.title || item.name}</Text>
-          </TouchableOpacity>
-        )} />
+        renderItem={({item})=> {
+          const active = isActive(item);
+          return (
+            <TouchableOpacity onPress={()=>active && setSelected(item.id)} disabled={!active}>
+              <Text>
+                - {item.title || item.name}
+                {!active ? " (cerrada)" : ""}
+              </Text>
+            </TouchableOpacity>
+          );
+        }} />
     </View>
   );
 }

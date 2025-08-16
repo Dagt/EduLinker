@@ -5,7 +5,16 @@ import { getSurveys } from '../../../api';
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
 jest.mock('../../../api', () => ({ getSurveys: jest.fn() }));
 
-(getSurveys as jest.Mock).mockResolvedValue([{ id:1, title:'Survey 1'}]);
+const now = Date.now();
+(getSurveys as jest.Mock).mockResolvedValue([
+  {
+    id:1,
+    title:'Survey 1',
+    status:'ACTIVE',
+    start_at:new Date(now-3600*1000).toISOString(),
+    end_at:new Date(now+3600*1000).toISOString(),
+  }
+]);
 
 test('loads surveys from API', async () => {
   const { getByText } = render(<Surveys />);
