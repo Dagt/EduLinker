@@ -10,3 +10,4 @@ Guías y referencias para los distintos módulos de EduLinker.
 - [Permissions Overview](permissions.md)
 - [Seeds de datos](seeds.md)
 - [Casos de uso](use_cases.md)
+- [OpenAPI schema](../backend/docs/openapi.json) (generado con `python backend/manage.py spectacular --file backend/docs/openapi.json`)
