@@ -20,6 +20,7 @@ jest.mock('../screens/Suggestions', () => ({ __esModule: true, default: () => <T
 jest.mock('../screens/Homeworks', () => ({ __esModule: true, default: () => <Text>HomeworksScreen</Text> }));
 jest.mock('../screens/Surveys', () => ({ __esModule: true, default: () => <Text>SurveysScreen</Text> }));
 jest.mock('../screens/EventCalendar', () => ({ __esModule: true, default: () => <Text>EventCalendarScreen</Text> }));
+jest.mock('../screens/Fundraising', () => ({ __esModule: true, default: () => <Text>FundraisingScreen</Text> }));
 
 const App = require('../../App').default;
 
@@ -41,5 +42,23 @@ test('navigates to suggestions', () => {
   const { getByText } = render(<App />);
   fireEvent.press(getByText(i18n.t('menu.suggestions')));
   expect(getByText('SuggestionsScreen')).toBeTruthy();
+});
+
+test('navigates to complaints', () => {
+  const { getByText } = render(<App />);
+  fireEvent.press(getByText(i18n.t('menu.complaints')));
+  expect(getByText('ComplaintsScreen')).toBeTruthy();
+});
+
+test('navigates to surveys', () => {
+  const { getByText } = render(<App />);
+  fireEvent.press(getByText(i18n.t('menu.surveys')));
+  expect(getByText('SurveysScreen')).toBeTruthy();
+});
+
+test('navigates to fundraising', () => {
+  const { getByText } = render(<App />);
+  fireEvent.press(getByText(i18n.t('menu.fundraising')));
+  expect(getByText('FundraisingScreen')).toBeTruthy();
 });
 

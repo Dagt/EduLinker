@@ -14,7 +14,8 @@ const translations = {
       suggestions: 'Suggestions',
       homeworks: 'Homeworks',
       surveys: 'Surveys',
-      events: 'Events',
+      fundraising: 'Fundraising',
+      events: 'Calendar',
     },
     login: {
       title: 'EduLinker',
@@ -50,6 +51,10 @@ const translations = {
       save: 'Save',
       delete: 'Delete',
     },
+    fundraising: {
+      ledger: 'Ledger',
+      expenses: 'Expenses',
+    },
   },
   es: {
     general: {
@@ -63,7 +68,8 @@ const translations = {
       suggestions: 'Sugerencias',
       homeworks: 'Tareas',
       surveys: 'Encuestas',
-      events: 'Eventos',
+      fundraising: 'Recaudación',
+      events: 'Calendario',
     },
     login: {
       title: 'EduLinker',
@@ -98,6 +104,10 @@ const translations = {
       back: 'Volver',
       save: 'Guardar',
       delete: 'Eliminar',
+    },
+    fundraising: {
+      ledger: 'Ingresos',
+      expenses: 'Gastos',
     },
   },
 };
