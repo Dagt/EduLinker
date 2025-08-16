@@ -12,6 +12,7 @@ from .models import (
     ParentStudent,
     ComplaintParticipant,
 )
+from .roles import Roles
 
 
 # ---------------------------------------------------------------------------
@@ -19,28 +20,35 @@ from .models import (
 # ---------------------------------------------------------------------------
 
 
+def is_admin_tenant(user: User) -> bool:
+    return user.role == Roles.ADMIN_TENANT
+
+
 def is_director(user: User) -> bool:
-    return user.role == User.Roles.DIRECTOR
+    return user.role == Roles.DIRECTOR
 
 
 def is_maestro_titular(user: User) -> bool:
-    return user.role == User.Roles.MAESTRO_TITULAR
+    return user.role == Roles.MAESTRO_TITULAR
 
 
 def is_maestro_itinerante(user: User) -> bool:
-    return user.role == User.Roles.MAESTRO_ITINERANTE
+    return user.role == Roles.MAESTRO_ITINERANTE
 
 
 def is_vocal(user: User) -> bool:
-    return user.role == User.Roles.VOCAL
+    return user.role == Roles.VOCAL
 
 
 def is_padre(user: User) -> bool:
-    return user.role == User.Roles.PADRE
+    return user.role == Roles.PADRE
 
 
 def can_view_event(user: User, event: Event) -> bool:
     """Return True if user can view the given event."""
+    if is_admin_tenant(user):
+        return True
+
     if user.school_id != event.school_id:
         return False
 
@@ -80,6 +88,9 @@ def can_view_event(user: User, event: Event) -> bool:
 
 def can_post_activity_photo(user: User, group: Group) -> bool:
     """Return True if user may upload an activity photo for the group."""
+    if is_admin_tenant(user):
+        return True
+
     if user.school_id != group.school_id:
         return False
 
@@ -116,6 +127,9 @@ class CanAccessComplaint(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         user = request.user
+
+        if is_admin_tenant(user):
+            return True
 
         if user.school_id != obj.school_id:
             return False

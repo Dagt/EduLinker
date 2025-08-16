@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+from .roles import Roles
 
 
 class School(models.Model):
@@ -41,12 +42,8 @@ class SchoolYear(models.Model):
 
 
 class User(AbstractUser):
-    class Roles(models.TextChoices):
-        DIRECTOR = "DIRECTOR", "Director"
-        MAESTRO_TITULAR = "MAESTRO_TITULAR", "Maestro Titular"
-        MAESTRO_ITINERANTE = "MAESTRO_ITINERANTE", "Maestro Itinerante"
-        VOCAL = "VOCAL", "Vocal"
-        PADRE = "PADRE", "Padre"
+    # Re-export centralised roles for backwards compatibility
+    Roles = Roles
 
     school = models.ForeignKey(
         School, on_delete=models.CASCADE, related_name="users"

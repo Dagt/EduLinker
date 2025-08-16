@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.db.models import Count, Sum
 from django.utils import timezone
 from core.models import Complaint, User, Event
+from core.roles import Roles
 from fundraising.models import FundraisingGroupLedger
 from surveys.models import SurveyVote
 from suggestions.models import Suggestion
@@ -17,7 +18,7 @@ class IsDirector(BasePermission):
         return bool(
             user
             and user.is_authenticated
-            and user.role == User.Roles.DIRECTOR
+            and user.role in {Roles.DIRECTOR, Roles.ADMIN_TENANT}
         )
 
 @api_view(["GET"])
