@@ -457,14 +457,20 @@ class EventDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Event.objects.filter(school_id=self.request.school_id)
+        user = self.request.user
+        return Event.objects.filter(school_id=self.request.school_id).filter(
+            user_can_view_event(user)
+        )
 
 class EventUpdateView(generics.UpdateAPIView):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Event.objects.filter(school_id=self.request.school_id)
+        user = self.request.user
+        return Event.objects.filter(school_id=self.request.school_id).filter(
+            user_can_view_event(user)
+        )
 
     def update(self, request, *args, **kwargs):
         event = self.get_object()

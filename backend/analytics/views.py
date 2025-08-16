@@ -1,5 +1,4 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from django.db.models import Count, Sum
 from django.utils import timezone
@@ -14,16 +13,7 @@ from core.models import (
 from fundraising.models import FundraisingGroupLedger
 from surveys.models import SurveyVote
 from suggestions.models import Suggestion
-
-
-class IsDirector(BasePermission):
-    """Allow access only to users with DIRECTOR role."""
-
-    def has_permission(self, request, view):
-        user = request.user
-        return bool(
-            user and user.is_authenticated and user.role == User.Roles.DIRECTOR
-        )
+from core.permissions import IsDirector
 
 
 class OverviewAnalyticsView(APIView):
