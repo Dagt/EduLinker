@@ -1,4 +1,5 @@
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import Complaints from '..';
 import { getComplaints, createComplaint } from '../../../api';
 import i18n from '../../../i18n';
@@ -11,6 +12,12 @@ jest.mock('../../../api', () => ({
   sendComplaintMessage: jest.fn(),
 }));
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+afterEach(cleanup);
+
 test('loads complaints from API', async () => {
   i18n.locale = 'es';
   (getComplaints as jest.Mock).mockResolvedValue([{ id:1, title:'Test Complaint'}]);
@@ -19,17 +26,37 @@ test('loads complaints from API', async () => {
   expect(getComplaints).toHaveBeenCalled();
 });
 
-test('creates complaint', async () => {
+test('creates complaint with required fields', async () => {
   i18n.locale = 'es';
   (getComplaints as jest.Mock)
     .mockResolvedValueOnce([])
     .mockResolvedValueOnce([{ id:2, content:'Nueva queja' }]);
   (createComplaint as jest.Mock).mockResolvedValue({ id:2, content:'Nueva queja' });
   const { getByPlaceholderText, getByText } = render(<Complaints />);
-  const input = getByPlaceholderText(i18n.t('complaints.placeholder'));
-  fireEvent.changeText(input, 'Nueva queja');
+  fireEvent.changeText(getByPlaceholderText('Group ID'), '1');
+  fireEvent.changeText(getByPlaceholderText('Teacher ID'), '2');
+  fireEvent.changeText(getByPlaceholderText(i18n.t('complaints.placeholder')), 'Nueva queja');
+  fireEvent.changeText(getByPlaceholderText('Student ID'), '3');
   fireEvent.press(getByText(i18n.t('complaints.send')));
-  await waitFor(() => expect(createComplaint).toHaveBeenCalledWith({ content:'Nueva queja' }));
+  await waitFor(() => expect(createComplaint).toHaveBeenCalledWith({
+    content:'Nueva queja',
+    group_id:1,
+    target_teacher_id:2,
+    about_student_id:3,
+  }));
   await waitFor(() => getByText(/Nueva queja/));
+});
+
+test('validates required fields before creating complaint', async () => {
+  i18n.locale = 'es';
+  (getComplaints as jest.Mock).mockResolvedValue([]);
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const { getByPlaceholderText, getByText } = render(<Complaints />);
+  fireEvent.changeText(getByPlaceholderText(i18n.t('complaints.placeholder')), 'Contenido');
+  fireEvent.press(getByText(i18n.t('complaints.send')));
+  await waitFor(() => {
+    expect(createComplaint).not.toHaveBeenCalled();
+    expect(alertSpy).toHaveBeenCalled();
+  });
 });
 

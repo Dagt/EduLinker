@@ -70,7 +70,12 @@ export async function getComplaints(){
   return apiGet("/complaints/");
 }
 
-export async function createComplaint(body: any){
+export async function createComplaint(body: {
+  content: string;
+  group_id: number;
+  target_teacher_id: number;
+  about_student_id?: number;
+}){
   return apiPost("/complaints/", body);
 }
 
@@ -83,7 +88,13 @@ export async function sendComplaintMessage(id: number, body: any){
 }
 
 // Suggestions API helpers
-export async function createSuggestion(body: any){
+export async function createSuggestion(body: {
+  title: string;
+  description: string;
+  group_id: number;
+  target_teacher_id: number;
+  about_student_id?: number;
+}){
   return apiPost("/suggestions/", body);
 }
 
