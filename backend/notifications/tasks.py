@@ -120,6 +120,13 @@ def push_to_users(
 
 @shared_task
 def cleanup_invalid_tokens():
+    """Remove device tokens for which Expo reports `DeviceNotRegistered`.
+
+    The task fetches stored Expo tickets, queries the Expo receipts API and
+    deletes any device tokens that are reported as invalid.  Processed tickets
+    are removed regardless of their status so that we do not query them again
+    on subsequent runs.
+    """
     tickets = list(ExpoTicket.objects.values_list("ticket_id", "token"))
     if not tickets:
         return {"processed": 0, "deleted": 0}
