@@ -103,6 +103,10 @@ export async function deleteComplaint(id: number){
   return apiDeleteAuth(`/complaints/${id}/`);
 }
 
+export async function escalateComplaint(id: number){
+  return apiPost(`/complaints/${id}/status/`, { status: 'ESCALATED' });
+}
+
 // Suggestions API helpers
 export async function getSuggestions(){
   return apiGet("/suggestions/");
