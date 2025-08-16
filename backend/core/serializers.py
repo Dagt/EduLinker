@@ -18,6 +18,7 @@ from .models import (
     EventGroupAudience,
     EventAttachment,
     EventPhoto,
+    Announcement,
     Homework,
     ActivityPhoto,
 )
@@ -260,6 +261,52 @@ class EventPhotoSerializer(serializers.ModelSerializer):
         model = EventPhoto
         fields = ["id", "photo_url", "caption", "created_at"]
         read_only_fields = ["created_at"]
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Announcement
+        fields = [
+            "id",
+            "group",
+            "teacher",
+            "title",
+            "message",
+            "attachments",
+            "created_at",
+        ]
+        read_only_fields = ["teacher", "created_at"]
+
+    def validate_group(self, value):
+        request = self.context.get("request")
+        school_id = getattr(request, "school_id", None)
+        if school_id is not None and value.school_id != school_id:
+            raise serializers.ValidationError("Group mismatch for school")
+        return value
+
+
+class HomeworkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Homework
+        fields = [
+            "id",
+            "group",
+            "subject",
+            "teacher",
+            "title",
+            "description",
+            "due_date",
+            "attachments",
+            "created_at",
+        ]
+        read_only_fields = ["teacher", "created_at"]
+
+    def validate_group(self, value):
+        request = self.context.get("request")
+        school_id = getattr(request, "school_id", None)
+        if school_id is not None and value.school_id != school_id:
+            raise serializers.ValidationError("Group mismatch for school")
+        return value
 
 
 class ActivityPhotoSerializer(serializers.ModelSerializer):
