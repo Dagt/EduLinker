@@ -35,5 +35,46 @@
     "missing": "Se requieren título y descripción",
     "confirm": "¿Está seguro de crear esta sugerencia?",
     "error": "Error"
+  },
+  "Fundraising": {
+    "header": "Recaudación",
+    "name": "Nombre",
+    "date": "Fecha",
+    "description": "Descripción",
+    "create": "Crear"
+  },
+  "FundraisingLedger": {
+    "header": "Registrar recaudación por grupo",
+    "eventId": "ID de evento",
+    "groupId": "ID de grupo",
+    "amount": "Monto",
+    "notes": "Notas",
+    "save": "Guardar",
+    "success": "Registro agregado #{id}",
+    "error": "Error al registrar"
+  },
+  "FundraisingExpense": {
+    "header": "Registrar evidencia de gasto",
+    "ledgerId": "ID de ledger (opcional)",
+    "groupId": "ID de grupo (opcional)",
+    "amount": "Monto",
+    "concept": "Concepto",
+    "save": "Guardar evidencia",
+    "uploadFirst": "Sube el archivo primero",
+    "fileReady": "Archivo listo: {url}",
+    "success": "Evidencia registrada #{id}",
+    "error": "Error al registrar evidencia"
+  },
+  "FundraisingSummary": {
+    "header": "Resumen de recaudación",
+    "eventId": "ID de evento",
+    "load": "Cargar",
+    "totalCollected": "Total recaudado",
+    "totalExpenses": "Gastos totales",
+    "balance": "Saldo",
+    "concept": "Concepto",
+    "amount": "Monto",
+    "file": "Archivo",
+    "unauthorized": "No autorizado"
   }
 }

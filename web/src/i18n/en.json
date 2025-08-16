@@ -35,5 +35,46 @@
     "missing": "Title and description are required",
     "confirm": "Are you sure you want to create this suggestion?",
     "error": "Error"
+  },
+  "Fundraising": {
+    "header": "Fundraising",
+    "name": "Name",
+    "date": "Date",
+    "description": "Description",
+    "create": "Create"
+  },
+  "FundraisingLedger": {
+    "header": "Record collection by group",
+    "eventId": "Event ID",
+    "groupId": "Group ID",
+    "amount": "Amount",
+    "notes": "Notes",
+    "save": "Save",
+    "success": "Record added #{id}",
+    "error": "Error while saving"
+  },
+  "FundraisingExpense": {
+    "header": "Register expense evidence",
+    "ledgerId": "Ledger ID (optional)",
+    "groupId": "Group ID (optional)",
+    "amount": "Amount",
+    "concept": "Concept",
+    "save": "Save evidence",
+    "uploadFirst": "Upload the file first",
+    "fileReady": "File ready: {url}",
+    "success": "Evidence recorded #{id}",
+    "error": "Error while registering evidence"
+  },
+  "FundraisingSummary": {
+    "header": "Fundraising summary",
+    "eventId": "Event ID",
+    "load": "Load",
+    "totalCollected": "Total collected",
+    "totalExpenses": "Total expenses",
+    "balance": "Balance",
+    "concept": "Concept",
+    "amount": "Amount",
+    "file": "File",
+    "unauthorized": "Unauthorized"
   }
 }
