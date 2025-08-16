@@ -203,6 +203,9 @@ def test_director_accesses_analytics_endpoints():
     data = res.json()
     assert data["complaints_total"] == 2
     assert float(data["fundraising_by_group"][0]["total"]) == 100.0
+    assert float(data["fundraising_by_event"][0]["total"]) == 100.0
+    assert data["surveys_participation_by_survey"][0]["survey_id"] == survey1.id
+    assert data["surveys_participation_by_survey"][0]["votes"] == 1
     scopes = {item["scope"]: item["total"] for item in data["events_by_scope"]}
     assert scopes == {"GLOBAL": 1, "GROUP": 1}
 
@@ -217,6 +220,12 @@ def test_director_accesses_analytics_endpoints():
     assert res.status_code == 200
     data = res.json()
     assert float(data["fundraising_by_group"][0]["total"]) == 100.0
+
+    res = client.get(f"/api/v1/analytics/fundraising/?event_id={event1.id}")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["fundraising_by_event"][0]["event__id"] == event1.id
+    assert float(data["fundraising_by_event"][0]["total"]) == 100.0
 
 
 @pytest.mark.django_db
