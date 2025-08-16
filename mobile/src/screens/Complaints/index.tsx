@@ -6,6 +6,9 @@ import i18n from "../../i18n";
 export default function Complaints(){
   const [items, setItems] = useState<any[]>([]);
   const [content, setContent] = useState("");
+  const [groupId, setGroupId] = useState("");
+  const [teacherId, setTeacherId] = useState("");
+  const [studentId, setStudentId] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
   const [message, setMessage] = useState("");
 
@@ -21,12 +24,20 @@ export default function Complaints(){
   useEffect(()=>{ loadComplaints(); },[]);
 
   const submitComplaint = async () => {
-    if(!content){
+    if(!content || !groupId || !teacherId){
       Alert.alert(i18n.t('general.error'), i18n.t('complaints.requiredComplaint'));
       return;
     }
-    await createComplaint({ content });
+    await createComplaint({
+      content,
+      group_id: Number(groupId),
+      target_teacher_id: Number(teacherId),
+      ...(studentId ? { about_student_id: Number(studentId) } : {})
+    });
     setContent("");
+    setGroupId("");
+    setTeacherId("");
+    setStudentId("");
     await loadComplaints();
   };
 
@@ -68,6 +79,9 @@ export default function Complaints(){
   return (
     <View style={{padding:16}}>
       <Text style={{fontSize:18, marginBottom:8}}>{i18n.t('complaints.title')}</Text>
+      <TextInput placeholder="Group ID" value={groupId} onChangeText={setGroupId} />
+      <TextInput placeholder="Teacher ID" value={teacherId} onChangeText={setTeacherId} />
+      <TextInput placeholder="Student ID (optional)" value={studentId} onChangeText={setStudentId} />
       <TextInput placeholder={i18n.t('complaints.placeholder')} value={content} onChangeText={setContent} />
       <Button title={i18n.t('complaints.send')} onPress={submitComplaint} />
       <FlatList data={items} keyExtractor={(x)=>String(x.id)}

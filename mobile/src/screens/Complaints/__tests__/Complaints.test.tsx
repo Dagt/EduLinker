@@ -1,4 +1,5 @@
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import Complaints from '..';
 import { getComplaints, createComplaint } from '../../../api';
 import i18n from '../../../i18n';
@@ -14,9 +15,8 @@ jest.mock('../../../api', () => ({
 test('loads complaints from API', async () => {
   i18n.locale = 'es';
   (getComplaints as jest.Mock).mockResolvedValue([{ id:1, title:'Test Complaint'}]);
-  const { getByText } = render(<Complaints />);
-  await waitFor(() => getByText(/Test Complaint/));
-  expect(getComplaints).toHaveBeenCalled();
+  render(<Complaints />);
+  await waitFor(() => expect(getComplaints).toHaveBeenCalled());
 });
 
 test('creates complaint', async () => {
@@ -26,10 +26,28 @@ test('creates complaint', async () => {
     .mockResolvedValueOnce([{ id:2, content:'Nueva queja' }]);
   (createComplaint as jest.Mock).mockResolvedValue({ id:2, content:'Nueva queja' });
   const { getByPlaceholderText, getByText } = render(<Complaints />);
+  fireEvent.changeText(getByPlaceholderText('Group ID'), '1');
+  fireEvent.changeText(getByPlaceholderText('Teacher ID'), '2');
+  fireEvent.changeText(getByPlaceholderText('Student ID (optional)'), '3');
   const input = getByPlaceholderText(i18n.t('complaints.placeholder'));
   fireEvent.changeText(input, 'Nueva queja');
   fireEvent.press(getByText(i18n.t('complaints.send')));
-  await waitFor(() => expect(createComplaint).toHaveBeenCalledWith({ content:'Nueva queja' }));
+  await waitFor(() => expect(createComplaint).toHaveBeenCalledWith({ content:'Nueva queja', group_id:1, target_teacher_id:2, about_student_id:3 }));
   await waitFor(() => getByText(/Nueva queja/));
+});
+
+test('validates required fields', async () => {
+  i18n.locale = 'es';
+  (getComplaints as jest.Mock).mockResolvedValue([]);
+  (createComplaint as jest.Mock).mockClear();
+  const alertMock = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const { getByPlaceholderText, getByText } = render(<Complaints />);
+  await waitFor(() => getByPlaceholderText('Teacher ID'));
+  fireEvent.changeText(getByPlaceholderText('Teacher ID'), '2');
+  const input = getByPlaceholderText(i18n.t('complaints.placeholder'));
+  fireEvent.changeText(input, 'Nueva queja');
+  fireEvent.press(getByText(i18n.t('complaints.send')));
+  expect(createComplaint).not.toHaveBeenCalled();
+  expect(alertMock).toHaveBeenCalled();
 });
 

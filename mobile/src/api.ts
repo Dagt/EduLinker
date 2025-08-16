@@ -70,7 +70,12 @@ export async function getComplaints(){
   return apiGet("/complaints/");
 }
 
-export async function createComplaint(body: any){
+export async function createComplaint(body: {
+  content: string;
+  group_id: number;
+  target_teacher_id: number;
+  about_student_id?: number;
+}){
   return apiPost("/complaints/", body);
 }
 
@@ -80,6 +85,20 @@ export async function getComplaintMessages(id: number){
 
 export async function sendComplaintMessage(id: number, body: any){
   return apiPost(`/complaints/${id}/messages/`, body);
+}
+
+// Suggestions API helpers
+export async function getSuggestions(){
+  return apiGet("/suggestions/");
+}
+
+export async function createSuggestion(body: {
+  content: string;
+  group_id: number;
+  target_teacher_id: number;
+  about_student_id?: number;
+}){
+  return apiPost("/suggestions/", body);
 }
 
 // Photos API helpers
