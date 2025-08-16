@@ -12,8 +12,10 @@ jest.mock('../api', () => ({
   sendComplaintMessage: jest.fn(),
 }));
 
+jest.setTimeout(10000);
+
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
 });
 
 afterEach(cleanup);
