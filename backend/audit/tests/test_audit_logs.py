@@ -28,6 +28,19 @@ def test_complaint_status_change_logged_and_endpoint():
     assert res.status_code == 200
     assert len(res.json()) >= 1
 
+
+@pytest.mark.django_db
+def test_non_director_cannot_view_audit_logs():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    user = User.objects.create_user(
+        username="t@x.com", email="t@x.com", password="p", role="MAESTRO_TITULAR", school=school
+    )
+    client = APIClient()
+    token = str(RefreshToken.for_user(user).access_token)
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id))
+    res = client.get("/api/v1/audit-logs/")
+    assert res.status_code == 403
+
 @pytest.mark.django_db
 def test_event_creation_logged():
     school = School.objects.create(name="S", slug="s", subdomain="s", active=True)

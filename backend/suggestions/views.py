@@ -7,8 +7,11 @@ from .serializers import (
     SuggestionMessageSerializer,
     SuggestionStatusSerializer,
 )
-from .permissions import CanAccessSuggestion
-from core.permissions import is_director, is_padre, is_maestro_titular, is_vocal
+from core.permissions import (
+    CanAccessSuggestion,
+    can_create_suggestion,
+    can_update_suggestion_status,
+)
 
 class SuggestionListCreateView(generics.ListCreateAPIView):
     serializer_class = SuggestionSerializer
@@ -23,8 +26,7 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user
-        # Padres, vocales y maestros titulares pueden crear sugerencias
-        if not (is_padre(user) or is_vocal(user) or is_maestro_titular(user)):
+        if not can_create_suggestion(user):
             raise PermissionDenied("Not allowed to create suggestions")
         serializer.save(school_id=self.request.school_id, created_by=user)
 
@@ -58,7 +60,7 @@ class SuggestionStatusUpdateView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         suggestion = self.get_object()
         user = self.request.user
-        if not (is_director(user) or user == suggestion.target_teacher):
+        if not can_update_suggestion_status(user, suggestion):
             raise PermissionDenied("Cannot change status")
         prev_status = suggestion.status
         serializer.save()
