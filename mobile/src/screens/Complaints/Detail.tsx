@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TextInput, Button, Alert } from "react-native";
-import { getComplaintMessages, sendComplaintMessage } from "../../services/complaints";
+import { getComplaintMessages, sendComplaintMessage, updateComplaint, deleteComplaint } from "../../api";
 import i18n from "../../i18n";
 
 export default function ComplaintDetail({ complaint, onBack }: { complaint: any; onBack: () => void }) {
   const [data, setData] = useState<any>(complaint);
   const [message, setMessage] = useState("");
+  const [content, setContent] = useState(complaint.content || "");
 
   useEffect(() => {
     (async () => {
@@ -30,7 +31,15 @@ export default function ComplaintDetail({ complaint, onBack }: { complaint: any;
 
   return (
     <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>{data.title || data.content}</Text>
+      <TextInput
+        style={{ fontSize: 18, marginBottom: 8 }}
+        value={content}
+        onChangeText={setContent}
+      />
+      <Button title={i18n.t('complaints.save')} onPress={async () => {
+        await updateComplaint(data.id, { content });
+        setData({ ...data, content });
+      }} />
       <FlatList
         data={data.messages || []}
         keyExtractor={(x) => String(x.id)}
@@ -44,6 +53,7 @@ export default function ComplaintDetail({ complaint, onBack }: { complaint: any;
       />
       <Button title={i18n.t('complaints.send')} onPress={sendMsg} />
       <Button title={i18n.t('complaints.back')} onPress={onBack} />
+      <Button title={i18n.t('complaints.delete')} onPress={async () => { await deleteComplaint(data.id); onBack(); }} />
     </View>
   );
 }

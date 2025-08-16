@@ -5,7 +5,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }), { virtual: true });
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { headers, setSchoolId, uploadFile, updateComplaint, updateSuggestion } from './api';
+import { headers, setSchoolId, uploadFile, updateComplaint, updateSuggestion, deleteComplaint, deleteSuggestion } from './api';
 
 beforeEach(() => {
   (AsyncStorage.getItem as jest.Mock).mockReset();
@@ -72,4 +72,20 @@ test('updateSuggestion sends PUT request', async () => {
   await updateSuggestion(3, { title: 't' });
   expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/suggestions/3/');
   expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('PUT');
+});
+
+test('deleteComplaint sends DELETE request', async () => {
+  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
+  (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, status: 204 });
+  await deleteComplaint(2);
+  expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/complaints/2/');
+  expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('DELETE');
+});
+
+test('deleteSuggestion sends DELETE request', async () => {
+  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
+  (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, status: 204 });
+  await deleteSuggestion(4);
+  expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/suggestions/4/');
+  expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('DELETE');
 });

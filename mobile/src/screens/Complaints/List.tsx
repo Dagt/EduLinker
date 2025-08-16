@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TextInput, Button, Alert } from "react-native";
-import { getComplaints, createComplaint } from "../../services/complaints";
+import { getComplaints, createComplaint } from "../../api";
 import i18n from "../../i18n";
 
 export default function ComplaintsList({ onSelect, refresh }: { onSelect: (item: any) => void; refresh: number }) {

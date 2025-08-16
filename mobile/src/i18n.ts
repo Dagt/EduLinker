@@ -35,6 +35,8 @@ const translations = {
       back: 'Back',
       requiredComplaint: 'Please enter a complaint',
       requiredMessage: 'Please enter a message',
+      save: 'Save',
+      delete: 'Delete',
     },
     suggestions: {
       title: 'Suggestions',
@@ -45,6 +47,8 @@ const translations = {
       messagesNone: 'No messages',
       messagePlaceholder: 'Message',
       back: 'Back',
+      save: 'Save',
+      delete: 'Delete',
     },
   },
   es: {
@@ -80,6 +84,8 @@ const translations = {
       back: 'Volver',
       requiredComplaint: 'Ingresa una queja',
       requiredMessage: 'Ingresa un mensaje',
+      save: 'Guardar',
+      delete: 'Eliminar',
     },
     suggestions: {
       title: 'Sugerencias',
@@ -90,6 +96,8 @@ const translations = {
       messagesNone: 'Sin mensajes',
       messagePlaceholder: 'Mensaje',
       back: 'Volver',
+      save: 'Guardar',
+      delete: 'Eliminar',
     },
   },
 };

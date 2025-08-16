@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TextInput, Button, Alert } from "react-native";
-import { getSuggestions, createSuggestion } from "../../services/suggestions";
+import { getSuggestions, createSuggestion } from "../../api";
 import { getRole } from "../../role";
 import i18n from "../../i18n";
 

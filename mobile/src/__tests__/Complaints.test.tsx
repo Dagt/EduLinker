@@ -1,21 +1,28 @@
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import Complaints from '../screens/Complaints';
-import { getComplaints, createComplaint, getComplaintMessages, sendComplaintMessage } from '../services/complaints';
+import { getComplaints, createComplaint, getComplaintMessages, sendComplaintMessage } from '../api';
 import i18n from '../i18n';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
-jest.mock('../services/complaints', () => ({
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+}), { virtual: true });
+jest.mock('../api', () => ({
   getComplaints: jest.fn(),
   createComplaint: jest.fn(),
   getComplaintMessages: jest.fn(),
   sendComplaintMessage: jest.fn(),
 }));
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 jest.setTimeout(10000);
 
 beforeEach(() => {
   jest.resetAllMocks();
+  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
 });
 
 afterEach(cleanup);
