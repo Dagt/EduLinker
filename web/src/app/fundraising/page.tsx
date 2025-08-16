@@ -59,7 +59,13 @@ export default function FundraisingPage(){
         </form>
         <ul>
           {events.map(ev => (
-            <li key={ev.id}><strong>{ev.name}</strong> - {ev.date}</li>
+            <li key={ev.id}>
+              {t.rich('eventItem', {
+                b: (chunks) => <strong>{chunks}</strong>,
+                name: ev.name,
+                date: ev.date
+              })}
+            </li>
           ))}
         </ul>
       </main>
