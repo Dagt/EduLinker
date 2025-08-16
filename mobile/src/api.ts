@@ -52,7 +52,24 @@ export async function apiPostAuth(path: string, body: any){
 
 export async function apiPutAuth(path: string, body: any){
   const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"PUT", headers: headers(tk), body: JSON.stringify(body) });
+  const r = await fetch(`${BASE}${path}`, { method:"PUT", headers: await headers(tk), body: JSON.stringify(body) });
   if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
   return r.json();
+}
+
+// Complaints API helpers
+export async function getComplaints(){
+  return apiGet("/complaints/");
+}
+
+export async function createComplaint(body: any){
+  return apiPost("/complaints/", body);
+}
+
+export async function getComplaintMessages(id: number){
+  return apiGet(`/complaints/${id}/messages/`);
+}
+
+export async function sendComplaintMessage(id: number, body: any){
+  return apiPost(`/complaints/${id}/messages/`, body);
 }
