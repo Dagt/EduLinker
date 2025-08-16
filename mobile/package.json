@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "expo": "~51.0.0",
+    "expo-image-picker": "^16.1.4",
     "expo-secure-store": "~13.0.0",
     "react": "18.2.0",
     "react-native": "0.74.0"
