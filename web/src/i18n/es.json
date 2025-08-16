@@ -17,6 +17,19 @@
     "status": "Estado",
     "update": "Actualizar",
     "updated": "Estado actualizado",
+    "error": "Error",
+    "missing": "ID y estado son obligatorios",
+    "confirm": "¿Está seguro de actualizar el estado?"
+  },
+  "SuggestionCreate": {
+    "header": "Crear sugerencia",
+    "groupId": "ID de grupo (opcional)",
+    "title": "Título",
+    "description": "Descripción",
+    "create": "Crear",
+    "created": "Sugerencia creada",
+    "missing": "Se requieren título y descripción",
+    "confirm": "¿Está seguro de crear esta sugerencia?",
     "error": "Error"
   }
 }

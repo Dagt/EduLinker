@@ -4,8 +4,7 @@ import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
 import { updateSuggestionStatus } from "@/lib/api";
 import { requireRole } from "@/lib/roles";
-import {NextIntlClientProvider, useTranslations} from 'next-intl';
-import esMessages from "@/i18n/es.json";
+import {useTranslations} from 'next-intl';
 
 function SuggestionStatusContent(){
   const [id,setId]=useState("");
@@ -17,6 +16,11 @@ function SuggestionStatusContent(){
 
   async function submit(e:React.FormEvent){
     e.preventDefault(); setMsg("");
+    if(!id.trim() || !status.trim()){
+      setMsg(t('missing'));
+      return;
+    }
+    if(typeof window !== 'undefined' && !window.confirm(t('confirm'))) return;
     try{
       const tk = getToken();
       await updateSuggestionStatus(Number(id), status, tk);
@@ -42,9 +46,5 @@ function SuggestionStatusContent(){
 }
 
 export default function SuggestionStatus(){
-  return (
-    <NextIntlClientProvider locale="es" messages={esMessages}>
-      <SuggestionStatusContent/>
-    </NextIntlClientProvider>
-  );
+  return <SuggestionStatusContent/>;
 }
