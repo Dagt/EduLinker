@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install dependencies
-        run: pip install -r backend/requirements.txt flake8 pytest
+        run: pip install -r backend/requirements.txt flake8 pytest pytest-django pytest-cov
       - name: Lint with flake8
         run: flake8 .
         working-directory: backend
@@ -38,7 +38,7 @@ jobs:
         run: npm run lint
         working-directory: web
       - name: Test with npm
-        run: npm test
+        run: npm test -- --coverage
         working-directory: web
       - name: Build web app
         run: npm run build
@@ -58,7 +58,7 @@ jobs:
         run: npm run lint
         working-directory: mobile
       - name: Test with npm
-        run: npm test
+        run: npm test -- --coverage
         working-directory: mobile
       - name: Build mobile app
         run: npm run build
