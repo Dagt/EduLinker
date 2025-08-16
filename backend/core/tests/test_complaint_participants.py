@@ -70,10 +70,11 @@ def test_participant_flow_access():
 
     res = client_parent.post(
         f"/api/v1/complaints/{complaint_id}/participants/",
-        {"user": outsider.id},
+        {"user": outsider.id, "role_in_thread": "MAESTRO_TITULAR"},
         format="json",
     )
     assert res.status_code in (200, 201)
+    assert res.data["added_by"] == parent.id
 
     res = client_outsider.get(f"/api/v1/complaints/{complaint_id}/")
     assert res.status_code == 200
@@ -134,7 +135,7 @@ def test_cannot_add_participant_from_other_school():
 
     res = client_parent.post(
         f"/api/v1/complaints/{complaint_id}/participants/",
-        {"user": outsider.id},
+        {"user": outsider.id, "role_in_thread": "MAESTRO_TITULAR"},
         format="json",
     )
     assert res.status_code == 400

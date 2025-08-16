@@ -259,7 +259,7 @@ class ComplaintParticipantCreateView(generics.CreateAPIView):
             Complaint, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
         self.check_object_permissions(self.request, complaint)
-        serializer.save(complaint=complaint)
+        serializer.save(complaint=complaint, added_by=self.request.user)
 
 
 class ComplaintStatusUpdateView(generics.UpdateAPIView):
