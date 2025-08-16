@@ -1,4 +1,5 @@
 import json
+import urllib.error
 from unittest.mock import patch
 
 import pytest
@@ -54,6 +55,26 @@ def test_cleanup_deletes_invalid_tokens():
     assert DeviceToken.objects.filter(token="tok1").exists()
     assert not DeviceToken.objects.filter(token="tok2").exists()
     assert ExpoTicket.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_cleanup_handles_http_error():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    user = User.objects.create_user(
+        username="u@x.com", email="u@x.com", password="p", role="PADRE", school=school
+    )
+    DeviceToken.objects.create(school=school, user=user, token="tok", platform="web")
+    ExpoTicket.objects.create(ticket_id="t1", token="tok")
+
+    def fake_urlopen(req, data=None):
+        raise urllib.error.HTTPError(req.full_url, 500, "err", None, None)
+
+    with patch("notifications.tasks.urllib.request.urlopen", side_effect=fake_urlopen):
+        result = tasks.cleanup_invalid_tokens.run()
+
+    assert result == {"processed": 0, "deleted": 0}
+    assert DeviceToken.objects.filter(token="tok").exists()
+    assert ExpoTicket.objects.filter(ticket_id="t1").exists()
 
 
 @pytest.mark.django_db

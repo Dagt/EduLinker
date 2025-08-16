@@ -137,8 +137,8 @@ def cleanup_invalid_tokens():
             req, data=json.dumps({"ids": list(ticket_map.keys())}).encode("utf-8")
         ) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError:
-        payload = {}
+    except (urllib.error.HTTPError, urllib.error.URLError):
+        return {"processed": 0, "deleted": 0}
 
     for tid, info in (payload.get("data") or {}).items():
         if info.get("status") == "error":
