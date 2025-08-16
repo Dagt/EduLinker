@@ -6,7 +6,11 @@ import { getRole } from "../role";
 export default function FundraisingLedger(){
   const [items,setItems]=useState<any[]>([]);
   const [role,setRole]=useState("guest");
-  useEffect(()=>{ (async()=>{ setRole(await getRole()); const r = await apiGet("/fundraising/ledger"); setItems(r); })(); },[]);
+  useEffect(()=>{ (async()=>{
+    setRole(await getRole());
+    const r = await apiGet("/fundraising-ledger/");
+    setItems(r);
+  })(); },[]);
   if(role!=="treasurer" && role!=="admin") return <Text>No autorizado</Text>;
   return (
     <View style={{padding:16}}>
