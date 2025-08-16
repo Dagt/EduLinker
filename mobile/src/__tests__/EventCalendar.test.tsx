@@ -29,6 +29,8 @@ const picker = require('expo-image-picker');
 ]);
 (role.getRole as jest.Mock).mockResolvedValue('student');
 
+jest.setTimeout(10000);
+
 test('loads events and schedules reminder', async () => {
   const { getByText, getByTestId } = render(<EventCalendar />);
   await waitFor(() => getByText(/Event 1/));

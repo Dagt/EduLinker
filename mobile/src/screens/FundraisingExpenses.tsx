@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, TextInput, Button } from "react-native";
-import { getFundraisingSummary, createExpenseEvidence } from "../api";
+import { View, Text, FlatList, TextInput, Button, Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { getFundraisingSummary, createExpenseEvidence, uploadFile, postActivityPhoto } from "../api";
 import { getRole } from "../role";
 import i18n from "../i18n";
 
@@ -31,6 +32,19 @@ export default function FundraisingExpenses(){
   };
 
   useEffect(()=>{ (async()=>{ setRole(await getRole()); await load(); })(); },[]);
+
+  const pick = async () => {
+    try{
+      const img = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images });
+      if(img.canceled) return;
+      const uri = img.assets[0].uri;
+      const url = await uploadFile(uri, "image/jpeg");
+      await postActivityPhoto({ url });
+      setFileUrl(url);
+    }catch{
+      Alert.alert("Error", "No se pudo subir la imagen");
+    }
+  };
 
   const submit = async () => {
     await createExpenseEvidence({
@@ -68,7 +82,8 @@ export default function FundraisingExpenses(){
       <TextInput placeholder="Ledger ID" value={ledgerId} onChangeText={setLedgerId} />
       <TextInput placeholder="Concept" value={concept} onChangeText={setConcept} />
       <TextInput placeholder="Amount" value={amount} onChangeText={setAmount} />
-      <TextInput placeholder="File URL" value={fileUrl} onChangeText={setFileUrl} />
+      <Button title="Pick Photo" onPress={pick} />
+      {fileUrl ? <Text>File: {fileUrl}</Text> : null}
       <Button title="Add" onPress={submit} />
       <FlatList data={items} keyExtractor={(_,i)=>String(i)}
         ListEmptyComponent={<Text>No items</Text>}
