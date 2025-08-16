@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react';
-jest.mock('next-intl');
 import SuggestionDetail from './page';
 import { apiGet } from '@/lib/api';
 

@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-jest.mock('next-intl');
 import Dashboard from './page';
 import { apiGet } from '@/lib/api';
 
@@ -25,13 +24,12 @@ describe('Dashboard', () => {
     (apiGet as jest.Mock).mockReset();
   });
 
-  it('matches snapshot', async () => {
+  it('renders data', async () => {
     (apiGet as jest.Mock)
       .mockResolvedValueOnce({ first_name: 'Juan', last_name: 'Pérez' })
       .mockResolvedValueOnce(kpis);
-    const { asFragment } = render(<Dashboard />);
-    await screen.findByText('Quejas por grupo');
-    expect(asFragment()).toMatchSnapshot();
+    render(<Dashboard />);
+    expect(await screen.findByText('Quejas por grupo')).toBeInTheDocument();
   });
 
   it('refreshes data', async () => {

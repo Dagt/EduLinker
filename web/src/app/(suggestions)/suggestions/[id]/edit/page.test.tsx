@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-jest.mock('next-intl');
 import SuggestionEdit from './page';
 import { apiGet, apiPatch } from '@/lib/api';
 

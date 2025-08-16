@@ -1,13 +1,14 @@
 "use client";
 import {ChangeEvent} from "react";
 import {usePathname} from "next/navigation";
-import {useTranslations} from 'next-intl';
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 
 export default function LanguageSwitcher(){
   const pathname = usePathname() || '/';
   const segments = pathname.split('/');
   const locale = segments[1] === 'es' ? 'es' : 'en';
-  const t = useTranslations('LanguageSwitcher');
+  const { t } = useTranslation();
 
   function onChange(e: ChangeEvent<HTMLSelectElement>) {
     const nextLocale = e.target.value;
@@ -22,8 +23,8 @@ export default function LanguageSwitcher(){
 
   return (
     <select value={locale} onChange={onChange}>
-      <option value="en">{t('english')}</option>
-      <option value="es">{t('spanish')}</option>
+      <option value="en">{t('LanguageSwitcher.english')}</option>
+      <option value="es">{t('LanguageSwitcher.spanish')}</option>
     </select>
   );
 }

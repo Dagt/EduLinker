@@ -4,10 +4,11 @@ import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
 import { getFundraisingEventSummary } from "@/lib/api";
 import { requireRole } from "@/lib/roles";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 
 export default function FundraisingSummary() {
-  const t = useTranslations("FundraisingSummary");
+  const { t } = useTranslation();
   const [eventId, setEventId] = useState("");
   const [summary, setSummary] = useState<any | null>(null);
 
@@ -23,7 +24,7 @@ export default function FundraisingSummary() {
     }
   }
 
-  if (!requireRole(["admin", "treasurer"])) return <p>{t("unauthorized")}</p>;
+  if (!requireRole(["admin", "treasurer"])) return <p>{t("FundraisingSummary.unauthorized")}</p>;
 
   const totalExpenses =
     summary?.expenses?.reduce((s: number, e: any) => s + Number(e.amount), 0) || 0;
@@ -33,34 +34,34 @@ export default function FundraisingSummary() {
     <>
       <Nav />
       <main style={{ padding: 16 }}>
-        <h2>{t("header")}</h2>
+        <h2>{t("FundraisingSummary.header")}</h2>
         <form onSubmit={load}>
           <input
-            placeholder={t("eventId")}
+            placeholder={t("FundraisingSummary.eventId")}
             value={eventId}
             onChange={(e) => setEventId(e.target.value)}
             style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
             required
           />
-          <button>{t("load")}</button>
+          <button>{t("FundraisingSummary.load")}</button>
         </form>
         {summary && (
           <>
             <p>
-              {t("totalCollected")}: {summary.total_collected}
+              {t("FundraisingSummary.totalCollected")}: {summary.total_collected}
             </p>
             <p>
-              {t("totalExpenses")}: {totalExpenses.toFixed(2)}
+              {t("FundraisingSummary.totalExpenses")}: {totalExpenses.toFixed(2)}
             </p>
             <p>
-              {t("balance")}: {balance.toFixed(2)}
+              {t("FundraisingSummary.balance")}: {balance.toFixed(2)}
             </p>
             <table>
               <thead>
                 <tr>
-                  <th>{t("concept")}</th>
-                  <th>{t("amount")}</th>
-                  <th>{t("file")}</th>
+                  <th>{t("FundraisingSummary.concept")}</th>
+                  <th>{t("FundraisingSummary.amount")}</th>
+                  <th>{t("FundraisingSummary.file")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -74,7 +75,7 @@ export default function FundraisingSummary() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {t("file")}
+                        {t("FundraisingSummary.file")}
                       </a>
                     </td>
                   </tr>

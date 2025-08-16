@@ -1,11 +1,12 @@
 "use client";
 import { getToken } from "@/lib/auth";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 
 type Props = { onUploaded: (fileUrl: string) => void };
 
 export default function UploadButton({ onUploaded }: Props) {
-  const t = useTranslations("UploadButton");
+  const { t } = useTranslation();
 
   async function handle(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -26,7 +27,7 @@ export default function UploadButton({ onUploaded }: Props) {
       }
     );
     if (!presignRes.ok) {
-      alert(t("presignError"));
+      alert(t("UploadButton.presignError"));
       return;
     }
     const { upload, file_url } = await presignRes.json();
@@ -39,7 +40,7 @@ export default function UploadButton({ onUploaded }: Props) {
 
     const s3Res = await fetch(upload.url, { method: "POST", body: fd });
     if (!s3Res.ok) {
-      alert(t("s3Error"));
+      alert(t("UploadButton.s3Error"));
       return;
     }
 

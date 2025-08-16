@@ -4,7 +4,8 @@ import Nav from "@/components/Nav";
 import { useForm } from "react-hook-form";
 import { listFundraisingEvents, createFundraisingEvent } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { useTranslations } from "next-intl";
+import { useTranslation, Trans } from "react-i18next";
+import "@/i18n";
 import Link from "next/link";
 import { requireRole } from "@/lib/roles";
 
@@ -13,7 +14,7 @@ type Event = { id: number; name: string; date: string; description: string };
 type FormData = { name: string; date: string; description: string };
 
 export default function FundraisingPage(){
-  const t = useTranslations("Fundraising");
+  const { t } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const { register, handleSubmit, reset } = useForm<FormData>();
   const allowed = requireRole(["admin"]);
@@ -42,31 +43,31 @@ export default function FundraisingPage(){
     }
   }
 
-  if (!allowed) return <p>{t("unauthorized")}</p>;
+  if (!allowed) return <p>{t("Fundraising.unauthorized")}</p>;
 
   return (
     <>
       <Nav />
       <main style={{ padding:16, maxWidth:680 }}>
-        <h2>{t("header")}</h2>
+        <h2>{t("Fundraising.header")}</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <input placeholder={t("name")} {...register("name", {required:true})}
+          <input placeholder={t("Fundraising.name")} {...register("name", {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <input placeholder={t("date")} {...register("date", {required:true})}
+          <input placeholder={t("Fundraising.date")} {...register("date", {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <textarea placeholder={t("description")} {...register("description")}
+          <textarea placeholder={t("Fundraising.description")} {...register("description")}
                     style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
-          <button>{t("create")}</button>
+          <button>{t("Fundraising.create")}</button>
         </form>
         <ul>
           {events.map(ev => (
             <li key={ev.id}>
               <Link href={`/fundraising/${ev.id}`}>
-                {t.rich('eventItem', {
-                  b: (chunks) => <strong>{chunks}</strong>,
-                  name: ev.name,
-                  date: ev.date
-                })}
+                <Trans
+                  i18nKey="Fundraising.eventItem"
+                  values={{ name: ev.name, date: ev.date }}
+                  components={{ b: <strong /> }}
+                />
               </Link>
             </li>
           ))}

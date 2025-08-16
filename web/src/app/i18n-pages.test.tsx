@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react';
-jest.mock('next-intl');
 jest.mock('recharts', () => {
   const React = require('react');
   const Mock = ({ children }: any) => <div>{children}</div>;

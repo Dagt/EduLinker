@@ -13,7 +13,7 @@
     "s3Error": "Upload error"
   },
   "Dashboard": {
-    "welcome": "Welcome, {name}",
+    "welcome": "Welcome, {{name}}",
     "refresh": "Refresh",
     "complaintsByGroup": "Complaints by group",
     "fundraisingByGroup": "Fundraising by group",
@@ -44,7 +44,7 @@
   },
   "SuggestionDetail": {
     "loading": "Loading...",
-    "header": "Suggestion #{id}",
+    "header": "Suggestion #{{id}}",
     "title": "Title:",
     "description": "Description:",
     "status": "Status:",
@@ -73,7 +73,7 @@
     "date": "Date",
     "description": "Description",
     "create": "Create",
-    "eventItem": "<b>{name}</b> - {date}",
+    "eventItem": "<b>{{name}}</b> - {{date}}",
     "unauthorized": "Unauthorized"
   },
   "FundraisingLedger": {
@@ -83,7 +83,7 @@
     "amount": "Amount",
     "notes": "Notes",
     "save": "Save",
-    "success": "Record added #{id}",
+    "success": "Record added #{{id}}",
     "error": "Error while saving",
     "unauthorized": "Unauthorized"
   },
@@ -95,8 +95,8 @@
     "concept": "Concept",
     "save": "Save evidence",
     "uploadFirst": "Upload the file first",
-    "fileReady": "File ready: {url}",
-    "success": "Evidence recorded #{id}",
+    "fileReady": "File ready: {{url}}",
+    "success": "Evidence recorded #{{id}}",
     "error": "Error while registering evidence",
     "unauthorized": "Unauthorized"
   },
@@ -114,7 +114,7 @@
   },
   "FundraisingDetail": {
     "loading": "Loading...",
-    "header": "Fundraising event #{id}",
+    "header": "Fundraising event #{{id}}",
     "name": "Name:",
     "date": "Date:",
     "description": "Description:",
@@ -154,11 +154,11 @@
     "studentId": "About Student ID (optional)",
     "description": "Description",
     "create": "Create complaint",
-    "created": "Complaint created #{id}",
+    "created": "Complaint created #{{id}}",
     "error": "Error creating complaint"
   },
   "ComplaintThread": {
-    "header": "Complaint #{id}",
+    "header": "Complaint #{{id}}",
     "status": "Status:",
     "description": "Description:",
     "messages": "Messages",
@@ -183,7 +183,7 @@
   },
   "Calendar": {
     "header": "Calendar",
-    "uploaded": "Uploaded: {url}",
+    "uploaded": "Uploaded: {{url}}",
     "attachLast": "Attach last file",
     "attached": "Attachment added"
   },
@@ -221,7 +221,7 @@
     "date": "Date (YYYY-MM-DD)",
     "description": "Description",
     "create": "Create event",
-    "created": "Event created #{id}",
+    "created": "Event created #{{id}}",
     "error": "Error creating event"
   },
   "Analytics": {

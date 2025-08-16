@@ -13,7 +13,7 @@
     "s3Error": "Error de S3"
   },
   "Dashboard": {
-    "welcome": "Bienvenido, {name}",
+    "welcome": "Bienvenido, {{name}}",
     "refresh": "Actualizar",
     "complaintsByGroup": "Quejas por grupo",
     "fundraisingByGroup": "Recaudaciones por grupo",
@@ -44,7 +44,7 @@
   },
   "SuggestionDetail": {
     "loading": "Cargando...",
-    "header": "Sugerencia #{id}",
+    "header": "Sugerencia #{{id}}",
     "title": "Título:",
     "description": "Descripción:",
     "status": "Estado:",
@@ -73,7 +73,7 @@
     "date": "Fecha",
     "description": "Descripción",
     "create": "Crear",
-    "eventItem": "<b>{name}</b> - {date}",
+    "eventItem": "<b>{{name}}</b> - {{date}}",
     "unauthorized": "No autorizado"
   },
   "FundraisingLedger": {
@@ -83,7 +83,7 @@
     "amount": "Monto",
     "notes": "Notas",
     "save": "Guardar",
-    "success": "Registro agregado #{id}",
+    "success": "Registro agregado #{{id}}",
     "error": "Error al registrar",
     "unauthorized": "No autorizado"
   },
@@ -95,8 +95,8 @@
     "concept": "Concepto",
     "save": "Guardar evidencia",
     "uploadFirst": "Sube el archivo primero",
-    "fileReady": "Archivo listo: {url}",
-    "success": "Evidencia registrada #{id}",
+    "fileReady": "Archivo listo: {{url}}",
+    "success": "Evidencia registrada #{{id}}",
     "error": "Error al registrar evidencia",
     "unauthorized": "No autorizado"
   },
@@ -114,7 +114,7 @@
   },
   "FundraisingDetail": {
     "loading": "Cargando...",
-    "header": "Evento de recaudación #{id}",
+    "header": "Evento de recaudación #{{id}}",
     "name": "Nombre:",
     "date": "Fecha:",
     "description": "Descripción:",
@@ -154,11 +154,11 @@
     "studentId": "ID de estudiante (opcional)",
     "description": "Descripción",
     "create": "Crear queja",
-    "created": "Queja creada #{id}",
+    "created": "Queja creada #{{id}}",
     "error": "Error al crear queja"
   },
   "ComplaintThread": {
-    "header": "Queja #{id}",
+    "header": "Queja #{{id}}",
     "status": "Estado:",
     "description": "Descripción:",
     "messages": "Mensajes",
@@ -183,7 +183,7 @@
   },
   "Calendar": {
     "header": "Calendario",
-    "uploaded": "Subido: {url}",
+    "uploaded": "Subido: {{url}}",
     "attachLast": "Adjuntar último archivo",
     "attached": "Adjunto agregado"
   },
@@ -221,7 +221,7 @@
     "date": "Fecha (YYYY-MM-DD)",
     "description": "Descripción",
     "create": "Crear evento",
-    "created": "Evento creado #{id}",
+    "created": "Evento creado #{{id}}",
     "error": "Error al crear evento"
   },
   "Analytics": {

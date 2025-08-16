@@ -4,10 +4,11 @@ import Nav from "@/components/Nav";
 import { apiGet } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { requireRole } from "@/lib/roles";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 
 export default function GroupList() {
-  const t = useTranslations("GroupList");
+  const { t } = useTranslation();
   const [groups, setGroups] = useState<any[]>([]);
   const [error, setError] = useState("");
 
@@ -18,19 +19,19 @@ export default function GroupList() {
         const data = await apiGet<any[]>("/groups/", tk);
         setGroups(data);
       } catch (err: any) {
-        setError(err.message || t("error"));
+        setError(err.message || t("GroupList.error"));
       }
     }
     load();
   }, []);
 
-  if (!requireRole(["admin"])) return <p>{t("unauthorized")}</p>;
+  if (!requireRole(["admin"])) return <p>{t("GroupList.unauthorized")}</p>;
 
   return (
     <>
       <Nav />
       <main style={{ padding: 16 }}>
-        <h2>{t("header")}</h2>
+        <h2>{t("GroupList.header")}</h2>
         {error && <p>{error}</p>}
         <ul>
           {groups.map((g) => (
