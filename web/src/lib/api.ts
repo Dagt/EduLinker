@@ -31,6 +31,13 @@ export async function apiPost<T>(path: string, body: any, token?: string): Promi
   return res.json();
 }
 
+export async function apiPatch<T>(path: string, body: any, token?: string): Promise<T> {
+  const base = process.env.NEXT_PUBLIC_API_URL!;
+  const res = await fetch(`${base}${path}`, { method: "PATCH", headers: authHeaders(token), body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
+
 // Suggestion status update
 export async function updateSuggestionStatus(id: number, status: string, token?: string) {
   return apiPost(`/suggestions/${id}/status`, { status }, token);

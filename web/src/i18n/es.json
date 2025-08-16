@@ -164,6 +164,57 @@
     "unauthorized": "No autorizado",
     "header": "Dashboard Analítico"
   },
+  "GroupList": {
+    "header": "Lista de grupos",
+    "unauthorized": "No autorizado"
+  },
+  "GroupCreate": {
+    "unauthorized": "No autorizado",
+    "header": "Crear grupo",
+    "name": "Nombre",
+    "grade": "Grado",
+    "create": "Crear",
+    "created": "Grupo creado",
+    "error": "Error"
+  },
+  "GroupEdit": {
+    "unauthorized": "No autorizado",
+    "header": "Editar grupo",
+    "groupId": "ID de grupo",
+    "name": "Nombre",
+    "grade": "Grado",
+    "update": "Actualizar",
+    "updated": "Grupo actualizado",
+    "error": "Error"
+  },
+  "AssignHomeroom": {
+    "unauthorized": "No autorizado",
+    "header": "Asignar maestro titular",
+    "groupId": "ID de grupo",
+    "teacherId": "ID de maestro",
+    "assign": "Asignar",
+    "assigned": "Maestro asignado",
+    "error": "Error"
+  },
+  "AssignSpecialist": {
+    "unauthorized": "No autorizado",
+    "header": "Asignar especialista",
+    "groupId": "ID de grupo",
+    "teacherId": "ID de maestro",
+    "subject": "Materia",
+    "assign": "Asignar",
+    "assigned": "Especialista asignado",
+    "error": "Error"
+  },
+  "AssignVocal": {
+    "unauthorized": "No autorizado",
+    "header": "Asignar vocal",
+    "groupId": "ID de grupo",
+    "parentId": "ID de padre",
+    "assign": "Asignar",
+    "assigned": "Vocal asignado",
+    "error": "Error"
+  },
   "Login": {
     "invalid": "Credenciales inválidas",
     "title": "EduLinker — Dirección",
