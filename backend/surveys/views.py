@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -83,3 +84,41 @@ class SurveyVoteView(generics.CreateAPIView):
             ):
                 raise PermissionDenied("Not allowed to vote in this survey")
         serializer.save(survey=survey, voter=user)
+
+
+class SurveyResultsView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        survey = get_object_or_404(
+            Survey, pk=pk, school_id=self.request.school_id
+        )
+        user = request.user
+        # Check permissions
+        allowed = False
+        if survey.created_by_id == user.id or is_director(user):
+            allowed = True
+        elif survey.scope == Survey.Scope.GROUP:
+            group = survey.group
+            if (
+                is_maestro_titular(user)
+                and group.homeroom_teacher_id == user.id
+            ) or (
+                is_maestro_itinerante(user)
+                and SpecialistAssignment.objects.filter(group=group, teacher=user).exists()
+            ) or (
+                is_vocal(user)
+                and VocalAssignment.objects.filter(group=group, parent=user, active=True).exists()
+            ):
+                allowed = True
+        if not allowed:
+            raise PermissionDenied("Not allowed to view results")
+
+        agg = (
+            SurveyVote.objects.filter(survey=survey)
+            .values("option_index")
+            .annotate(count=Count("id"))
+            .order_by("option_index")
+        )
+        results = {str(item["option_index"]): item["count"] for item in agg}
+        return Response({"results": results})
