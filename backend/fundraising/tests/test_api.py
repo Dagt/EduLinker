@@ -165,4 +165,228 @@ def test_ledger_creation_rejects_wrong_school_event(setup_entities):
         {"event": event_other.id, "group": group.id, "amount_collected": "10.00"},
         format="json",
     )
-    assert res.status_code == 403
+    assert res.status_code == 400
+
+
+@pytest.mark.django_db
+def test_vocal_can_list_and_retrieve_ledgers(setup_entities):
+    school, director, parent, group = setup_entities
+    client = _client_for(director, school)
+    res = client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    event_id = res.json()["id"]
+    client = _client_for(parent, school)
+    res = client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event_id, "group": group.id, "amount_collected": "25.00"},
+        format="json",
+    )
+    ledger_id = res.json()["id"]
+    res = client.get("/api/v1/fundraising-ledger/")
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+    res = client.get(f"/api/v1/fundraising-ledger/{ledger_id}/")
+    assert res.status_code == 200
+    assert res.json()["id"] == ledger_id
+
+
+@pytest.mark.django_db
+def test_vocal_cannot_view_other_group_ledgers(setup_entities):
+    school, director, parent, group = setup_entities
+    teacher2 = User.objects.create_user(
+        username="t2@x.com",
+        email="t2@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    group2 = Group.objects.create(
+        school=school,
+        school_year=group.school_year,
+        name="5B",
+        grade_level=5,
+        homeroom_teacher=teacher2,
+    )
+    parent2 = User.objects.create_user(
+        username="p2@x.com",
+        email="p2@x.com",
+        password="p",
+        role="VOCAL",
+        school=school,
+    )
+    VocalAssignment.objects.create(
+        school=school, group=group2, parent=parent2, assigned_by=teacher2, active=True
+    )
+    client = _client_for(director, school)
+    res = client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    event_id = res.json()["id"]
+    client = _client_for(parent2, school)
+    res = client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event_id, "group": group2.id, "amount_collected": "60.00"},
+        format="json",
+    )
+    ledger_id = res.json()["id"]
+    client = _client_for(parent, school)
+    res = client.get("/api/v1/fundraising-ledger/")
+    assert res.status_code == 200
+    assert res.json() == []
+    res = client.get(f"/api/v1/fundraising-ledger/{ledger_id}/")
+    assert res.status_code == 404
+
+
+@pytest.mark.django_db
+def test_vocal_can_list_and_retrieve_expenses(setup_entities):
+    school, director, parent, group = setup_entities
+    client = _client_for(director, school)
+    res = client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    event_id = res.json()["id"]
+    client = _client_for(parent, school)
+    res = client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event_id, "group": group.id, "amount_collected": "30.00"},
+        format="json",
+    )
+    ledger_id = res.json()["id"]
+    res = client.post(
+        "/api/v1/expense-evidences/",
+        {
+            "ledger": ledger_id,
+            "file_url": "http://example.com/e1.jpg",
+            "amount": "10.00",
+            "concept": "Snacks",
+        },
+        format="json",
+    )
+    evidence_id = res.json()["id"]
+    res = client.get("/api/v1/expense-evidences/")
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+    res = client.get(f"/api/v1/expense-evidences/{evidence_id}/")
+    assert res.status_code == 200
+    assert res.json()["id"] == evidence_id
+
+
+@pytest.mark.django_db
+def test_vocal_cannot_view_other_group_expenses(setup_entities):
+    school, director, parent, group = setup_entities
+    teacher2 = User.objects.create_user(
+        username="t2@x.com",
+        email="t2@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    group2 = Group.objects.create(
+        school=school,
+        school_year=group.school_year,
+        name="5B",
+        grade_level=5,
+        homeroom_teacher=teacher2,
+    )
+    parent2 = User.objects.create_user(
+        username="p2@x.com",
+        email="p2@x.com",
+        password="p",
+        role="VOCAL",
+        school=school,
+    )
+    VocalAssignment.objects.create(
+        school=school, group=group2, parent=parent2, assigned_by=teacher2, active=True
+    )
+    client = _client_for(director, school)
+    res = client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    event_id = res.json()["id"]
+    client = _client_for(parent2, school)
+    res = client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event_id, "group": group2.id, "amount_collected": "40.00"},
+        format="json",
+    )
+    ledger_id = res.json()["id"]
+    res = client.post(
+        "/api/v1/expense-evidences/",
+        {
+            "ledger": ledger_id,
+            "file_url": "http://example.com/e2.jpg",
+            "amount": "5.00",
+            "concept": "Decor",
+        },
+        format="json",
+    )
+    evidence_id = res.json()["id"]
+    client = _client_for(parent, school)
+    res = client.get("/api/v1/expense-evidences/")
+    assert res.status_code == 200
+    assert res.json() == []
+    res = client.get(f"/api/v1/expense-evidences/{evidence_id}/")
+    assert res.status_code == 404
+
+
+@pytest.mark.django_db
+def test_summary_filters_to_user_groups(setup_entities):
+    school, director, parent, group = setup_entities
+    teacher2 = User.objects.create_user(
+        username="t2@x.com",
+        email="t2@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    group2 = Group.objects.create(
+        school=school,
+        school_year=group.school_year,
+        name="5B",
+        grade_level=5,
+        homeroom_teacher=teacher2,
+    )
+    parent2 = User.objects.create_user(
+        username="p2@x.com",
+        email="p2@x.com",
+        password="p",
+        role="VOCAL",
+        school=school,
+    )
+    VocalAssignment.objects.create(
+        school=school, group=group2, parent=parent2, assigned_by=teacher2, active=True
+    )
+    client = _client_for(director, school)
+    res = client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    event_id = res.json()["id"]
+    client = _client_for(parent, school)
+    client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event_id, "group": group.id, "amount_collected": "30.00"},
+        format="json",
+    )
+    client = _client_for(parent2, school)
+    client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event_id, "group": group2.id, "amount_collected": "50.00"},
+        format="json",
+    )
+    client = _client_for(parent, school)
+    res = client.get(f"/api/v1/fundraising-events/{event_id}/summary/")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["ledgers"]) == 1
+    assert data["ledgers"][0]["group_id"] == group.id
