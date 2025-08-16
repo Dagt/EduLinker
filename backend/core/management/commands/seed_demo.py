@@ -12,6 +12,7 @@ from core.models import (
     Complaint, ComplaintMessage,
     Event, EventGroupAudience, EventPhoto, Homework, ActivityPhoto
 )
+from core.roles import Roles
 from chat.models import GroupChat, ChatMessage
 from suggestions.models import Suggestion, SuggestionMessage
 from fundraising.models import FundraisingEvent, FundraisingGroupLedger, ExpenseEvidence
@@ -47,7 +48,7 @@ class Command(BaseCommand):
         # Usuarios
         director, _ = User.objects.get_or_create(
             email="director@demo.com", school=school,
-            defaults=dict(first_name="Diana", last_name="Directora", role="DIRECTOR",
+            defaults=dict(first_name="Diana", last_name="Directora", role=Roles.DIRECTOR,
                           password=make_password("demo123"), is_staff=True, is_superuser=True)
         )
         titulares = []
@@ -55,7 +56,7 @@ class Command(BaseCommand):
             fn, ln = rname()
             u, _ = User.objects.get_or_create(
                 email=f"{group_name.lower()}@demo.com", school=school,
-                defaults=dict(first_name=fn, last_name=ln, role="MAESTRO_TITULAR",
+                defaults=dict(first_name=fn, last_name=ln, role=Roles.MAESTRO_TITULAR,
                               password=make_password("demo123"))
             )
             titulares.append((group_name, grade, u))
@@ -65,7 +66,7 @@ class Command(BaseCommand):
             fn, ln = rname()
             u, _ = User.objects.get_or_create(
                 email=f"{subj.lower()}@demo.com", school=school,
-                defaults=dict(first_name=fn, last_name=ln, role="MAESTRO_ITINERANTE",
+                defaults=dict(first_name=fn, last_name=ln, role=Roles.MAESTRO_ITINERANTE,
                               password=make_password("demo123"))
             )
             itinerantes.append((subj, u))
@@ -99,7 +100,7 @@ class Command(BaseCommand):
                 pf, pl = rname()
                 parent, _ = User.objects.get_or_create(
                     email=f"{student.enrollment_code.lower()}@familia.com", school=school,
-                    defaults=dict(first_name=pf, last_name=pl, role="PADRE", password=make_password("demo123"))
+                    defaults=dict(first_name=pf, last_name=pl, role=Roles.PADRE, password=make_password("demo123"))
                 )
                 from core.models import ParentStudent
                 ParentStudent.objects.get_or_create(
@@ -108,10 +109,18 @@ class Command(BaseCommand):
                 parents.append(parent)
                 group_parents[g].append(parent)
 
-        # Asignar un Vocal por grupo
+        # Asignar un Vocal por grupo, asegurando rol y relación
         for g in groups:
-            p = random.choice(parents)
-            VocalAssignment.objects.get_or_create(school=school, group=g, parent=p, defaults={"assigned_by": g.homeroom_teacher, "active": True})
+            p = random.choice(group_parents[g])
+            if p.role != Roles.VOCAL:
+                p.role = Roles.VOCAL
+                p.save(update_fields=["role"])
+            VocalAssignment.objects.get_or_create(
+                school=school,
+                group=g,
+                parent=p,
+                defaults={"assigned_by": g.homeroom_teacher, "active": True},
+            )
 
         # Eventos (globales y de grupo)
         now = datetime.now(dt_tz.utc)
@@ -217,8 +226,12 @@ class Command(BaseCommand):
 
         # Quejas y mensajes
         c = Complaint.objects.create(
-            school=school, group=groups[0], created_by=random.choice(parents),
-            target_teacher=groups[0].homeroom_teacher, status="OPEN", description="Situación en el recreo",
+            school=school,
+            group=groups[0],
+            created_by=random.choice(group_parents[groups[0]]),
+            target_teacher=groups[0].homeroom_teacher,
+            status="OPEN",
+            description="Situación en el recreo",
         )
         ComplaintMessage.objects.create(complaint=c, author=groups[0].homeroom_teacher, message="Reviso el caso y doy seguimiento.")
 
