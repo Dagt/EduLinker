@@ -1017,6 +1017,28 @@ paths:
                 items:
                   $ref: '#/components/schemas/Group'
           description: ''
+  /api/v1/groups/{id}/activity-photos/:
+    get:
+      operationId: v1_groups_activity_photos_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityPhoto'
+          description: ''
   /api/v1/homeworks/:
     get:
       operationId: v1_homeworks_list
