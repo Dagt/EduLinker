@@ -34,18 +34,24 @@ class OverviewAnalyticsView(APIView):
             .order_by("-total")
         )
 
-        # Fundraising by group
-        fundraising_totals = (
-            FundraisingGroupLedger.objects.filter(event__school_id=school_id)
-            .values("group__id")
-            .annotate(total=Sum("amount_collected"))
+        # Fundraising aggregated by group and event
+        fundraising_qs = FundraisingGroupLedger.objects.filter(
+            event__school_id=school_id
+        )
+        fundraising_totals = fundraising_qs.values("group__id").annotate(
+            total=Sum("amount_collected")
+        )
+        fundraising_by_event = fundraising_qs.values("event__id").annotate(
+            total=Sum("amount_collected")
         )
 
-        # Survey participation by group
+        # Survey participation by group and survey
+        survey_qs = SurveyVote.objects.filter(survey__school_id=school_id)
         survey_participation = (
-            SurveyVote.objects.filter(survey__school_id=school_id)
-            .values("survey__group")
-            .annotate(votes=Count("id"))
+            survey_qs.values("survey__group").annotate(votes=Count("id"))
+        )
+        survey_participation_by_survey = survey_qs.values("survey_id").annotate(
+            votes=Count("id")
         )
 
         suggestions_by_status = (
@@ -78,7 +84,11 @@ class OverviewAnalyticsView(APIView):
                 "suggestions_total": suggestions_total,
                 "complaints_by_group": list(complaints_by_group),
                 "fundraising_by_group": list(fundraising_totals),
+                "fundraising_by_event": list(fundraising_by_event),
                 "surveys_participation": list(survey_participation),
+                "surveys_participation_by_survey": list(
+                    survey_participation_by_survey
+                ),
                 "suggestions_by_status": list(suggestions_by_status),
                 "events_total": events_total,
                 "events_upcoming": events_upcoming,
@@ -126,12 +136,25 @@ class FundraisingAnalyticsView(APIView):
 
     def get(self, request):
         school_id = request.school_id
-        fundraising_totals = (
-            FundraisingGroupLedger.objects.filter(event__school_id=school_id)
-            .values("group__id")
-            .annotate(total=Sum("amount_collected"))
+        event_id = request.query_params.get("event_id")
+
+        ledger_qs = FundraisingGroupLedger.objects.filter(event__school_id=school_id)
+        if event_id:
+            ledger_qs = ledger_qs.filter(event_id=event_id)
+
+        fundraising_by_group = ledger_qs.values("group__id").annotate(
+            total=Sum("amount_collected")
         )
-        return Response({"fundraising_by_group": list(fundraising_totals)})
+        fundraising_by_event = ledger_qs.values("event__id").annotate(
+            total=Sum("amount_collected")
+        )
+
+        return Response(
+            {
+                "fundraising_by_group": list(fundraising_by_group),
+                "fundraising_by_event": list(fundraising_by_event),
+            }
+        )
 
 
 class EngagementAnalyticsView(APIView):
