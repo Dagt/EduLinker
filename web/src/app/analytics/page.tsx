@@ -10,17 +10,11 @@ import {
 } from "@/lib/api";
 import { requireRole } from "@/lib/roles";
 import { useTranslations } from "next-intl";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import KPICards from "./KPICards";
+import ComplaintsChart from "./ComplaintsChart";
+import FundraisingChart from "./FundraisingChart";
+import EventsChart from "./EventsChart";
+import SurveysChart from "./SurveysChart";
 
 export default function AnalyticsPage() {
   const [overview, setOverview] = useState<any>(null);
@@ -53,6 +47,38 @@ export default function AnalyticsPage() {
 
   const ready = overview && complaints && fundraising && engagement;
   const eventColors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
+  const kpis = !ready
+    ? []
+    : [
+        {
+          label: t("complaintsByGroup"),
+          value: complaints.complaints_by_group.reduce(
+            (sum: number, c: any) => sum + c.total,
+            0
+          ),
+        },
+        {
+          label: t("fundraisingByGroup"),
+          value: fundraising.fundraising_by_group.reduce(
+            (sum: number, f: any) => sum + f.total,
+            0
+          ),
+        },
+        {
+          label: t("eventsByScope"),
+          value: overview.events_by_scope.reduce(
+            (sum: number, e: any) => sum + e.total,
+            0
+          ),
+        },
+        {
+          label: t("surveysParticipation"),
+          value: engagement.surveys_participation.reduce(
+            (sum: number, s: any) => sum + s.total,
+            0
+          ),
+        },
+      ];
 
   return (
     <>
@@ -60,67 +86,28 @@ export default function AnalyticsPage() {
       <main style={{ padding: 16 }}>
         <h2>{t("header")}</h2>
         {ready && (
-          <div style={{ display: "grid", gap: 32 }}>
-            <section>
-              <h3>{t("complaintsByGroup")}</h3>
-              <div style={{ height: 300 }}>
-                <ResponsiveContainer>
-                  <BarChart data={complaints.complaints_by_group}>
-                    <XAxis dataKey="group" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="total" fill="#8884d8" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </section>
-            <section>
-              <h3>{t("fundraisingByGroup")}</h3>
-              <div style={{ height: 300 }}>
-                <ResponsiveContainer>
-                  <BarChart data={fundraising.fundraising_by_group}>
-                    <XAxis dataKey="group__id" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="total" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </section>
-            <section>
-              <h3>{t("eventsByScope")}</h3>
-              <div style={{ height: 300 }}>
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie
-                      data={overview.events_by_scope}
-                      dataKey="total"
-                      nameKey="scope"
-                      label
-                    >
-                      {overview.events_by_scope.map((_: any, i: number) => (
-                        <Cell key={i} fill={eventColors[i % eventColors.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </section>
-            <section>
-              <h3>{t("surveysParticipation")}</h3>
-              <div style={{ height: 300 }}>
-                <ResponsiveContainer>
-                  <BarChart data={engagement.surveys_participation}>
-                    <XAxis dataKey="group_id" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="total" fill="#ffc658" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </section>
-          </div>
+          <>
+            <KPICards items={kpis} />
+            <div style={{ display: "grid", gap: 32 }}>
+              <ComplaintsChart
+                data={complaints.complaints_by_group}
+                title={t("complaintsByGroup")}
+              />
+              <FundraisingChart
+                data={fundraising.fundraising_by_group}
+                title={t("fundraisingByGroup")}
+              />
+              <EventsChart
+                data={overview.events_by_scope}
+                title={t("eventsByScope")}
+                colors={eventColors}
+              />
+              <SurveysChart
+                data={engagement.surveys_participation}
+                title={t("surveysParticipation")}
+              />
+            </div>
+          </>
         )}
       </main>
     </>

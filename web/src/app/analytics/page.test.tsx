@@ -49,14 +49,20 @@ describe('AnalyticsPage', () => {
     (getEngagementAnalytics as jest.Mock).mockReset();
   });
 
-  it('renders translations', async () => {
+  it('renders KPIs and charts', async () => {
     (getAnalytics as jest.Mock).mockResolvedValue(overview);
     (getComplaintsAnalytics as jest.Mock).mockResolvedValue(complaints);
     (getFundraisingAnalytics as jest.Mock).mockResolvedValue(fundraising);
     (getEngagementAnalytics as jest.Mock).mockResolvedValue(engagement);
     render(<AnalyticsPage />);
-    await screen.findByText('Quejas por grupo');
-    expect(screen.getByText('Recaudación por grupo')).toBeInTheDocument();
+    await screen.findByText('Quejas por grupo', { selector: 'h3' });
+    expect(screen.getByText('Recaudación por grupo', { selector: 'h3' })).toBeInTheDocument();
+    expect(screen.getByText('Eventos por alcance', { selector: 'h3' })).toBeInTheDocument();
+    expect(screen.getByText('Participación en encuestas', { selector: 'h3' })).toBeInTheDocument();
+    expect(screen.getByText('2', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('100', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('3', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('4', { selector: 'strong' })).toBeInTheDocument();
   });
 });
 
