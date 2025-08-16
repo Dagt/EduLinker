@@ -11,9 +11,21 @@ export default function FundraisingSummary() {
   const { t } = useTranslation();
   const [eventId, setEventId] = useState("");
   const [summary, setSummary] = useState<any | null>(null);
+  const [msg, setMsg] = useState("");
 
   async function load(e: React.FormEvent) {
     e.preventDefault();
+    setMsg("");
+    if(!eventId.trim()){
+      setSummary(null);
+      setMsg(t('Validation.required'));
+      return;
+    }
+    if(isNaN(Number(eventId))){
+      setSummary(null);
+      setMsg(t('Validation.invalidNumber'));
+      return;
+    }
     try {
       const tk = getToken();
       const data = await getFundraisingEventSummary(Number(eventId), tk);
@@ -45,6 +57,7 @@ export default function FundraisingSummary() {
           />
           <button>{t("FundraisingSummary.load")}</button>
         </form>
+        {msg && <p>{msg}</p>}
         {summary && (
           <>
             <p>

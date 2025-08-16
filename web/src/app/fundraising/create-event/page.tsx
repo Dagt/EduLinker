@@ -13,6 +13,10 @@ export default function FundraisingCreateEvent(){
 
   async function submit(e:React.FormEvent){
     e.preventDefault(); setMsg("");
+    if(!name.trim() || !date.trim()){
+      setMsg(t('Validation.required'));
+      return;
+    }
     try{
       const tk = getToken();
       const body = { name, date, description }; // school_year se resuelve en backend si lo implementaste así; si no, añade el ID
@@ -29,9 +33,9 @@ export default function FundraisingCreateEvent(){
         <h2>{t("FundraisingCreateEvent.header")}</h2>
         <form onSubmit={submit}>
           <input placeholder={t("FundraisingCreateEvent.name")} value={name} onChange={e=>setName(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} required/>
+                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
           <input placeholder={t("FundraisingCreateEvent.date")} value={date} onChange={e=>setDate(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} required/>
+                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
           <textarea placeholder={t("FundraisingCreateEvent.description")} value={description} onChange={e=>setDescription(e.target.value)}
                     style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}}/>
           <button>{t("FundraisingCreateEvent.create")}</button>

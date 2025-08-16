@@ -294,7 +294,8 @@
   },
   "Validation": {
     "required": "Required",
-    "invalidEmail": "Invalid email"
+    "invalidEmail": "Invalid email",
+    "invalidNumber": "Invalid number"
   },
   "Login": {
     "invalid": "Invalid credentials",

@@ -11,7 +11,7 @@ type FormData = { name:string; date:string; description:string };
 type Event = { id:number; name:string; date:string; description:string };
 
 export default function FundraisingEdit({ params }:{ params:{ id:string } }){
-  const { register, handleSubmit, reset } = useForm<FormData>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
   const [msg, setMsg] = useState("");
   const { t } = useTranslation();
 
@@ -46,8 +46,10 @@ export default function FundraisingEdit({ params }:{ params:{ id:string } }){
         <form onSubmit={handleSubmit(onSubmit)}>
           <input placeholder={t('FundraisingEdit.name')} {...register('name', {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
+          {errors.name && <p>{t('Validation.required')}</p>}
           <input placeholder={t('FundraisingEdit.date')} {...register('date', {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
+          {errors.date && <p>{t('Validation.required')}</p>}
           <textarea placeholder={t('FundraisingEdit.description')} {...register('description')}
                     style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
           <button>{t('FundraisingEdit.update')}</button>

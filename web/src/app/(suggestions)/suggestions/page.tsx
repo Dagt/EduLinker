@@ -14,7 +14,7 @@ type FormData = { title: string; description: string };
 
 export default function SuggestionsPage(){
   const [items, setItems] = useState<Suggestion[]>([]);
-  const { register, handleSubmit, reset } = useForm<FormData>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -60,8 +60,10 @@ export default function SuggestionsPage(){
         <form onSubmit={handleSubmit(onSubmit)}>
           <input placeholder={t("Suggestions.title")} {...register("title", {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <textarea placeholder={t("Suggestions.description")} {...register("description")}
+          {errors.title && <p>{t('Validation.required')}</p>}
+          <textarea placeholder={t("Suggestions.description")} {...register("description", {required:true})}
                     style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
+          {errors.description && <p>{t('Validation.required')}</p>}
           <button>{t("Suggestions.send")}</button>
         </form>
         <ul>

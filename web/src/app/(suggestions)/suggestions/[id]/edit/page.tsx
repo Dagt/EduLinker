@@ -12,7 +12,7 @@ type FormData = { title: string; description: string };
 type Suggestion = { id:number; title:string; description:string };
 
 export default function SuggestionEdit({ params }:{ params:{ id:string } }){
-  const { register, handleSubmit, reset } = useForm<FormData>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
   const [msg, setMsg] = useState("");
   const { t } = useTranslation();
 
@@ -47,8 +47,10 @@ export default function SuggestionEdit({ params }:{ params:{ id:string } }){
         <form onSubmit={handleSubmit(onSubmit)}>
           <input placeholder={t('SuggestionEdit.title')} {...register('title', {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
+          {errors.title && <p>{t('Validation.required')}</p>}
           <textarea placeholder={t('SuggestionEdit.description')} {...register('description', {required:true})}
                     style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
+          {errors.description && <p>{t('Validation.required')}</p>}
           <button>{t('SuggestionEdit.update')}</button>
         </form>
         {msg && <p>{msg}</p>}
