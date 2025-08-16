@@ -18,10 +18,27 @@ def _chunk(tokens: List[str], size: int = 95) -> List[List[str]]:
 
 class ExpoProvider:
     def send_and_get_receipts(
-        self, tokens: Iterable[str], title: str, body: str, data: Dict[str, Any] | None = None
+        self,
+        tokens: Iterable[str],
+        title: str,
+        body: str,
+        data: Dict[str, Any] | None = None,
     ) -> Tuple[List[Tuple[str, str]], Dict[str, Any], List[str]]:
+        """Send a push notification and retrieve the delivery receipts.
+
+        The Expo API returns *tickets* for each sent message which must later be
+        resolved into delivery receipts.  In order to relate those receipts back
+        to the original device tokens we keep a mapping of ``ticket -> token``
+        which is returned to the caller alongside the receipt payload.
+
+        Returns a tuple ``(ticket_pairs, receipts, invalid_tokens)`` where
+        ``ticket_pairs`` is a list of ``(ticket_id, token)`` tuples and
+        ``invalid_tokens`` contains the subset of tokens deemed invalid either
+        during the send step or when fetching receipts.
+        """
+
         tokens = list(tokens)
-        token_ticket_map: Dict[str, str] = {}
+        ticket_to_token: Dict[str, str] = {}
         invalid_tokens: List[str] = []
         for batch in _chunk(tokens):
             messages = [
@@ -36,7 +53,7 @@ class ExpoProvider:
                     payload = json.loads(resp.read().decode("utf-8"))
                     for token, item in zip(batch, payload.get("data", [])):
                         if "id" in item:
-                            token_ticket_map[item["id"]] = token
+                            ticket_to_token[item["id"]] = token
                         elif item.get("status") == "error":
                             details = item.get("details") or {}
                             if details.get("error") in INVALID_TOKEN_ERRORS:
@@ -45,7 +62,7 @@ class ExpoProvider:
                 pass
 
         receipts: Dict[str, Any] = {}
-        ticket_ids = list(token_ticket_map.keys())
+        ticket_ids = list(ticket_to_token.keys())
         if ticket_ids:
             try:
                 req = urllib.request.Request(
@@ -63,8 +80,8 @@ class ExpoProvider:
                 if info.get("status") == "error":
                     details = info.get("details") or {}
                     if details.get("error") in INVALID_TOKEN_ERRORS:
-                        token = token_ticket_map.get(tid)
+                        token = ticket_to_token.get(tid)
                         if token:
                             invalid_tokens.append(token)
 
-        return list(token_ticket_map.items()), receipts, list(dict.fromkeys(invalid_tokens))
+        return list(ticket_to_token.items()), receipts, list(dict.fromkeys(invalid_tokens))

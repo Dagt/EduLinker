@@ -22,7 +22,7 @@ def push_to_users(school_id: int, user_ids: list[int], title: str, body: str, da
     )
 
     if invalid_tokens:
-        DeviceToken.objects.filter(token__in=invalid_tokens).delete()
+        DeviceToken.objects.filter(token__in=invalid_tokens).update(active=False)
 
     return {
         "sent": len(tokens),
