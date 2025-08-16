@@ -39,7 +39,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplaintsAnalytics'
+          description: ''
   /api/v1/analytics/engagement/:
     get:
       operationId: v1_analytics_engagement_retrieve
@@ -49,7 +53,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngagementAnalytics'
+          description: ''
   /api/v1/analytics/fundraising/:
     get:
       operationId: v1_analytics_fundraising_retrieve
@@ -59,7 +67,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundraisingAnalytics'
+          description: ''
   /api/v1/analytics/overview/:
     get:
       operationId: v1_analytics_overview_retrieve
@@ -69,7 +81,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OverviewAnalytics'
+          description: ''
   /api/v1/announcements/:
     get:
       operationId: v1_announcements_list
@@ -2873,6 +2889,98 @@ components:
       - id
       - parent
       - start_at
+    ComplaintsAnalytics:
+      type: object
+      properties:
+        complaints_total:
+          type: integer
+        complaints_open:
+          type: integer
+        complaints_by_group:
+          type: array
+          items:
+            type: object
+        top_parents_by_complaints:
+          type: array
+          items:
+            type: object
+    EngagementAnalytics:
+      type: object
+      properties:
+        surveys_participation:
+          type: array
+          items:
+            type: object
+        homework_participation:
+          type: array
+          items:
+            type: object
+        events_participation:
+          type: array
+          items:
+            type: object
+        participation_rate_by_group:
+          type: array
+          items:
+            type: object
+    FundraisingAnalytics:
+      type: object
+      properties:
+        fundraising_by_group:
+          type: array
+          items:
+            type: object
+        fundraising_by_event:
+          type: array
+          items:
+            type: object
+        fundraising_total:
+          type: number
+    OverviewAnalytics:
+      type: object
+      properties:
+        complaints_total:
+          type: integer
+        complaints_open:
+          type: integer
+        suggestions_total:
+          type: integer
+        complaints_by_group:
+          type: array
+          items:
+            type: object
+        fundraising_by_group:
+          type: array
+          items:
+            type: object
+        fundraising_by_event:
+          type: array
+          items:
+            type: object
+        fundraising_total:
+          type: number
+        surveys_participation:
+          type: array
+          items:
+            type: object
+        surveys_participation_by_survey:
+          type: array
+          items:
+            type: object
+        suggestions_by_status:
+          type: array
+          items:
+            type: object
+        events_total:
+          type: integer
+        events_upcoming:
+          type: integer
+        events_cancelled:
+          type: integer
+        events_by_scope:
+          type: array
+          items:
+            type: object
   securitySchemes:
     jwtAuth:
       type: http

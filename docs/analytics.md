@@ -8,6 +8,7 @@ fundraising and surveys, the endpoint reports event statistics:
 - `events_upcoming`: count of upcoming active events.
 - `events_cancelled`: number of events marked as cancelled.
 - `events_by_scope`: list with the total events grouped by scope (GLOBAL or GROUP).
+- `fundraising_total`: overall amount collected across all fundraising events.
 
 ## Complaints analytics
 
@@ -16,6 +17,17 @@ active parents in the complaint system:
 
 - `top_parents_by_complaints`: list of up to five parents ordered by the number
   of complaints they have submitted.
+
+## Fundraising analytics
+
+The fundraising endpoint (`/api/v1/analytics/fundraising/`) now reports
+aggregate metrics and supports filtering by event using the `event_id` query
+parameter:
+
+- `fundraising_total`: total amount collected, optionally scoped to a specific
+  event.
+- `fundraising_by_group` and `fundraising_by_event`: breakdowns of the amounts
+  raised per group and per event.
 
 ## Engagement analytics
 

@@ -52,6 +52,11 @@ class OverviewAnalyticsView(APIView):
         fundraising_by_event = fundraising_qs.values("event__id").annotate(
             total=Sum("amount_collected")
         )
+        fundraising_total = (
+            fundraising_qs.aggregate(total=Sum("amount_collected"))
+            ["total"]
+            or 0
+        )
 
         # Survey participation by group and survey
         survey_qs = SurveyVote.objects.filter(survey__school_id=school_id)
@@ -93,6 +98,7 @@ class OverviewAnalyticsView(APIView):
                 "complaints_by_group": list(complaints_by_group),
                 "fundraising_by_group": list(fundraising_totals),
                 "fundraising_by_event": list(fundraising_by_event),
+                "fundraising_total": fundraising_total,
                 "surveys_participation": list(survey_participation),
                 "surveys_participation_by_survey": list(
                     survey_participation_by_survey
@@ -158,11 +164,15 @@ class FundraisingAnalyticsView(APIView):
         fundraising_by_event = ledger_qs.values("event__id").annotate(
             total=Sum("amount_collected")
         )
+        fundraising_total = (
+            ledger_qs.aggregate(total=Sum("amount_collected"))["total"] or 0
+        )
 
         serializer = FundraisingAnalyticsSerializer(
             {
                 "fundraising_by_group": list(fundraising_by_group),
                 "fundraising_by_event": list(fundraising_by_event),
+                "fundraising_total": fundraising_total,
             }
         )
         return Response(serializer.data)

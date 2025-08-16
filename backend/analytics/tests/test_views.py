@@ -129,6 +129,12 @@ def test_director_accesses_analytics_endpoints():
     FundraisingGroupLedger.objects.create(
         event=event1, group=group1, amount_collected=100, created_by=teacher1
     )
+    event1b = FundraisingEvent.objects.create(
+        school=school1, school_year=sy1, name="F1b", date=date(2025, 6, 1)
+    )
+    FundraisingGroupLedger.objects.create(
+        event=event1b, group=group1, amount_collected=50, created_by=teacher1
+    )
     event2 = FundraisingEvent.objects.create(
         school=school2, school_year=sy2, name="F2", date=date(2025, 5, 1)
     )
@@ -202,8 +208,13 @@ def test_director_accesses_analytics_endpoints():
     assert res.status_code == 200
     data = res.json()
     assert data["complaints_total"] == 2
-    assert float(data["fundraising_by_group"][0]["total"]) == 100.0
-    assert float(data["fundraising_by_event"][0]["total"]) == 100.0
+    assert data["events_total"] == 2
+    assert float(data["fundraising_total"]) == 150.0
+    by_group = {item["group__id"]: float(item["total"]) for item in data["fundraising_by_group"]}
+    assert by_group[group1.id] == 150.0
+    by_event = {item["event__id"]: float(item["total"]) for item in data["fundraising_by_event"]}
+    assert by_event[event1.id] == 100.0
+    assert by_event[event1b.id] == 50.0
     assert data["surveys_participation_by_survey"][0]["survey_id"] == survey1.id
     assert data["surveys_participation_by_survey"][0]["votes"] == 1
     scopes = {item["scope"]: item["total"] for item in data["events_by_scope"]}
@@ -219,13 +230,16 @@ def test_director_accesses_analytics_endpoints():
     res = client.get("/api/v1/analytics/fundraising/")
     assert res.status_code == 200
     data = res.json()
-    assert float(data["fundraising_by_group"][0]["total"]) == 100.0
+    assert float(data["fundraising_total"]) == 150.0
+    by_group = {item["group__id"]: float(item["total"]) for item in data["fundraising_by_group"]}
+    assert by_group[group1.id] == 150.0
 
     res = client.get(f"/api/v1/analytics/fundraising/?event_id={event1.id}")
     assert res.status_code == 200
     data = res.json()
-    assert data["fundraising_by_event"][0]["event__id"] == event1.id
-    assert float(data["fundraising_by_event"][0]["total"]) == 100.0
+    assert float(data["fundraising_total"]) == 100.0
+    fund_event = {item["event__id"]: float(item["total"]) for item in data["fundraising_by_event"]}
+    assert fund_event == {event1.id: 100.0}
 
 
 @pytest.mark.django_db
