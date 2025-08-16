@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.db import connection
 
 from .models import School
 
@@ -9,22 +10,16 @@ class SchoolMiddleware:
 
     def __call__(self, request):
         host = request.get_host().split(':')[0]
-        parts = host.split('.')
-        school = None
+        subdomain = host.split('.')[0]
+        try:
+            school = School.objects.get(subdomain=subdomain)
+        except School.DoesNotExist:
+            return JsonResponse({"detail": "Invalid tenant"}, status=400)
 
-        if parts and parts[0]:
-            subdomain = parts[0]
-            school = School.objects.filter(subdomain=subdomain).first()
-            if school:
-                request.school_id = school.id
+        connection.set_tenant(school)
+        request.school_id = school.id
 
-        if not school:
-            school_id = request.META.get("HTTP_X_SCHOOL_ID")
-            if not school_id:
-                return JsonResponse({"detail": "X-School-ID header missing"}, status=400)
-            try:
-                request.school_id = int(school_id)
-            except (TypeError, ValueError):
-                return JsonResponse({"detail": "Invalid X-School-ID"}, status=400)
+        response = self.get_response(request)
 
-        return self.get_response(request)
+        connection.set_schema_to_public()
+        return response
