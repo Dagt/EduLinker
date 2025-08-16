@@ -63,7 +63,7 @@ def test_parent_can_create_suggestion_and_teacher_updates_status():
         HTTP_X_SCHOOL_ID=str(school.id),
     )
     res = client.patch(
-        f"/api/v1/suggestions/{suggestion_id}/status/",
+        f"/api/v1/suggestions/{suggestion_id}/",
         {"status": "IN_REVIEW"},
         format="json",
     )
