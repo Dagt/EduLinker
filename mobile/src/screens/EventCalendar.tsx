@@ -25,7 +25,14 @@ export default function EventCalendar() {
 
   async function remind(ev: EventItem) {
     try {
-      await Notifications.requestPermissionsAsync();
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permiso necesario",
+          "Activa las notificaciones para recibir recordatorios"
+        );
+        return;
+      }
       await Notifications.scheduleNotificationAsync({
         content: { title: ev.title },
         trigger: new Date(ev.start_at),

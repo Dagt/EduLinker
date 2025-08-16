@@ -13,7 +13,7 @@ jest.mock('../role', () => ({ getRole: jest.fn() }));
 jest.mock(
   'expo-notifications',
   () => ({
-    requestPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
+    requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
     scheduleNotificationAsync: jest.fn(),
   }),
   { virtual: true }
