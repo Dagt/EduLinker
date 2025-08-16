@@ -3,19 +3,19 @@ import { View, Text, Button, Switch } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { registerForPushNotificationsAsync } from "../notifications";
 import { getRole } from "../role";
-import { getNotificationChannels, updateNotificationChannels } from "../api";
+import { getNotificationPreferences, updateNotificationPreferences } from "../api";
 
 export default function NotificationSettings() {
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState("guest");
-  const [channels, setChannels] = useState({ push: true, email: true });
+  const [prefs, setPrefs] = useState<Record<string, boolean>>({ push: true, email: true });
 
   const PREFS_KEY = "notificationPrefs";
 
   useEffect(() => {
     (async () => {
       const stored = await AsyncStorage.getItem(PREFS_KEY);
-      if (stored) setChannels(JSON.parse(stored));
+      if (stored) setPrefs(JSON.parse(stored));
     })();
   }, []);
 
@@ -26,8 +26,8 @@ export default function NotificationSettings() {
   useEffect(() => {
     (async () => {
       if (role !== "guest") {
-        const prefs = await getNotificationChannels();
-        setChannels(prefs);
+        const prefs = await getNotificationPreferences();
+        setPrefs(prefs);
         await AsyncStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
       }
     })();
@@ -40,10 +40,10 @@ export default function NotificationSettings() {
     setToken(tk);
   }
 
-  async function toggleChannel(key: "push" | "email", value: boolean) {
-    const newPrefs = { ...channels, [key]: value };
-    setChannels(newPrefs);
-    await updateNotificationChannels(newPrefs);
+  async function togglePref(key: string, value: boolean) {
+    const newPrefs = { ...prefs, [key]: value };
+    setPrefs(newPrefs);
+    await updateNotificationPreferences(newPrefs);
     await AsyncStorage.setItem(PREFS_KEY, JSON.stringify(newPrefs));
   }
 
@@ -51,22 +51,19 @@ export default function NotificationSettings() {
     <View style={{ padding: 16 }}>
       <Button title="Registrar" onPress={register} />
       {token && <Text>{token}</Text>}
-      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
-        <Text>Push</Text>
-        <Switch
-          testID="push-switch"
-          value={channels.push}
-          onValueChange={(v) => toggleChannel("push", v)}
-        />
-      </View>
-      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
-        <Text>Email</Text>
-        <Switch
-          testID="email-switch"
-          value={channels.email}
-          onValueChange={(v) => toggleChannel("email", v)}
-        />
-      </View>
+      {Object.keys(prefs).map((key) => (
+        <View
+          key={key}
+          style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}
+        >
+          <Text>{key}</Text>
+          <Switch
+            testID={`${key}-switch`}
+            value={prefs[key]}
+            onValueChange={(v) => togglePref(key, v)}
+          />
+        </View>
+      ))}
     </View>
   );
 }
