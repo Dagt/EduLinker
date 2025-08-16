@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework import generics, permissions
 
 from .models import (
     Announcement,
@@ -41,6 +41,10 @@ from .serializers import (
     EventSerializer,
     ActivityPhotoSerializer,
     GroupSerializer,
+    GroupCreateSerializer,
+    AssignHomeroomTeacherSerializer,
+    SpecialistAssignmentSerializer,
+    VocalAssignmentSerializer,
     UserSerializer,
 )
 
@@ -98,6 +102,85 @@ class GroupListView(generics.ListAPIView):
         return Group.objects.filter(
             school_id=self.request.school_id, school_year__is_current=True
         )
+
+
+class GroupCreateView(generics.CreateAPIView):
+    serializer_class = GroupCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        if not is_director(self.request.user):
+            raise PermissionDenied("Only directors can create groups")
+        school_year = SchoolYear.objects.filter(
+            school_id=self.request.school_id, is_current=True
+        ).first()
+        serializer.save(
+            school_id=self.request.school_id,
+            school_year=school_year,
+        )
+
+
+class AssignHomeroomTeacherView(generics.UpdateAPIView):
+    serializer_class = AssignHomeroomTeacherSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Group.objects.filter(school_id=self.request.school_id)
+
+    def perform_update(self, serializer):
+        if not is_director(self.request.user):
+            raise PermissionDenied("Only directors can assign homeroom teachers")
+        serializer.save()
+
+
+class AssignSpecialistView(generics.CreateAPIView):
+    serializer_class = SpecialistAssignmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        if not is_director(self.request.user):
+            raise PermissionDenied("Only directors can assign specialists")
+        group = get_object_or_404(
+            Group, pk=self.kwargs["pk"], school_id=self.request.school_id
+        )
+        teacher = serializer.validated_data["teacher"]
+        if teacher.school_id != self.request.school_id:
+            raise PermissionDenied("Teacher mismatch for school")
+        serializer.save(group=group, school_id=self.request.school_id)
+
+
+class VocalAssignmentCreateView(generics.CreateAPIView):
+    serializer_class = VocalAssignmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        if not is_director(self.request.user):
+            raise PermissionDenied("Only directors can assign vocals")
+        serializer.save(
+            school_id=self.request.school_id, assigned_by=self.request.user
+        )
+
+
+class VocalAssignmentDeactivateView(generics.UpdateAPIView):
+    serializer_class = VocalAssignmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return VocalAssignment.objects.filter(
+            school_id=self.request.school_id, active=True
+        )
+
+    def update(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if not is_director(request.user):
+            raise PermissionDenied(
+                "Only directors can deactivate vocal assignments"
+            )
+        assignment.active = False
+        assignment.end_at = timezone.now()
+        assignment.save()
+        serializer = self.get_serializer(assignment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ComplaintCreateView(generics.CreateAPIView):

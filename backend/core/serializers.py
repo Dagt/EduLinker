@@ -62,6 +62,30 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "grade_level", "school_year", "homeroom_teacher"]
 
 
+class GroupCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating groups. School and year will be provided by the view."""
+
+    class Meta:
+        model = Group
+        fields = ["id", "name", "grade_level"]
+        read_only_fields = ["id"]
+
+
+class AssignHomeroomTeacherSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ["homeroom_teacher"]
+
+    def validate_homeroom_teacher(self, teacher):
+        request = self.context.get("request")
+        school_id = getattr(request, "school_id", None)
+        if teacher.school_id != school_id:
+            raise serializers.ValidationError("Teacher mismatch for school")
+        if not is_maestro_titular(teacher):
+            raise serializers.ValidationError("Teacher must be maestro titular")
+        return teacher
+
+
 class GroupMembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMembership
@@ -72,6 +96,7 @@ class SpecialistAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecialistAssignment
         fields = ["id", "group", "teacher", "subject"]
+        read_only_fields = ["id", "group"]
 
 
 class VocalAssignmentSerializer(serializers.ModelSerializer):
@@ -86,6 +111,18 @@ class VocalAssignmentSerializer(serializers.ModelSerializer):
             "end_at",
             "active",
         ]
+        read_only_fields = ["id", "assigned_by", "start_at", "end_at", "active"]
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        school_id = getattr(request, "school_id", None)
+        group = attrs.get("group")
+        parent = attrs.get("parent")
+        if group.school_id != school_id:
+            raise serializers.ValidationError("Group mismatch for school")
+        if parent.school_id != school_id:
+            raise serializers.ValidationError("Parent mismatch for school")
+        return attrs
 
 
 class ComplaintMessageSerializer(serializers.ModelSerializer):
