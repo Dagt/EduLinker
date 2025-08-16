@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.db.models import Q
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -23,6 +24,7 @@ from .models import (
     GroupMembership,
     ParentStudent,
     VocalAssignment,
+    ActivityPhoto,
 )
 from .permissions import (
     CanAccessComplaint,
@@ -412,6 +414,22 @@ class EventPhotoCreateView(generics.CreateAPIView):
         if not can_view_event(self.request.user, event):
             raise PermissionDenied("Cannot add photo to this event")
         serializer.save(event=event)
+
+
+class ActivityPhotoListView(generics.ListAPIView):
+    serializer_class = ActivityPhotoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.kwargs["pk"]
+        group_ids = _visible_group_ids(self.request.user)
+        qs = ActivityPhoto.objects.filter(
+            school_id=self.request.school_id
+        ).filter(Q(group_id=group_id) | Q(homework__group_id=group_id))
+        qs = qs.filter(
+            Q(group_id__in=group_ids) | Q(homework__group_id__in=group_ids)
+        )
+        return qs
 
 
 class ActivityPhotoCreateView(generics.CreateAPIView):

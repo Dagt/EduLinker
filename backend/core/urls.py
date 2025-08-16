@@ -12,6 +12,7 @@ from .views import (
     EventPhotoCreateView,
     EventListCreateView,
     ActivityPhotoCreateView,
+    ActivityPhotoListView,
     GroupListView,
     GroupCreateView,
     AssignHomeroomTeacherView,
@@ -49,6 +50,11 @@ urlpatterns = [
         "groups/<int:pk>/assign-specialist/",
         AssignSpecialistView.as_view(),
         name="group-assign-specialist",
+    ),
+    path(
+        "groups/<int:pk>/activity-photos/",
+        ActivityPhotoListView.as_view(),
+        name="activity-photo-list",
     ),
     path(
         "groups/vocal-assignments/",
