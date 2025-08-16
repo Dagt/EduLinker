@@ -252,6 +252,14 @@ class ComplaintParticipant(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="complaint_participations"
     )
+    role_in_thread = models.CharField(max_length=20, choices=UserRoles.choices, null=True)
+    added_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="complaint_participants_added",
+        null=True,
+    )
+    added_at = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
         constraints = [

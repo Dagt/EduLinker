@@ -22,6 +22,7 @@ from .models import (
     Homework,
     ActivityPhoto,
 )
+from .roles import Roles as UserRoles
 
 from .permissions import is_director, is_maestro_itinerante, is_maestro_titular
 
@@ -136,15 +137,32 @@ class ComplaintMessageSerializer(serializers.ModelSerializer):
 class ComplaintParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = ComplaintParticipant
-        fields = ["id", "user", "complaint"]
-        read_only_fields = ["complaint"]
+        fields = ["id", "user", "complaint", "role_in_thread", "added_by", "added_at"]
+        read_only_fields = ["complaint", "added_by", "added_at"]
 
     def validate(self, attrs):
         request = self.context.get("request")
         school_id = getattr(request, "school_id", None)
         user = attrs.get("user")
+        role_in_thread = attrs.get("role_in_thread")
+
+        allowed_roles = {
+            UserRoles.DIRECTOR,
+            UserRoles.MAESTRO_TITULAR,
+            UserRoles.MAESTRO_ITINERANTE,
+            UserRoles.VOCAL,
+            UserRoles.PADRE,
+        }
+
+        if role_in_thread not in allowed_roles:
+            raise serializers.ValidationError("Invalid role for participant")
+
+        if user.role != role_in_thread:
+            raise serializers.ValidationError("User role mismatch")
+
         if school_id is not None and user.school_id != school_id:
             raise serializers.ValidationError("User mismatch for school")
+
         return attrs
 
 
