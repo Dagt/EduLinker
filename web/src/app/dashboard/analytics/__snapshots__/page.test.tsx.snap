@@ -21,7 +21,7 @@ exports[`AnalyticsDashboard matches snapshot 1`] = `
       Quejas
     </a>
     <a
-      href="/suggestions"
+      href="/sugerencias"
     >
       Sugerencias
     </a>

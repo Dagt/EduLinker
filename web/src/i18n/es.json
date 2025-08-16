@@ -41,6 +41,23 @@
     "confirm": "¿Está seguro de crear esta sugerencia?",
     "error": "Error"
   },
+  "SuggestionDetail": {
+    "loading": "Cargando...",
+    "header": "Sugerencia #{id}",
+    "title": "Título:",
+    "description": "Descripción:",
+    "status": "Estado:",
+    "edit": "Editar"
+  },
+  "SuggestionEdit": {
+    "header": "Editar sugerencia",
+    "title": "Título",
+    "description": "Descripción",
+    "update": "Actualizar",
+    "updated": "Sugerencia actualizada",
+    "error": "Error",
+    "confirm": "¿Está seguro de actualizar esta sugerencia?"
+  },
   "Fundraising": {
     "header": "Recaudación",
     "name": "Nombre",
@@ -86,7 +103,8 @@
     "header": "Sugerencias",
     "title": "Título",
     "description": "Descripción",
-    "send": "Enviar"
+    "send": "Enviar",
+    "createLink": "Crear sugerencia"
   },
   "ComplaintCreate": {
     "header": "Crear queja privada",
