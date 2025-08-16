@@ -119,6 +119,16 @@ export async function postEventPhoto(id: number, body: any){
   return apiPost(`/events/${id}/photos/`, body);
 }
 
+export async function uploadFile(uri: string, mime: string){
+  const name = uri.split('/').pop() || 'upload';
+  const presign = await apiPost("/storage/presign-upload/", { filename: name, content_type: mime });
+  const local = await fetch(uri);
+  const blob = await local.blob();
+  const up = await fetch(presign.upload_url, { method: "PUT", headers:{ "Content-Type": mime }, body: blob });
+  if(!up.ok) throw new Error("upload failed");
+  return presign.file_url;
+}
+
 // Surveys API helpers
 export async function getSurveys(){
   return apiGet("/surveys/");
