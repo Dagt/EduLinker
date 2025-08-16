@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, Button, Alert } from "react-native";
 import * as Notifications from "expo-notifications";
-import { apiGet } from "../api";
-import { getRole } from "../role";
-import EventPhotoUploader from "../components/EventPhotoUploader";
+import { apiGet } from "../../api";
+import { getRole } from "../../role";
+import EventPhotoUploader from "../../components/EventPhotoUploader";
 
 interface EventItem {
   id: number;
@@ -11,7 +11,7 @@ interface EventItem {
   start_at: string;
 }
 
-export default function EventCalendar() {
+export default function Calendar() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [role, setRole] = useState("guest");
 
@@ -33,9 +33,10 @@ export default function EventCalendar() {
         );
         return;
       }
+      const trigger = new Date(new Date(ev.start_at).getTime() - 5 * 60 * 1000);
       await Notifications.scheduleNotificationAsync({
         content: { title: ev.title },
-        trigger: new Date(ev.start_at),
+        trigger,
       });
     } catch (e) {
       // ignore

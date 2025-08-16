@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react-native';
-import EventCalendar from '../screens/EventCalendar';
+import Calendar from '../screens/Calendar';
 import { apiGet, postEventPhoto, uploadFile } from '../api';
 import { getRole } from '../role';
 import * as Notifications from 'expo-notifications';
@@ -32,7 +32,7 @@ const picker = require('expo-image-picker');
 jest.setTimeout(10000);
 
 test('loads events and schedules reminder', async () => {
-  const { getByText, getByTestId } = render(<EventCalendar />);
+  const { getByText, getByTestId } = render(<Calendar />);
   await waitFor(() => getByText(/Event 1/));
   expect(apiGet).toHaveBeenCalledWith('/events/');
   fireEvent.press(getByTestId('remind-1'));
@@ -44,7 +44,7 @@ test('loads events and schedules reminder', async () => {
 test('uploads photo for event', async () => {
   (picker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({ canceled: false, assets: [{ uri: 'file://e.jpg' }] });
   (uploadFile as jest.Mock).mockResolvedValue('https://p');
-  const { getByTestId } = render(<EventCalendar />);
+  const { getByTestId } = render(<Calendar />);
   await waitFor(() => getByTestId('photo-1'));
   fireEvent.press(getByTestId('photo-1'));
   await waitFor(() => expect(postEventPhoto).toHaveBeenCalledWith(1, { url: 'https://p' }));
@@ -54,7 +54,7 @@ test('shows alert on photo error', async () => {
   (picker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({ canceled: false, assets: [{ uri: 'file://e.jpg' }] });
   (uploadFile as jest.Mock).mockRejectedValue(new Error('err'));
   const spy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  const { getByTestId } = render(<EventCalendar />);
+  const { getByTestId } = render(<Calendar />);
   await waitFor(() => getByTestId('photo-1'));
   fireEvent.press(getByTestId('photo-1'));
   await waitFor(() => expect(spy).toHaveBeenCalled());
@@ -62,14 +62,14 @@ test('shows alert on photo error', async () => {
 
 test('shows unauthorized for guest role', async () => {
   (role.getRole as jest.Mock).mockResolvedValueOnce('guest');
-  const { getByText } = render(<EventCalendar />);
+  const { getByText } = render(<Calendar />);
   await waitFor(() => getByText('No autorizado'));
 });
 
 test('alerts when notification permission denied', async () => {
   (notifs.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({ status: 'denied' });
   const spy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  const { getByTestId } = render(<EventCalendar />);
+  const { getByTestId } = render(<Calendar />);
   await waitFor(() => getByTestId('remind-1'));
   fireEvent.press(getByTestId('remind-1'));
   await waitFor(() => expect(spy).toHaveBeenCalled());

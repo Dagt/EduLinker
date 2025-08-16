@@ -6,7 +6,7 @@ import Complaints from "./src/screens/Complaints";
 import Suggestions from "./src/screens/Suggestions";
 import Homeworks from "./src/screens/Homeworks";
 import Surveys from "./src/screens/Surveys";
-import EventCalendar from "./src/screens/EventCalendar";
+import Calendar from "./src/screens/Calendar";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
 
@@ -32,7 +32,7 @@ export default function App(){
            view==="suggestions" ? <Suggestions/> :
            view==="homeworks" ? <Homeworks/> :
            view==="surveys" ? <Surveys/> :
-           <EventCalendar/>}
+           <Calendar/>}
         </>
       ) : <Login onLoggedIn={()=>setLogged(true)}/> }
     </View>

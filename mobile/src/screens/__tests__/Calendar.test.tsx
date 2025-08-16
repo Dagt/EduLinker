@@ -1,5 +1,5 @@
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import EventCalendar from '../EventCalendar';
+import Calendar from '../Calendar';
 import { apiGet } from '../../api';
 import { getRole } from '../../role';
 import { Alert } from 'react-native';
@@ -33,7 +33,7 @@ afterEach(() => {
 
 test('schedules reminder when permissions granted', async () => {
   (Notifications.requestPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'granted' });
-  const { getByTestId, getByText } = render(<EventCalendar />);
+  const { getByTestId, getByText } = render(<Calendar />);
   await waitFor(() => getByText(/Event 1/));
   fireEvent.press(getByTestId('remind-1'));
   await waitFor(() => expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled());
@@ -42,7 +42,7 @@ test('schedules reminder when permissions granted', async () => {
 test('alerts when notification permission denied', async () => {
   (Notifications.requestPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'denied' });
   const alertSpy = jest.spyOn(Alert, 'alert');
-  const { getByTestId, getByText } = render(<EventCalendar />);
+  const { getByTestId, getByText } = render(<Calendar />);
   await waitFor(() => getByText(/Event 1/));
   fireEvent.press(getByTestId('remind-1'));
   await waitFor(() => expect(alertSpy).toHaveBeenCalled());
