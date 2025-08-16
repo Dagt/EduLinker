@@ -12,6 +12,7 @@ const translations = {
       complaints: 'Complaints',
       homeworks: 'Homeworks',
       surveys: 'Surveys',
+      events: 'Events',
     },
     login: {
       title: 'EduLinker',
@@ -54,6 +55,7 @@ const translations = {
       complaints: 'Quejas',
       homeworks: 'Tareas',
       surveys: 'Encuestas',
+      events: 'Eventos',
     },
     login: {
       title: 'EduLinker',
