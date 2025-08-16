@@ -1,6 +1,8 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
+
 from .models import Suggestion, SuggestionMessage
 from .serializers import (
     SuggestionSerializer,
@@ -11,6 +13,7 @@ from core.permissions import (
     CanAccessSuggestion,
     can_create_suggestion,
     can_update_suggestion_status,
+    is_director,
 )
 
 class SuggestionListCreateView(generics.ListCreateAPIView):
@@ -18,7 +21,14 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
         qs = Suggestion.objects.filter(school_id=self.request.school_id)
+        if not is_director(user):
+            qs = qs.filter(
+                Q(created_by=user)
+                | Q(target_teacher=user)
+                | Q(group__homeroom_teacher=user)
+            )
         group_id = self.request.query_params.get("group_id")
         if group_id:
             qs = qs.filter(group_id=group_id)
@@ -30,12 +40,18 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
             raise PermissionDenied("Not allowed to create suggestions")
         serializer.save(school_id=self.request.school_id, created_by=user)
 
-class SuggestionDetailView(generics.RetrieveAPIView):
+class SuggestionRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     serializer_class = SuggestionSerializer
     permission_classes = [permissions.IsAuthenticated, CanAccessSuggestion]
 
     def get_queryset(self):
         return Suggestion.objects.filter(school_id=self.request.school_id)
+
+    def perform_update(self, serializer):
+        suggestion = self.get_object()
+        if suggestion.created_by != self.request.user:
+            raise PermissionDenied("Cannot update suggestion")
+        serializer.save()
 
 class SuggestionMessageCreateView(generics.CreateAPIView):
     serializer_class = SuggestionMessageSerializer
