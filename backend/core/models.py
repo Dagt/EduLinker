@@ -63,6 +63,30 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.school})"
 
+    def anonymize(self):
+        """Replace sensitive fields with neutral values."""
+        anon_id = f"deleted-{self.pk}"
+        self.first_name = ""
+        self.last_name = ""
+        self.email = f"{anon_id}@example.com"
+        self.phone = ""
+        self.save(update_fields=["first_name", "last_name", "email", "phone"])
+
+    def delete(self, *args, **kwargs):
+        actor = kwargs.pop("actor", None)
+        self.anonymize()
+        self.is_active = False
+        self.save(update_fields=["is_active"])
+        from audit.models import AuditLog
+
+        AuditLog.objects.create(
+            school=self.school,
+            actor=actor or self,
+            action="anonymize",
+            entity_type="user",
+            entity_id=self.id,
+        )
+
 
 class Student(models.Model):
     school = models.ForeignKey(
