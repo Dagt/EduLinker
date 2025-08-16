@@ -23,6 +23,10 @@ escuela (`school_id`) enviado mediante el encabezado `X-SCHOOL-ID`.
 - La exportación ICS de eventos exige el encabezado `X-SCHOOL-ID` y
   valida que corresponda con la escuela del usuario autenticado. Un
   encabezado de otra escuela produce un error de permiso.
+- Los reportes de analítica y los registros de auditoría verifican que el
+  encabezado `X-SCHOOL-ID` coincida con la escuela del usuario. Cualquier
+  discrepancia resulta en un error 403 y evita el acceso cruzado entre
+  instituciones.
 - Los registros de recaudación y las evidencias de gasto requieren que el
   evento, el grupo y el usuario pertenezcan a la misma escuela, y sólo pueden
   ser registrados por directores, maestros de grupo o vocals asignados.
