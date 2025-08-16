@@ -9,4 +9,13 @@ jobs:
         with: { node-version: "20" }
       - run: cd mobile && npm ci
       - run: cd mobile && npm run lint
-      - run: cd mobile && npm test -- --coverage
+      - run: cd mobile && npm test
+      - run: cd mobile && npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mobile-coverage
+          path: mobile/coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mobile-build
+          path: mobile/dist
