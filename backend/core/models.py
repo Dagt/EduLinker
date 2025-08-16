@@ -247,6 +247,22 @@ class Complaint(models.Model):
         indexes = [models.Index(fields=["school", "status"])]
 
 
+class ComplaintParticipant(models.Model):
+    complaint = models.ForeignKey(
+        Complaint, on_delete=models.CASCADE, related_name="participants"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="complaint_participations"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["complaint", "user"], name="unique_complaint_participant"
+            )
+        ]
+
+
 class ComplaintMessage(models.Model):
     complaint = models.ForeignKey(
         Complaint, on_delete=models.CASCADE, related_name="messages"

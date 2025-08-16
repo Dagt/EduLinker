@@ -19,6 +19,7 @@ from .permissions import (
 )
 from .serializers import (
     ComplaintMessageSerializer,
+    ComplaintParticipantSerializer,
     ComplaintSerializer,
     ComplaintStatusSerializer,
     EventAttachmentSerializer,
@@ -76,6 +77,18 @@ class ComplaintMessageCreateView(generics.CreateAPIView):
         )
         self.check_object_permissions(self.request, complaint)
         serializer.save(complaint=complaint, author=self.request.user)
+
+
+class ComplaintParticipantCreateView(generics.CreateAPIView):
+    serializer_class = ComplaintParticipantSerializer
+    permission_classes = [permissions.IsAuthenticated, CanAccessComplaint]
+
+    def perform_create(self, serializer):
+        complaint = get_object_or_404(
+            Complaint, pk=self.kwargs["pk"], school_id=self.request.school_id
+        )
+        self.check_object_permissions(self.request, complaint)
+        serializer.save(complaint=complaint)
 
 
 class ComplaintStatusUpdateView(generics.UpdateAPIView):

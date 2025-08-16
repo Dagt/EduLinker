@@ -2,7 +2,7 @@
 from django.urls import path
 from .storage_views import PresignUploadView
 from .views import (
-    ComplaintCreateView, ComplaintDetailView, ComplaintMessageCreateView, ComplaintStatusUpdateView,
+    ComplaintCreateView, ComplaintDetailView, ComplaintMessageCreateView, ComplaintParticipantCreateView, ComplaintStatusUpdateView,
     EventAttachmentCreateView, EventCancelView, EventPhotoCreateView, EventListCreateView,
     ActivityPhotoCreateView, GroupListView, MeView,
     EventDetailView, EventUpdateView,  # <- añadidas en el paso calendario anterior
@@ -14,6 +14,7 @@ urlpatterns = [
     path("complaints/", ComplaintCreateView.as_view(), name="complaint-create"),
     path("complaints/<int:pk>/", ComplaintDetailView.as_view(), name="complaint-detail"),
     path("complaints/<int:pk>/messages/", ComplaintMessageCreateView.as_view(), name="complaint-add-message"),
+    path("complaints/<int:pk>/participants/", ComplaintParticipantCreateView.as_view(), name="complaint-add-participant"),
     path("complaints/<int:pk>/status/", ComplaintStatusUpdateView.as_view(), name="complaint-status"),
     path("events/", EventListCreateView.as_view(), name="event-list-create"),
     path("events/<int:pk>/", EventDetailView.as_view(), name="event-detail"),

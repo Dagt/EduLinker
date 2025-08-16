@@ -13,6 +13,7 @@ from .models import (
     VocalAssignment,
     Complaint,
     ComplaintMessage,
+    ComplaintParticipant,
     Event,
     EventGroupAudience,
     EventAttachment,
@@ -92,6 +93,21 @@ class ComplaintMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ComplaintMessage
         fields = ["id", "author", "message", "attachments", "created_at"]
+
+
+class ComplaintParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ComplaintParticipant
+        fields = ["id", "user", "complaint"]
+        read_only_fields = ["complaint"]
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        school_id = getattr(request, "school_id", None)
+        user = attrs.get("user")
+        if school_id is not None and user.school_id != school_id:
+            raise serializers.ValidationError("User mismatch for school")
+        return attrs
 
 
 class ComplaintSerializer(serializers.ModelSerializer):

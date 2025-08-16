@@ -10,6 +10,7 @@ from .models import (
     VocalAssignment,
     GroupMembership,
     ParentStudent,
+    ComplaintParticipant,
 )
 
 
@@ -125,10 +126,9 @@ class CanAccessComplaint(BasePermission):
         if is_director(user):
             return True
 
-        # Future participant handling: if the complaint has a related
-        # "participants" relation, check membership. This accommodates a future
-        # ComplaintParticipant model without requiring it now.
-        if hasattr(obj, "participants") and obj.participants.filter(id=user.id).exists():
+        if ComplaintParticipant.objects.filter(
+            complaint=obj, user=user
+        ).exists():
             return True
 
         return False
