@@ -90,4 +90,14 @@ describe('Suggestions screen', () => {
       expect(sendSuggestionMessage).toHaveBeenCalledWith(1, { content: 'Hi' });
     });
   });
+
+  it('handles load errors', async () => {
+    const { getRole } = require('../role');
+    const { getSuggestions } = require('../api');
+    (getRole as jest.Mock).mockResolvedValue('student');
+    (getSuggestions as jest.Mock).mockRejectedValue(new Error('fail'));
+    i18n.locale = 'en';
+    const { getByText } = render(<Suggestions />);
+    await waitFor(() => getByText(i18n.t('general.error')));
+  });
 });
