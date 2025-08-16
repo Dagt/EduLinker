@@ -37,3 +37,13 @@ cp env.example .env
 npm install
 npx expo start
 ```
+
+## Integración continua
+
+Este repositorio incluye pipelines de GitHub Actions para verificar el código automáticamente:
+
+- **Backend CI** ejecuta `flake8` y `pytest` con reporte de cobertura.
+- **Web CI** corre `npm test` y `npm run build` para la aplicación web.
+- **Mobile CI** corre `npm test` y `npm run build` para la aplicación móvil.
+
+Cada flujo publica los reportes de cobertura y los artefactos de compilación en la pestaña *Actions* de GitHub, donde pueden descargarse para revisión.
