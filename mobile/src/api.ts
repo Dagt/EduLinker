@@ -57,11 +57,11 @@ export async function apiPutAuth(path: string, body: any){
   return r.json();
 }
 
-export async function getNotificationChannels(){
+export async function getNotificationPreferences(){
   return apiGet("/notifications/preferences/");
 }
 
-export async function updateNotificationChannels(body: {push: boolean; email: boolean}){
+export async function updateNotificationPreferences(body: {[key: string]: boolean}){
   return apiPutAuth("/notifications/preferences/", body);
 }
 
