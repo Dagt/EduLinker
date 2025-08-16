@@ -3,17 +3,18 @@ import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 
 export default function NotifSettings(){
   const [prefs,setPrefs]=useState<any[]>([]);
   const tk = getToken();
-  const t = useTranslations("NotificationSettings");
+  const { t } = useTranslation();
   const kinds = [
-    { key: "event", label: t("event") },
-    { key: "survey", label: t("survey") },
-    { key: "complaint", label: t("complaint") },
-    { key: "complaint_message", label: t("complaint_message") },
+    { key: "event", label: t("NotificationSettings.event") },
+    { key: "survey", label: t("NotificationSettings.survey") },
+    { key: "complaint", label: t("NotificationSettings.complaint") },
+    { key: "complaint_message", label: t("NotificationSettings.complaint_message") },
   ];
   useEffect(()=>{ (async()=>{
     try{ const p = await apiGet<any[]>("/notifications/prefs/", tk); setPrefs(p); }catch{}
@@ -44,7 +45,7 @@ export default function NotifSettings(){
     <>
       <Nav/>
       <main style={{padding:16, maxWidth:680}}>
-        <h2>{t("header")}</h2>
+        <h2>{t("NotificationSettings.header")}</h2>
         <ul>
           {kinds.map(k=>(
             <li key={k.key} style={{marginBottom:8}}>

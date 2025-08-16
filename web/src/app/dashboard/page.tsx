@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
 import { apiGet } from "@/lib/api";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 import {
   BarChart,
   Bar,
@@ -16,7 +17,7 @@ import {
 function DashboardContent() {
   const [me, setMe] = useState<any>();
   const [kpis, setKpis] = useState<any>();
-  const t = useTranslations("Dashboard");
+  const { t } = useTranslation();
 
   const load = async () => {
     const tk = getToken();
@@ -49,12 +50,12 @@ function DashboardContent() {
     <>
       <Nav />
       <main style={{ padding: 16 }}>
-        <h2>{t("welcome", { name })}</h2>
-        <button onClick={load}>{t("refresh")}</button>
+        <h2>{t("Dashboard.welcome", { name })}</h2>
+        <button onClick={load}>{t("Dashboard.refresh")}</button>
         {kpis && (
           <div style={{ display: "grid", gap: 32 }}>
             <section>
-              <h3>{t("complaintsByGroup")}</h3>
+              <h3>{t("Dashboard.complaintsByGroup")}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={complaintsData}>
                   <XAxis dataKey="group" />
@@ -65,7 +66,7 @@ function DashboardContent() {
               </ResponsiveContainer>
             </section>
             <section>
-              <h3>{t("fundraisingByGroup")}</h3>
+              <h3>{t("Dashboard.fundraisingByGroup")}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={fundraisingData}>
                   <XAxis dataKey="group" />
@@ -76,7 +77,7 @@ function DashboardContent() {
               </ResponsiveContainer>
             </section>
             <section>
-              <h3>{t("surveysParticipation")}</h3>
+              <h3>{t("Dashboard.surveysParticipation")}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={surveysData}>
                   <XAxis dataKey="group" />

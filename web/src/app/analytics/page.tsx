@@ -9,7 +9,8 @@ import {
   getEngagementAnalytics,
 } from "@/lib/api";
 import { requireRole } from "@/lib/roles";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 import KPICards from "./KPICards";
 import ComplaintsChart from "./ComplaintsChart";
 import FundraisingChart from "./FundraisingChart";
@@ -21,7 +22,7 @@ export default function AnalyticsPage() {
   const [complaints, setComplaints] = useState<any>(null);
   const [fundraising, setFundraising] = useState<any>(null);
   const [engagement, setEngagement] = useState<any>(null);
-  const t = useTranslations("Analytics");
+  const { t } = useTranslation();
 
   useEffect(() => {
     (async () => {
@@ -43,7 +44,7 @@ export default function AnalyticsPage() {
     })();
   }, []);
 
-  if (!requireRole(["admin"])) return <p>{t("unauthorized")}</p>;
+  if (!requireRole(["admin"])) return <p>{t("Analytics.unauthorized")}</p>;
 
   const ready = overview && complaints && fundraising && engagement;
   const eventColors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
@@ -51,28 +52,28 @@ export default function AnalyticsPage() {
     ? []
     : [
         {
-          label: t("complaintsByGroup"),
+          label: t("Analytics.complaintsByGroup"),
           value: complaints.complaints_by_group.reduce(
             (sum: number, c: any) => sum + c.total,
             0
           ),
         },
         {
-          label: t("fundraisingByGroup"),
+          label: t("Analytics.fundraisingByGroup"),
           value: fundraising.fundraising_by_group.reduce(
             (sum: number, f: any) => sum + f.total,
             0
           ),
         },
         {
-          label: t("eventsByScope"),
+          label: t("Analytics.eventsByScope"),
           value: overview.events_by_scope.reduce(
             (sum: number, e: any) => sum + e.total,
             0
           ),
         },
         {
-          label: t("surveysParticipation"),
+          label: t("Analytics.surveysParticipation"),
           value: engagement.surveys_participation.reduce(
             (sum: number, s: any) => sum + s.total,
             0
@@ -84,27 +85,27 @@ export default function AnalyticsPage() {
     <>
       <Nav />
       <main style={{ padding: 16 }}>
-        <h2>{t("header")}</h2>
+        <h2>{t("Analytics.header")}</h2>
         {ready && (
           <>
             <KPICards items={kpis} />
             <div style={{ display: "grid", gap: 32 }}>
               <ComplaintsChart
                 data={complaints.complaints_by_group}
-                title={t("complaintsByGroup")}
+                title={t("Analytics.complaintsByGroup")}
               />
               <FundraisingChart
                 data={fundraising.fundraising_by_group}
-                title={t("fundraisingByGroup")}
+                title={t("Analytics.fundraisingByGroup")}
               />
               <EventsChart
                 data={overview.events_by_scope}
-                title={t("eventsByScope")}
+                title={t("Analytics.eventsByScope")}
                 colors={eventColors}
               />
               <SurveysChart
                 data={engagement.surveys_participation}
-                title={t("surveysParticipation")}
+                title={t("Analytics.surveysParticipation")}
               />
             </div>
           </>

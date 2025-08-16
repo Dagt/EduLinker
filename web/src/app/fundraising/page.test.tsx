@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-jest.mock('next-intl');
 import FundraisingPage from './page';
 import FundraisingLedger from './ledger/page';
 import FundraisingExpense from './expense/page';
@@ -36,7 +35,9 @@ describe('FundraisingPage', () => {
 
     render(<FundraisingPage />);
 
-    expect(await screen.findByText('e1 - 2024-01-01')).toBeInTheDocument();
+    expect(
+      await screen.findAllByText((_, el) => el?.textContent === 'e1 - 2024-01-01')
+    ).not.toHaveLength(0);
 
     fireEvent.change(screen.getByPlaceholderText('Nombre'), { target: { value: 'e2' } });
     fireEvent.change(screen.getByPlaceholderText('Fecha'), { target: { value: '2024-02-01' } });

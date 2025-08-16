@@ -4,7 +4,8 @@ import Nav from "@/components/Nav";
 import { useForm } from "react-hook-form";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 import Link from "next/link";
 
 type Suggestion = { id: number; title: string; description: string };
@@ -14,7 +15,7 @@ type FormData = { title: string; description: string };
 export default function SuggestionsPage(){
   const [items, setItems] = useState<Suggestion[]>([]);
   const { register, handleSubmit, reset } = useForm<FormData>();
-  const t = useTranslations("Suggestions");
+  const { t } = useTranslation();
 
   useEffect(() => {
     (async () => {
@@ -40,7 +41,7 @@ export default function SuggestionsPage(){
   }
 
   async function handleDelete(id: number){
-    if (typeof window !== 'undefined' && !window.confirm(t('deleteConfirm'))) return;
+    if (typeof window !== 'undefined' && !window.confirm(t('Suggestions.deleteConfirm'))) return;
     try {
       const tk = getToken();
       await apiDelete(`/suggestions/${id}/`, tk);
@@ -54,20 +55,20 @@ export default function SuggestionsPage(){
     <>
       <Nav />
       <main style={{ padding:16, maxWidth:560 }}>
-        <h2>{t("header")}</h2>
-        <p><Link href="/suggestions/create">{t("createLink")}</Link></p>
+        <h2>{t("Suggestions.header")}</h2>
+        <p><Link href="/suggestions/create">{t("Suggestions.createLink")}</Link></p>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <input placeholder={t("title")} {...register("title", {required:true})}
+          <input placeholder={t("Suggestions.title")} {...register("title", {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <textarea placeholder={t("description")} {...register("description")}
+          <textarea placeholder={t("Suggestions.description")} {...register("description")}
                     style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
-          <button>{t("send")}</button>
+          <button>{t("Suggestions.send")}</button>
         </form>
         <ul>
           {items.map(s => (
             <li key={s.id}>
               <Link href={`/suggestions/${s.id}`}>{s.title}</Link>: {s.description}
-              <button onClick={() => handleDelete(s.id)} style={{marginLeft:8}}>{t('delete')}</button>
+              <button onClick={() => handleDelete(s.id)} style={{marginLeft:8}}>{t('Suggestions.delete')}</button>
             </li>
           ))}
         </ul>

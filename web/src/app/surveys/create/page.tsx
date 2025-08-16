@@ -4,7 +4,8 @@ import { useForm } from "react-hook-form";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
 import { apiPost } from "@/lib/api";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 
 type FormData = {
   scope: "GROUP" | "SCHOOL";
@@ -18,7 +19,7 @@ type FormData = {
 export default function CreateSurvey(){
   const { register, handleSubmit, watch, reset, formState:{ errors } } = useForm<FormData>({ defaultValues:{ scope:"GROUP" } });
   const [msg,setMsg]=useState("");
-  const t = useTranslations("SurveyCreate");
+  const { t } = useTranslation();
 
   const scope = watch("scope");
 
@@ -36,7 +37,7 @@ export default function CreateSurvey(){
       start_at: data.startAt,
       end_at: data.endAt
     }, tk);
-    setMsg(t("created"));
+    setMsg(t("SurveyCreate.created"));
     reset({ scope:"GROUP", groupId:"", title:"", options:"", startAt:"", endAt:"" });
   }
 
@@ -44,16 +45,16 @@ export default function CreateSurvey(){
     <>
       <Nav/>
       <main style={{padding:16, maxWidth:680}}>
-        <h2>{t("header")}</h2>
+        <h2>{t("SurveyCreate.header")}</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
           <select {...register("scope")} style={{display:"block",margin:"8px 0",padding:8}}>
-            <option value="GROUP">{t("byGroup")}</option>
-            <option value="SCHOOL">{t("wholeSchool")}</option>
+            <option value="GROUP">{t("SurveyCreate.byGroup")}</option>
+            <option value="SCHOOL">{t("SurveyCreate.wholeSchool")}</option>
           </select>
           {scope === "GROUP" && (
             <>
               <input
-                placeholder={t("groupId")}
+                placeholder={t("SurveyCreate.groupId")}
                 {...register("groupId", { required: scope === "GROUP" })}
                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
               />
@@ -61,30 +62,30 @@ export default function CreateSurvey(){
             </>
           )}
           <input
-            placeholder={t("title")}
+            placeholder={t("SurveyCreate.title")}
             {...register("title", { required: true })}
             style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
           />
           {errors.title && <p style={{color:"red"}}>Required</p>}
           <input
-            placeholder={t("start")}
+            placeholder={t("SurveyCreate.start")}
             {...register("startAt", { required: true })}
             style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
           />
           {errors.startAt && <p style={{color:"red"}}>Required</p>}
           <input
-            placeholder={t("end")}
+            placeholder={t("SurveyCreate.end")}
             {...register("endAt", { required: true })}
             style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
           />
           {errors.endAt && <p style={{color:"red"}}>Required</p>}
           <input
-            placeholder={t("options")}
+            placeholder={t("SurveyCreate.options")}
             {...register("options", { required: true })}
             style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
           />
           {errors.options && <p style={{color:"red"}}>Required</p>}
-          <button>{t("create")}</button>
+          <button>{t("SurveyCreate.create")}</button>
         </form>
         {msg && <p>{msg}</p>}
       </main>

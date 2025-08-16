@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-jest.mock('next-intl');
 jest.mock('react-chartjs-2', () => ({
   Bar: (props: any) => <canvas {...props} />,
   Pie: (props: any) => <canvas {...props} />,

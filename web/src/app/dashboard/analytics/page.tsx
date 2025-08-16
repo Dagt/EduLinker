@@ -9,7 +9,8 @@ import {
   getEngagementAnalytics,
 } from "@/lib/api";
 import { requireRole } from "@/lib/roles";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -28,7 +29,7 @@ export default function AnalyticsDashboard() {
   const [complaints, setComplaints] = useState<any>(null);
   const [fundraising, setFundraising] = useState<any>(null);
   const [engagement, setEngagement] = useState<any>(null);
-  const t = useTranslations("AnalyticsDashboard");
+  const { t } = useTranslation();
 
   useEffect(() => {
     (async () => {
@@ -50,7 +51,7 @@ export default function AnalyticsDashboard() {
     })();
   }, []);
 
-  if (!requireRole(["admin"])) return <p>{t("unauthorized")}</p>;
+  if (!requireRole(["admin"])) return <p>{t("AnalyticsDashboard.unauthorized")}</p>;
 
   const commonBarOptions = { responsive: true, maintainAspectRatio: false } as const;
 
@@ -58,7 +59,7 @@ export default function AnalyticsDashboard() {
     labels: complaints?.complaints_by_group?.map((d: any) => d.group) ?? [],
     datasets: [
       {
-        label: t("complaintsByGroup"),
+        label: t("AnalyticsDashboard.complaintsByGroup"),
         data: complaints?.complaints_by_group?.map((d: any) => d.total) ?? [],
         backgroundColor: "#8884d8",
       },
@@ -69,7 +70,7 @@ export default function AnalyticsDashboard() {
     labels: fundraising?.fundraising_by_group?.map((d: any) => d.group__id) ?? [],
     datasets: [
       {
-        label: t("fundraisingByGroup"),
+        label: t("AnalyticsDashboard.fundraisingByGroup"),
         data:
           fundraising?.fundraising_by_group?.map((d: any) => parseFloat(d.total)) ?? [],
         backgroundColor: "#82ca9d",
@@ -91,7 +92,7 @@ export default function AnalyticsDashboard() {
     labels: engagement?.surveys_participation?.map((d: any) => d.group_id) ?? [],
     datasets: [
       {
-        label: t("surveysParticipation"),
+        label: t("AnalyticsDashboard.surveysParticipation"),
         data: engagement?.surveys_participation?.map((d: any) => d.total) ?? [],
         backgroundColor: "#ffc658",
       },
@@ -104,23 +105,23 @@ export default function AnalyticsDashboard() {
     <>
       <Nav />
       <main style={{ padding: 16 }}>
-        <h2>{t("header")}</h2>
+        <h2>{t("AnalyticsDashboard.header")}</h2>
         {ready && (
           <div style={{ display: "grid", gap: 32 }}>
             <section>
-              <h3>{t("complaintsByGroup")}</h3>
+              <h3>{t("AnalyticsDashboard.complaintsByGroup")}</h3>
               <div style={{ height: 300 }}>
                 <Bar data={complaintsChart} options={commonBarOptions} />
               </div>
             </section>
             <section>
-              <h3>{t("fundraisingByGroup")}</h3>
+              <h3>{t("AnalyticsDashboard.fundraisingByGroup")}</h3>
               <div style={{ height: 300 }}>
                 <Bar data={fundraisingChart} options={commonBarOptions} />
               </div>
             </section>
             <section>
-              <h3>{t("eventsByScope")}</h3>
+              <h3>{t("AnalyticsDashboard.eventsByScope")}</h3>
               <div style={{ height: 300 }}>
                 <Pie
                   data={eventsChart}
@@ -129,7 +130,7 @@ export default function AnalyticsDashboard() {
               </div>
             </section>
             <section>
-              <h3>{t("surveysParticipation")}</h3>
+              <h3>{t("AnalyticsDashboard.surveysParticipation")}</h3>
               <div style={{ height: 300 }}>
                 <Bar data={surveysChart} options={commonBarOptions} />
               </div>

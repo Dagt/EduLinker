@@ -1,12 +1,18 @@
 import en from './en.json';
 import es from './es.json';
 
-describe('i18n resources', () => {
-  it('loads English resources', () => {
-    expect(en.Nav.analytics).toBe('Analytics');
+function collectKeys(obj: any, prefix = ''): string[] {
+  return Object.keys(obj).flatMap((k) => {
+    const val = (obj as any)[k];
+    const newPrefix = prefix ? `${prefix}.${k}` : k;
+    return typeof val === 'object' ? collectKeys(val, newPrefix) : [newPrefix];
   });
+}
 
-  it('loads Spanish resources', () => {
-    expect(es.Nav.calendar).toBe('Calendario');
+describe('i18n resources', () => {
+  it('has the same keys in English and Spanish', () => {
+    const enKeys = collectKeys(en).sort();
+    const esKeys = collectKeys(es).sort();
+    expect(esKeys).toEqual(enKeys);
   });
 });

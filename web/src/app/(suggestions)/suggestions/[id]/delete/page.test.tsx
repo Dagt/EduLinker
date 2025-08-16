@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-jest.mock('next-intl');
 import SuggestionDelete from './page';
 import { apiDelete } from '@/lib/api';
 
