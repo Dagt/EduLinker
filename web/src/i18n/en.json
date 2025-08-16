@@ -168,6 +168,57 @@
     "eventsByScope": "Events by scope",
     "surveysParticipation": "Survey participation"
   },
+  "GroupList": {
+    "header": "Group list",
+    "unauthorized": "Unauthorized"
+  },
+  "GroupCreate": {
+    "unauthorized": "Unauthorized",
+    "header": "Create group",
+    "name": "Name",
+    "grade": "Grade level",
+    "create": "Create",
+    "created": "Group created",
+    "error": "Error"
+  },
+  "GroupEdit": {
+    "unauthorized": "Unauthorized",
+    "header": "Edit group",
+    "groupId": "Group ID",
+    "name": "Name",
+    "grade": "Grade level",
+    "update": "Update",
+    "updated": "Group updated",
+    "error": "Error"
+  },
+  "AssignHomeroom": {
+    "unauthorized": "Unauthorized",
+    "header": "Assign homeroom teacher",
+    "groupId": "Group ID",
+    "teacherId": "Teacher ID",
+    "assign": "Assign",
+    "assigned": "Teacher assigned",
+    "error": "Error"
+  },
+  "AssignSpecialist": {
+    "unauthorized": "Unauthorized",
+    "header": "Assign specialist",
+    "groupId": "Group ID",
+    "teacherId": "Teacher ID",
+    "subject": "Subject",
+    "assign": "Assign",
+    "assigned": "Specialist assigned",
+    "error": "Error"
+  },
+  "AssignVocal": {
+    "unauthorized": "Unauthorized",
+    "header": "Assign vocal",
+    "groupId": "Group ID",
+    "parentId": "Parent ID",
+    "assign": "Assign",
+    "assigned": "Vocal assigned",
+    "error": "Error"
+  },
   "Login": {
     "invalid": "Invalid credentials",
     "title": "EduLinker — Admin",

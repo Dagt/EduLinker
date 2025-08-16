@@ -1,4 +1,4 @@
-import { userRole, requireRole } from '../roles';
+import { userRole, requireRole, canAccessRoute } from '../roles';
 
 describe('roles helpers', () => {
   afterEach(() => {
@@ -22,5 +22,12 @@ describe('roles helpers', () => {
     localStorage.setItem('role', 'admin');
     expect(requireRole(['admin', 'teacher'])).toBe(true);
     expect(requireRole(['student'])).toBe(false);
+  });
+
+  it('validates protected routes', () => {
+    localStorage.setItem('role', 'teacher');
+    expect(canAccessRoute('/groups')).toBe(false);
+    localStorage.setItem('role', 'admin');
+    expect(canAccessRoute('/groups')).toBe(true);
   });
 });
