@@ -31,6 +31,13 @@ describe('roles helpers', () => {
     expect(canAccessRoute('/groups')).toBe(true);
   });
 
+  it('validates audit route for director', () => {
+    localStorage.setItem('role', 'director');
+    expect(canAccessRoute('/audit')).toBe(true);
+    localStorage.setItem('role', 'teacher');
+    expect(canAccessRoute('/audit')).toBe(false);
+  });
+
   it('allows access to unprotected routes', () => {
     expect(canAccessRoute('/home', 'guest')).toBe(true);
   });
