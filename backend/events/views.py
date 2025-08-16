@@ -1,20 +1,23 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 from icalendar import Calendar, Event as ICalEvent
-from rest_framework.permissions import AllowAny
+from rest_framework import permissions
 from rest_framework.views import APIView
 
 from core.models import Event
+from core.permissions import user_can_view_event
 
 
 class EventsICSView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         school_id = request.headers.get("X-SCHOOL-ID")
         if not school_id:
             return HttpResponseBadRequest("Missing X-SCHOOL-ID header")
 
-        events_qs = Event.objects.filter(school_id=school_id)
+        events_qs = Event.objects.filter(school_id=school_id).filter(
+            user_can_view_event(request.user)
+        )
 
         cal = Calendar()
         cal.add("prodid", "-//EduLinker//Events//ES")

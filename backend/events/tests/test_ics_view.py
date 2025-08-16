@@ -1,33 +1,159 @@
-from datetime import datetime
-from types import SimpleNamespace
-from unittest.mock import patch
+import pytest
+from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils import timezone
+from datetime import timedelta
 
-from django.test import RequestFactory
-from events.views import EventsICSView
-
-rf = RequestFactory()
-
-
-def test_events_ics_view_requires_school_header():
-    request = rf.get("/events.ics")
-    response = EventsICSView.as_view()(request)
-    assert response.status_code == 400
+from core.models import (
+    School,
+    SchoolYear,
+    Group,
+    User,
+    Event,
+    EventGroupAudience,
+)
 
 
-def test_events_ics_view_generates_calendar():
-    request = rf.get("/events.ics", HTTP_X_SCHOOL_ID="1")
-
-    fake_event = SimpleNamespace(
-        id=1,
-        title="T",
-        start_at=datetime(2024, 1, 1),
-        end_at=datetime(2024, 1, 2),
-        description="D",
+@pytest.mark.django_db
+def test_events_ics_requires_authentication():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="2025",
+        start_date="2025-01-01",
+        end_date="2025-12-31",
+        is_current=True,
     )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="G1",
+        grade_level=1,
+        homeroom_teacher=teacher,
+    )
+    client = APIClient()
+    res = client.get("/api/v1/events/ics/", HTTP_X_SCHOOL_ID=str(school.id))
+    assert res.status_code == 401
 
-    with patch("events.views.Event.objects.filter", return_value=[fake_event]):
-        response = EventsICSView.as_view()(request)
 
-    assert response.status_code == 200
-    assert response["Content-Type"] == "text/calendar"
-    assert b"SUMMARY:T" in response.content
+@pytest.mark.django_db
+def test_events_ics_requires_school_header():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="2025",
+        start_date="2025-01-01",
+        end_date="2025-12-31",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="G1",
+        grade_level=1,
+        homeroom_teacher=teacher,
+    )
+    token = str(RefreshToken.for_user(teacher).access_token)
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+    res = client.get("/api/v1/events/ics/")
+    assert res.status_code == 400
+
+
+@pytest.mark.django_db
+def test_events_ics_filters_events_by_user():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="2025",
+        start_date="2025-01-01",
+        end_date="2025-12-31",
+        is_current=True,
+    )
+    teacher1 = User.objects.create_user(
+        username="t1@x.com",
+        email="t1@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    teacher2 = User.objects.create_user(
+        username="t2@x.com",
+        email="t2@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    group1 = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="G1",
+        grade_level=1,
+        homeroom_teacher=teacher1,
+    )
+    group2 = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="G2",
+        grade_level=1,
+        homeroom_teacher=teacher2,
+    )
+    now = timezone.now()
+    # Global event
+    Event.objects.create(
+        school=school,
+        school_year=sy,
+        scope="GLOBAL",
+        title="Global",
+        start_at=now,
+        end_at=now + timedelta(hours=1),
+        created_by=teacher1,
+    )
+    # Event for group1
+    e1 = Event.objects.create(
+        school=school,
+        school_year=sy,
+        scope="GROUP",
+        title="G1 Event",
+        start_at=now,
+        end_at=now + timedelta(hours=1),
+        created_by=teacher1,
+    )
+    EventGroupAudience.objects.create(event=e1, group=group1)
+    # Event for group2
+    e2 = Event.objects.create(
+        school=school,
+        school_year=sy,
+        scope="GROUP",
+        title="G2 Event",
+        start_at=now,
+        end_at=now + timedelta(hours=1),
+        created_by=teacher2,
+    )
+    EventGroupAudience.objects.create(event=e2, group=group2)
+
+    token = str(RefreshToken.for_user(teacher1).access_token)
+    client = APIClient()
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+    res = client.get("/api/v1/events/ics/")
+    assert res.status_code == 200
+    content = res.content.decode()
+    assert "SUMMARY:Global" in content
+    assert "SUMMARY:G1 Event" in content
+    assert "SUMMARY:G2 Event" not in content
