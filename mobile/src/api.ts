@@ -58,11 +58,11 @@ export async function apiPutAuth(path: string, body: any){
 }
 
 export async function getNotificationChannels(){
-  return apiGet("/notifications/channels/");
+  return apiGet("/notifications/preferences/");
 }
 
 export async function updateNotificationChannels(body: {push: boolean; email: boolean}){
-  return apiPutAuth("/notifications/channels/", body);
+  return apiPutAuth("/notifications/preferences/", body);
 }
 
 // Complaints API helpers
