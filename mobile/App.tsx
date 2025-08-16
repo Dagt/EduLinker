@@ -6,6 +6,7 @@ import Complaints from "./src/screens/Complaints";
 import Homeworks from "./src/screens/Homeworks";
 import Surveys from "./src/screens/Surveys";
 import { View, Button } from "react-native";
+import i18n from "./src/i18n";
 
 export default function App(){
   const [logged,setLogged]=useState(false);
@@ -15,11 +16,11 @@ export default function App(){
       {logged ? (
         <>
           <View style={{flexDirection:"row", flexWrap:"wrap", gap:8, padding:8}}>
-            <Button title="Feed" onPress={()=>setView("feed")} />
-            <Button title="Chat" onPress={()=>setView("chat")} />
-            <Button title="Quejas" onPress={()=>setView("complaints")} />
-            <Button title="Tareas" onPress={()=>setView("homeworks")} />
-            <Button title="Encuestas" onPress={()=>setView("surveys")} />
+            <Button title={i18n.t('menu.feed')} onPress={()=>setView("feed")} />
+            <Button title={i18n.t('menu.chat')} onPress={()=>setView("chat")} />
+            <Button title={i18n.t('menu.complaints')} onPress={()=>setView("complaints")} />
+            <Button title={i18n.t('menu.homeworks')} onPress={()=>setView("homeworks")} />
+            <Button title={i18n.t('menu.surveys')} onPress={()=>setView("surveys")} />
           </View>
           {view==="feed" ? <Feed/> :
            view==="chat" ? <GroupChat groupId={1}/> :
