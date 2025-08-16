@@ -1,6 +1,3 @@
-import json
-import urllib.error
-import urllib.request
 
 from celery import shared_task
 
@@ -71,7 +68,7 @@ def send_notification(
         if not tokens:
             return {"sent": 0}
         provider_obj = ExpoProvider()
-        token_ticket_pairs, _, invalid_tokens = provider_obj.send_and_get_receipts(
+        token_ticket_pairs, invalid_tokens = provider_obj.send(
             tokens, title=title, body=body, data=data or {}
         )
         if token_ticket_pairs:
@@ -136,17 +133,9 @@ def cleanup_invalid_tokens():
     invalid_tokens: list[str] = []
     failed: list[FailedExpoTicket] = []
 
-    try:
-        req = urllib.request.Request(
-            expo.EXPO_RECEIPTS_URL,
-            method="POST",
-            headers={"Content-Type": "application/json"},
-        )
-        with urllib.request.urlopen(
-            req, data=json.dumps({"ids": list(ticket_map.keys())}).encode("utf-8")
-        ) as resp:
-            payload = json.loads(resp.read().decode("utf-8"))
-    except (urllib.error.HTTPError, urllib.error.URLError):
+    provider_obj = ExpoProvider()
+    payload = provider_obj.get_receipts(ticket_map.keys())
+    if not payload:
         return {"processed": 0, "disabled": 0}
 
     for tid, info in (payload.get("data") or {}).items():

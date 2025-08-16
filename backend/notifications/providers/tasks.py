@@ -17,7 +17,7 @@ def push_to_users(school_id: int, user_ids: list[int], title: str, body: str, da
     if not tokens:
         return {"sent": 0}
     provider = ExpoProvider()
-    token_ticket_pairs, _, invalid_tokens = provider.send_and_get_receipts(
+    token_ticket_pairs, invalid_tokens = provider.send(
         tokens, title=title, body=body, data=data or {}
     )
 
