@@ -39,7 +39,8 @@
     "created": "Suggestion created",
     "missing": "Title and description are required",
     "confirm": "Are you sure you want to create this suggestion?",
-    "error": "Error"
+    "error": "Error",
+    "invalidGroup": "Group ID must be a number"
   },
   "SuggestionDetail": {
     "loading": "Loading...",
@@ -291,12 +292,17 @@
     "assigned": "Vocal assigned",
     "error": "Error"
   },
+  "Validation": {
+    "required": "Required",
+    "invalidEmail": "Invalid email"
+  },
   "Login": {
     "invalid": "Invalid credentials",
     "title": "EduLinker — Admin",
     "email": "Email/username",
     "password": "Password",
-    "login": "Login"
+    "login": "Login",
+    "confirm": "Are you sure you want to log in?"
   },
   "LanguageSwitcher": {
     "english": "English",

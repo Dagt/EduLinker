@@ -39,7 +39,8 @@
     "created": "Sugerencia creada",
     "missing": "Se requieren título y descripción",
     "confirm": "¿Está seguro de crear esta sugerencia?",
-    "error": "Error"
+    "error": "Error",
+    "invalidGroup": "El ID de grupo debe ser numérico"
   },
   "SuggestionDetail": {
     "loading": "Cargando...",
@@ -291,12 +292,17 @@
     "assigned": "Vocal asignado",
     "error": "Error"
   },
+  "Validation": {
+    "required": "Requerido",
+    "invalidEmail": "Correo inválido"
+  },
   "Login": {
     "invalid": "Credenciales inválidas",
     "title": "EduLinker — Dirección",
     "email": "Email/usuario",
     "password": "Password",
-    "login": "Entrar"
+    "login": "Entrar",
+    "confirm": "¿Seguro que deseas iniciar sesión?"
   },
   "LanguageSwitcher": {
     "english": "Inglés",
