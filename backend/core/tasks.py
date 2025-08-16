@@ -15,16 +15,7 @@ from core.models import (
     Homework,
 )
 from surveys.models import Survey
-from notifications.tasks import push_to_users
-
-def notify_users(user_qs, subject, body):
-    # Punto de integración: aquí puedes:
-    # - Encolar emails (send_mail)
-    # - Enviar push (Expo)
-    # - Registrar en AuditLog
-    for u in user_qs:
-        # reemplaza por integración real
-        pass
+from notifications.tasks import push_to_users, send_notification
 
 def _event_audience_user_ids(event):
     if event.scope == "GLOBAL":
@@ -111,8 +102,35 @@ def escalate_stale_complaints():
         c.status = "ESCALATED"; c.save(update_fields=["status","updated_at"])
         # notificar director
         from core.models import User
-        directors = User.objects.filter(school_id=c.school_id, role="DIRECTOR")
-        notify_users(directors, "Queja escalada", f"La queja #{c.id} ha sido escalada.")
+        director_ids = list(
+            User.objects.filter(school_id=c.school_id, role="DIRECTOR")
+            .values_list("id", flat=True)
+        )
+        if director_ids:
+            data = {"type": "complaint", "complaint_id": c.id}
+            push_to_users.delay(
+                c.school_id,
+                director_ids,
+                "Queja escalada",
+                f"La queja #{c.id} ha sido escalada.",
+                data,
+            )
+            send_notification.delay(
+                "email",
+                c.school_id,
+                director_ids,
+                "Queja escalada",
+                f"La queja #{c.id} ha sido escalada.",
+                data,
+            )
+            send_notification.delay(
+                "sms",
+                c.school_id,
+                director_ids,
+                "Queja escalada",
+                f"La queja #{c.id} ha sido escalada.",
+                data,
+            )
     return stale.count()
 
 @shared_task
