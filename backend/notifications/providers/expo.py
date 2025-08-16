@@ -5,6 +5,14 @@ from typing import Iterable, Dict, Any, List, Tuple
 EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send"
 EXPO_RECEIPTS_URL = "https://exp.host/--/api/v2/push/getReceipts"
 
+# Expo may report a number of errors that indicate the provided token is no
+# longer valid.  Any of these should lead to the token being discarded.
+INVALID_TOKEN_ERRORS = {
+    "DeviceNotRegistered",
+    "InvalidCredentials",
+    "MessageTooBig",
+}
+
 def _chunk(tokens: List[str], size: int = 95) -> List[List[str]]:
     return [tokens[i:i+size] for i in range(0, len(tokens), size)]
 
@@ -31,7 +39,7 @@ class ExpoProvider:
                             token_ticket_map[item["id"]] = token
                         elif item.get("status") == "error":
                             details = item.get("details") or {}
-                            if details.get("error") == "DeviceNotRegistered":
+                            if details.get("error") in INVALID_TOKEN_ERRORS:
                                 invalid_tokens.append(token)
             except urllib.error.HTTPError:
                 pass
@@ -54,9 +62,9 @@ class ExpoProvider:
             for tid, info in data_obj.items():
                 if info.get("status") == "error":
                     details = info.get("details") or {}
-                    if details.get("error") == "DeviceNotRegistered":
+                    if details.get("error") in INVALID_TOKEN_ERRORS:
                         token = token_ticket_map.get(tid)
                         if token:
                             invalid_tokens.append(token)
 
-        return list(token_ticket_map.items()), receipts, invalid_tokens
+        return list(token_ticket_map.items()), receipts, list(dict.fromkeys(invalid_tokens))

@@ -24,7 +24,8 @@ class FakeResponse:
 
 
 @pytest.mark.django_db
-def test_invalid_tokens_removed_after_receipt_error():
+@pytest.mark.parametrize("error_code", ["DeviceNotRegistered", "InvalidCredentials"])
+def test_invalid_tokens_removed_after_receipt_error(error_code):
     school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
     user1 = User.objects.create_user(
         username="u1@x.com", email="u1@x.com", password="p", role="PADRE", school=school
@@ -39,7 +40,7 @@ def test_invalid_tokens_removed_after_receipt_error():
     receipts_payload = {
         "data": {
             "t1": {"status": "ok"},
-            "t2": {"status": "error", "details": {"error": "DeviceNotRegistered"}},
+            "t2": {"status": "error", "details": {"error": error_code}},
         }
     }
 
