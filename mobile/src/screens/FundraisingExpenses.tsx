@@ -6,7 +6,11 @@ import { getRole } from "../role";
 export default function FundraisingExpenses(){
   const [items,setItems]=useState<any[]>([]);
   const [role,setRole]=useState("guest");
-  useEffect(()=>{ (async()=>{ setRole(await getRole()); const r = await apiGet("/fundraising/expenses"); setItems(r); })(); },[]);
+  useEffect(()=>{ (async()=>{
+    setRole(await getRole());
+    const r = await apiGet("/expense-evidences/");
+    setItems(r);
+  })(); },[]);
   if(role!=="treasurer" && role!=="admin") return <Text>No autorizado</Text>;
   return (
     <View style={{padding:16}}>

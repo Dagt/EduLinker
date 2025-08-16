@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { View, Button, Image } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import { View, Button } from "react-native";
 import { apiPostAuth } from "../api";
+import PhotoPicker from "./PhotoPicker";
 
 interface Props {
   ledgerId: number;
@@ -12,31 +12,21 @@ interface Props {
 }
 
 export default function UploadEvidence({ ledgerId, groupId, amount, concept, onUploaded }: Props) {
-  const [image, setImage] = useState<string | null>(null);
-
-  async function pickImage() {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      base64: true,
-      quality: 0.8,
-    });
-    if (!result.canceled) {
-      const asset = result.assets[0];
-      setImage(`data:image/jpeg;base64,${asset.base64}`);
-    }
-  }
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [pickerKey, setPickerKey] = useState(0);
 
   async function upload() {
-    if (!image) return;
+    if (!fileUrl) return;
     try {
-      await apiPostAuth("/fundraising/expense-evidences/", {
+      await apiPostAuth("/expense-evidences/", {
         ledger: ledgerId,
         group: groupId,
-        file_url: image,
+        file_url: fileUrl,
         amount,
         concept,
       });
-      setImage(null);
+      setFileUrl(null);
+      setPickerKey((k) => k + 1);
       onUploaded && onUploaded();
     } catch (e) {
       console.error(e);
@@ -45,13 +35,8 @@ export default function UploadEvidence({ ledgerId, groupId, amount, concept, onU
 
   return (
     <View>
-      <Button title="Seleccionar foto" onPress={pickImage} />
-      {image && (
-        <>
-          <Image source={{ uri: image }} style={{ width: 200, height: 200, marginVertical: 8 }} />
-          <Button title="Subir" onPress={upload} />
-        </>
-      )}
+      <PhotoPicker key={pickerKey} onPhoto={setFileUrl} />
+      {fileUrl && <Button title="Subir" onPress={upload} />}
     </View>
   );
 }
