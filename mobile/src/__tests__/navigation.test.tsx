@@ -16,6 +16,7 @@ jest.mock('../screens/Login', () => ({
 jest.mock('../screens/Feed', () => ({ __esModule: true, default: () => <Text>FeedScreen</Text> }));
 jest.mock('../screens/GroupChat', () => ({ __esModule: true, default: () => <Text>ChatScreen</Text> }));
 jest.mock('../screens/Complaints', () => ({ __esModule: true, default: () => <Text>ComplaintsScreen</Text> }));
+jest.mock('../screens/Suggestions', () => ({ __esModule: true, default: () => <Text>SuggestionsScreen</Text> }));
 jest.mock('../screens/Homeworks', () => ({ __esModule: true, default: () => <Text>HomeworksScreen</Text> }));
 jest.mock('../screens/Surveys', () => ({ __esModule: true, default: () => <Text>SurveysScreen</Text> }));
 jest.mock('../screens/EventCalendar', () => ({ __esModule: true, default: () => <Text>EventCalendarScreen</Text> }));
@@ -34,5 +35,11 @@ test('navigates to homeworks', () => {
   const { getByText } = render(<App />);
   fireEvent.press(getByText(i18n.t('menu.homeworks')));
   expect(getByText('HomeworksScreen')).toBeTruthy();
+});
+
+test('navigates to suggestions', () => {
+  const { getByText } = render(<App />);
+  fireEvent.press(getByText(i18n.t('menu.suggestions')));
+  expect(getByText('SuggestionsScreen')).toBeTruthy();
 });
 

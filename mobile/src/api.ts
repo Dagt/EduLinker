@@ -79,6 +79,10 @@ export async function createComplaint(body: {
   return apiPost("/complaints/", body);
 }
 
+export async function updateComplaint(id: number, body: any){
+  return apiPutAuth(`/complaints/${id}/`, body);
+}
+
 export async function getComplaintMessages(id: number){
   return apiGet(`/complaints/${id}/messages/`);
 }
@@ -100,6 +104,10 @@ export async function createSuggestion(body: {
   about_student_id?: number;
 }){
   return apiPost("/suggestions/", body);
+}
+
+export async function updateSuggestion(id: number, body: any){
+  return apiPutAuth(`/suggestions/${id}/`, body);
 }
 
 export async function getSuggestionMessages(id: number){

@@ -5,7 +5,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }), { virtual: true });
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { headers, setSchoolId, uploadFile } from './api';
+import { headers, setSchoolId, uploadFile, updateComplaint, updateSuggestion } from './api';
 
 beforeEach(() => {
   (AsyncStorage.getItem as jest.Mock).mockReset();
@@ -56,4 +56,20 @@ describe('uploadFile', () => {
       .mockResolvedValueOnce({ ok: false });
     await expect(uploadFile('file://a.jpg', 'image/jpeg')).rejects.toThrow('upload failed');
   });
+});
+
+test('updateComplaint sends PUT request', async () => {
+  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
+  (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+  await updateComplaint(5, { content: 'c' });
+  expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/complaints/5/');
+  expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('PUT');
+});
+
+test('updateSuggestion sends PUT request', async () => {
+  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
+  (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+  await updateSuggestion(3, { title: 't' });
+  expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/suggestions/3/');
+  expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('PUT');
 });
