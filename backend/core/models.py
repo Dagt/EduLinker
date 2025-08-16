@@ -3,6 +3,8 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
+from .roles import Roles as UserRoles
+
 
 class School(models.Model):
     name = models.CharField(max_length=255)
@@ -41,18 +43,14 @@ class SchoolYear(models.Model):
 
 
 class User(AbstractUser):
-    class Roles(models.TextChoices):
-        DIRECTOR = "DIRECTOR", "Director"
-        MAESTRO_TITULAR = "MAESTRO_TITULAR", "Maestro Titular"
-        MAESTRO_ITINERANTE = "MAESTRO_ITINERANTE", "Maestro Itinerante"
-        VOCAL = "VOCAL", "Vocal"
-        PADRE = "PADRE", "Padre"
+    # Re-export roles for backwards compatibility
+    Roles = UserRoles
 
     school = models.ForeignKey(
         School, on_delete=models.CASCADE, related_name="users"
     )
     email = models.EmailField()
-    role = models.CharField(max_length=20, choices=Roles.choices)
+    role = models.CharField(max_length=20, choices=UserRoles.choices)
     phone = models.CharField(max_length=20, blank=True)
 
     class Meta:

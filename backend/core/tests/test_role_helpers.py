@@ -1,11 +1,13 @@
 from types import SimpleNamespace
 
 from core.permissions import (
+    is_admin_tenant,
     is_director,
     is_maestro_itinerante,
     is_maestro_titular,
     is_padre,
     is_vocal,
+    IsDirector,
 )
 
 
@@ -14,9 +16,17 @@ def make_user(role: str):
 
 
 def test_role_predicates():
+    assert is_admin_tenant(make_user("ADMIN_TENANT"))
     assert is_director(make_user("DIRECTOR"))
     assert is_maestro_titular(make_user("MAESTRO_TITULAR"))
     assert is_maestro_itinerante(make_user("MAESTRO_ITINERANTE"))
     assert is_vocal(make_user("VOCAL"))
     assert is_padre(make_user("PADRE"))
     assert not is_director(make_user("PADRE"))
+    assert not is_director(make_user("ADMIN_TENANT"))
+
+
+def test_is_director_permission_accepts_admin():
+    request = SimpleNamespace(user=make_user("ADMIN_TENANT"))
+    perm = IsDirector()
+    assert perm.has_permission(request, None)
