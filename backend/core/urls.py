@@ -1,5 +1,5 @@
 # backend/core/urls.py.py
-from django.urls import path
+from django.urls import path, include
 from .storage_views import PresignUploadView
 from .views import (
     ComplaintCreateView,
@@ -84,5 +84,8 @@ urlpatterns = [
     path("homeworks/<int:pk>/", HomeworkDetailView.as_view(), name="homework-detail"),
     path("feed/", FeedView.as_view(), name="feed"),
     path("storage/presign-upload/", PresignUploadView.as_view(), name="presign-upload"),
+    # Included app routes
+    path("", include("suggestions.urls")),
+    path("", include("fundraising.urls")),
 ]
 

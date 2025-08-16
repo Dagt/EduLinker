@@ -351,3 +351,59 @@ def test_summary_wrong_school_forbidden():
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school2.id))
     res = client.get(f"/api/v1/fundraising-events/{event.id}/summary/")
     assert res.status_code == 404
+
+
+@pytest.mark.django_db
+def test_event_update_requires_director_and_teachers_can_read():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    director = User.objects.create_user(
+        username="d@x.com",
+        email="d@x.com",
+        password="p",
+        role="DIRECTOR",
+        school=school,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    event = FundraisingEvent.objects.create(
+        school=school,
+        school_year=sy,
+        name="Kermes",
+        date="2025-10-10",
+    )
+    client = APIClient()
+    teacher_token = str(RefreshToken.for_user(teacher).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {teacher_token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+    res = client.get(f"/api/v1/fundraising-events/{event.id}/")
+    assert res.status_code == 200
+    res = client.patch(
+        f"/api/v1/fundraising-events/{event.id}/update/",
+        {"name": "Feria"},
+        format="json",
+    )
+    assert res.status_code == 403
+    director_token = str(RefreshToken.for_user(director).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {director_token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+    res = client.patch(
+        f"/api/v1/fundraising-events/{event.id}/update/",
+        {"name": "Feria"},
+        format="json",
+    )
+    assert res.status_code == 200
+    assert res.json()["name"] == "Feria"
