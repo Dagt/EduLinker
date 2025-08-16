@@ -21,6 +21,15 @@ class ExpoTicket(models.Model):
     token = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+class FailedExpoTicket(models.Model):
+    """Record of Expo tickets that resulted in an error."""
+
+    ticket_id = models.CharField(max_length=128)
+    token = models.CharField(max_length=255)
+    error = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+
 # backend/notifications/models.py (añade al final)
 class NotificationPreference(models.Model):
     class Kind(models.TextChoices):
