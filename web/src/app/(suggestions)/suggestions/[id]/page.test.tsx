@@ -12,5 +12,6 @@ describe('SuggestionDetail', () => {
     render(<SuggestionDetail params={{id:'1'}} />);
     expect(await screen.findByRole('heading', { name: 'Sugerencia #1' })).toBeInTheDocument();
     expect(screen.getByText('Editar')).toBeInTheDocument();
+    expect(screen.getByText('Eliminar')).toBeInTheDocument();
   });
 });

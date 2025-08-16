@@ -69,6 +69,18 @@ export async function createFundraisingEvent(body: any, token?: string): Promise
   return apiPost<any>(`/fundraising-events/`, body, token);
 }
 
+export async function getFundraisingEvent(id: number, token?: string): Promise<any> {
+  return apiGet<any>(`/fundraising-events/${id}`, token);
+}
+
+export async function updateFundraisingEvent(id: number, body: any, token?: string): Promise<any> {
+  return apiPatch<any>(`/fundraising-events/${id}`, body, token);
+}
+
+export async function deleteFundraisingEvent(id: number, token?: string): Promise<any> {
+  return apiDelete<any>(`/fundraising-events/${id}`, token);
+}
+
 export async function createFundraisingLedger(body: any, token?: string): Promise<any> {
   return apiPost<any>(`/fundraising-ledger/`, body, token);
 }

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { listFundraisingEvents, createFundraisingEvent } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { requireRole } from "@/lib/roles";
 
 type Event = { id: number; name: string; date: string; description: string };
@@ -60,11 +61,13 @@ export default function FundraisingPage(){
         <ul>
           {events.map(ev => (
             <li key={ev.id}>
-              {t.rich('eventItem', {
-                b: (chunks) => <strong>{chunks}</strong>,
-                name: ev.name,
-                date: ev.date
-              })}
+              <Link href={`/fundraising/${ev.id}`}>
+                {t.rich('eventItem', {
+                  b: (chunks) => <strong>{chunks}</strong>,
+                  name: ev.name,
+                  date: ev.date
+                })}
+              </Link>
             </li>
           ))}
         </ul>
