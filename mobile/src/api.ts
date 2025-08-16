@@ -49,3 +49,10 @@ export async function apiPostAuth(path: string, body: any){
   if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
   return r.json();
 }
+
+export async function apiPutAuth(path: string, body: any){
+  const tk = await getToken();
+  const r = await fetch(`${BASE}${path}`, { method:"PUT", headers: headers(tk), body: JSON.stringify(body) });
+  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+  return r.json();
+}
