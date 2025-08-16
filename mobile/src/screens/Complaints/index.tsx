@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, TextInput, Button } from "react-native";
+import { View, Text, FlatList, TextInput, Button, Alert } from "react-native";
 import { getComplaints, createComplaint, getComplaintMessages, sendComplaintMessage } from "../../api";
+import i18n from "../../i18n";
 
 export default function Complaints(){
   const [items, setItems] = useState<any[]>([]);
@@ -20,7 +21,10 @@ export default function Complaints(){
   useEffect(()=>{ loadComplaints(); },[]);
 
   const submitComplaint = async () => {
-    if(!content) return;
+    if(!content){
+      Alert.alert(i18n.t('general.error'), i18n.t('complaints.requiredComplaint'));
+      return;
+    }
     await createComplaint({ content });
     setContent("");
     await loadComplaints();
@@ -37,7 +41,11 @@ export default function Complaints(){
   };
 
   const sendMessageFn = async () => {
-    if(!selected || !message) return;
+    if(!selected) return;
+    if(!message){
+      Alert.alert(i18n.t('general.error'), i18n.t('complaints.requiredMessage'));
+      return;
+    }
     const msg = await sendComplaintMessage(selected.id, { content: message });
     setMessage("");
     setSelected({ ...selected, messages: [ ...(selected.messages||[]), msg ] });
@@ -48,22 +56,22 @@ export default function Complaints(){
       <View style={{padding:16}}>
         <Text style={{fontSize:18, marginBottom:8}}>{selected.title || selected.content}</Text>
         <FlatList data={selected.messages || []} keyExtractor={(x)=>String(x.id)}
-          ListEmptyComponent={<Text>No hay mensajes</Text>}
+          ListEmptyComponent={<Text>{i18n.t('complaints.messagesNone')}</Text>}
           renderItem={({item})=> <Text>- {item.content}</Text>} />
-        <TextInput placeholder="Mensaje" value={message} onChangeText={setMessage} />
-        <Button title="Enviar" onPress={sendMessageFn} />
-        <Button title="Volver" onPress={()=>{ setSelected(null); loadComplaints(); }} />
+        <TextInput placeholder={i18n.t('complaints.messagePlaceholder')} value={message} onChangeText={setMessage} />
+        <Button title={i18n.t('complaints.send')} onPress={sendMessageFn} />
+        <Button title={i18n.t('complaints.back')} onPress={()=>{ setSelected(null); loadComplaints(); }} />
       </View>
     );
   }
 
   return (
     <View style={{padding:16}}>
-      <Text style={{fontSize:18, marginBottom:8}}>Quejas</Text>
-      <TextInput placeholder="Escribe tu queja" value={content} onChangeText={setContent} />
-      <Button title="Enviar" onPress={submitComplaint} />
+      <Text style={{fontSize:18, marginBottom:8}}>{i18n.t('complaints.title')}</Text>
+      <TextInput placeholder={i18n.t('complaints.placeholder')} value={content} onChangeText={setContent} />
+      <Button title={i18n.t('complaints.send')} onPress={submitComplaint} />
       <FlatList data={items} keyExtractor={(x)=>String(x.id)}
-        ListEmptyComponent={<Text>No hay quejas</Text>}
+        ListEmptyComponent={<Text>{i18n.t('complaints.none')}</Text>}
         renderItem={({item})=> (
           <Text onPress={()=>openComplaint(item)}>- {item.title || item.content}</Text>
         )} />

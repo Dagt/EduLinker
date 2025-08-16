@@ -1,6 +1,7 @@
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import Complaints from '..';
 import { getComplaints, createComplaint } from '../../../api';
+import i18n from '../../../i18n';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
 jest.mock('../../../api', () => ({
@@ -11,6 +12,7 @@ jest.mock('../../../api', () => ({
 }));
 
 test('loads complaints from API', async () => {
+  i18n.locale = 'es';
   (getComplaints as jest.Mock).mockResolvedValue([{ id:1, title:'Test Complaint'}]);
   const { getByText } = render(<Complaints />);
   await waitFor(() => getByText(/Test Complaint/));
@@ -18,14 +20,15 @@ test('loads complaints from API', async () => {
 });
 
 test('creates complaint', async () => {
+  i18n.locale = 'es';
   (getComplaints as jest.Mock)
     .mockResolvedValueOnce([])
     .mockResolvedValueOnce([{ id:2, content:'Nueva queja' }]);
   (createComplaint as jest.Mock).mockResolvedValue({ id:2, content:'Nueva queja' });
   const { getByPlaceholderText, getByText } = render(<Complaints />);
-  const input = getByPlaceholderText('Escribe tu queja');
+  const input = getByPlaceholderText(i18n.t('complaints.placeholder'));
   fireEvent.changeText(input, 'Nueva queja');
-  fireEvent.press(getByText('Enviar'));
+  fireEvent.press(getByText(i18n.t('complaints.send')));
   await waitFor(() => expect(createComplaint).toHaveBeenCalledWith({ content:'Nueva queja' }));
   await waitFor(() => getByText(/Nueva queja/));
 });
