@@ -76,5 +76,99 @@
     "amount": "Amount",
     "file": "File",
     "unauthorized": "Unauthorized"
+  },
+  "Suggestions": {
+    "header": "Suggestions",
+    "title": "Title",
+    "description": "Description",
+    "send": "Send"
+  },
+  "ComplaintCreate": {
+    "header": "Create private complaint",
+    "groupId": "Group ID",
+    "teacherId": "Target Teacher ID",
+    "studentId": "About Student ID (optional)",
+    "description": "Description",
+    "create": "Create complaint",
+    "created": "Complaint created #{id}",
+    "error": "Error creating complaint"
+  },
+  "ComplaintThread": {
+    "header": "Complaint #{id}",
+    "status": "Status:",
+    "description": "Description:",
+    "messages": "Messages",
+    "reply": "Write a reply",
+    "send": "Send",
+    "loading": "Loading…",
+    "loadError": "Could not load complaint",
+    "sendError": "Could not send"
+  },
+  "CalendarCreate": {
+    "header": "Create event",
+    "byGroup": "By group",
+    "global": "Global",
+    "title": "Title",
+    "location": "Location",
+    "start": "Start (ISO)",
+    "end": "End (ISO)",
+    "groupIds": "Group IDs (comma)",
+    "description": "Description",
+    "create": "Create",
+    "created": "Event created"
+  },
+  "Calendar": {
+    "header": "Calendar",
+    "uploaded": "Uploaded: {url}",
+    "attachLast": "Attach last file",
+    "attached": "Attachment added"
+  },
+  "NotificationSettings": {
+    "header": "Notifications",
+    "event": "Events",
+    "survey": "Surveys",
+    "complaint": "Complaints",
+    "complaint_message": "Complaint messages"
+  },
+  "SurveyCreate": {
+    "header": "Create survey",
+    "byGroup": "By group",
+    "wholeSchool": "Whole school",
+    "groupId": "Group ID",
+    "title": "Title",
+    "start": "Start (ISO)",
+    "end": "End (ISO)",
+    "options": "Options separated by comma",
+    "create": "Create",
+    "created": "Survey created"
+  },
+  "SurveyVote": {
+    "unauthorized": "Unauthorized",
+    "voted": "Vote recorded",
+    "error": "Error",
+    "header": "Vote survey",
+    "surveyId": "Survey ID",
+    "optionId": "Option ID",
+    "vote": "Vote"
+  },
+  "FundraisingCreateEvent": {
+    "header": "Create fundraising event",
+    "name": "Name",
+    "date": "Date (YYYY-MM-DD)",
+    "description": "Description",
+    "create": "Create event",
+    "created": "Event created #{id}",
+    "error": "Error creating event"
+  },
+  "AnalyticsDashboard": {
+    "unauthorized": "Unauthorized",
+    "header": "Analytics Dashboard"
+  },
+  "Login": {
+    "invalid": "Invalid credentials",
+    "title": "EduLinker — Admin",
+    "email": "Email/username",
+    "password": "Password",
+    "login": "Login"
   }
 }

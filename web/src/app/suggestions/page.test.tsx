@@ -13,6 +13,8 @@ describe('SuggestionsPage', () => {
 
     render(<SuggestionsPage />);
 
+    expect(screen.getByRole('heading', { name: 'Sugerencias' })).toBeInTheDocument();
+
     expect(await screen.findByText('t1')).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText('Título'), { target: { value: 't2' } });

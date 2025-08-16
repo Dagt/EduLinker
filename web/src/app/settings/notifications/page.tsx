@@ -3,19 +3,20 @@ import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api";
-
-const kinds = [
-  { key: "event", label: "Eventos" },
-  { key: "survey", label: "Encuestas" },
-  { key: "complaint", label: "Quejas" },
-  { key: "complaint_message", label: "Mensajes de queja" },
-];
+import { useTranslations } from "next-intl";
 
 export default function NotifSettings(){
   const [prefs,setPrefs]=useState<any[]>([]);
   const tk = getToken();
+  const t = useTranslations("NotificationSettings");
+  const kinds = [
+    { key: "event", label: t("event") },
+    { key: "survey", label: t("survey") },
+    { key: "complaint", label: t("complaint") },
+    { key: "complaint_message", label: t("complaint_message") },
+  ];
   useEffect(()=>{ (async()=>{
-    try{ const p = await apiGet("/notifications/prefs/", tk); setPrefs(p); }catch{}
+    try{ const p = await apiGet<any[]>("/notifications/prefs/", tk); setPrefs(p); }catch{}
   })(); },[]);
 
   async function toggle(kind:string){
@@ -43,7 +44,7 @@ export default function NotifSettings(){
     <>
       <Nav/>
       <main style={{padding:16, maxWidth:680}}>
-        <h2>Notificaciones</h2>
+        <h2>{t("header")}</h2>
         <ul>
           {kinds.map(k=>(
             <li key={k.key} style={{marginBottom:8}}>

@@ -5,10 +5,12 @@ import { getToken } from "@/lib/auth";
 import { apiGet } from "@/lib/api";
 import UploadButton from "@/components/UploadButton";
 import { apiPost } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 export default function Calendar(){
   const [events,setEvents]=useState<any[]>([]);
   const [lastUrl,setLastUrl]=useState("");
+  const t = useTranslations("Calendar");
 
   useEffect(()=>{ (async()=>{
     const tk = getToken();
@@ -19,21 +21,21 @@ export default function Calendar(){
   async function attachToEvent(eventId:number, fileUrl:string){
     const tk = getToken();
     await apiPost(`/events/${eventId}/attachments/`, { file_url: fileUrl, filename: fileUrl.split("/").pop(), mime_type: "" }, tk);
-    alert("Adjunto agregado");
+    alert(t("attached"));
   }
 
   return (
     <>
       <Nav/>
       <main style={{padding:16}}>
-        <h2>Calendario</h2>
+        <h2>{t("header")}</h2>
         <UploadButton onUploaded={(u)=>setLastUrl(u)} />
-        {lastUrl && <p>Subido: {lastUrl}</p>}
+        {lastUrl && <p>{t("uploaded", {url:lastUrl})}</p>}
         <ul>
           {events.map(e=>(
             <li key={e.id}>
               {e.title} — {new Date(e.start_at).toLocaleString()} {" "}
-              {lastUrl && <button onClick={()=>attachToEvent(e.id,lastUrl)}>Adjuntar último archivo</button>}
+              {lastUrl && <button onClick={()=>attachToEvent(e.id,lastUrl)}>{t("attachLast")}</button>}
             </li>
           ))}
         </ul>
