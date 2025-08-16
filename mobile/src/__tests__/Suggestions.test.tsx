@@ -5,7 +5,7 @@ import i18n from '../i18n';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
 jest.mock('../role', () => ({ getRole: jest.fn() }));
-jest.mock('../api', () => ({
+jest.mock('../services/suggestions', () => ({
   getSuggestions: jest.fn(),
   createSuggestion: jest.fn(),
   getSuggestionMessages: jest.fn(),
@@ -24,7 +24,7 @@ describe('Suggestions screen', () => {
   it('restricts guest users', async () => {
     const { getRole } = require('../role');
     (getRole as jest.Mock).mockResolvedValue('guest');
-    const { getSuggestions } = require('../api');
+    const { getSuggestions } = require('../services/suggestions');
     (getSuggestions as jest.Mock).mockResolvedValue([]);
     i18n.locale = 'es';
     const { getByText } = render(<Suggestions />);
@@ -33,7 +33,7 @@ describe('Suggestions screen', () => {
 
   it('allows creating suggestions', async () => {
     const { getRole } = require('../role');
-    const { getSuggestions, createSuggestion } = require('../api');
+    const { getSuggestions, createSuggestion } = require('../services/suggestions');
     (getRole as jest.Mock).mockResolvedValue('student');
     (getSuggestions as jest.Mock).mockResolvedValue([]);
     (createSuggestion as jest.Mock).mockImplementation(async (body: any) => ({ id: 1, ...body }));
@@ -59,7 +59,7 @@ describe('Suggestions screen', () => {
 
   it('validates required fields', async () => {
     const { getRole } = require('../role');
-    const { getSuggestions, createSuggestion } = require('../api');
+    const { getSuggestions, createSuggestion } = require('../services/suggestions');
     (getRole as jest.Mock).mockResolvedValue('student');
     (getSuggestions as jest.Mock).mockResolvedValue([]);
     i18n.locale = 'en';
@@ -76,7 +76,7 @@ describe('Suggestions screen', () => {
   });
   it('sends messages in suggestions', async () => {
     const { getRole } = require('../role');
-    const { getSuggestions, getSuggestionMessages, sendSuggestionMessage } = require('../api');
+    const { getSuggestions, getSuggestionMessages, sendSuggestionMessage } = require('../services/suggestions');
     (getRole as jest.Mock).mockResolvedValue('student');
     (getSuggestions as jest.Mock).mockResolvedValue([{ id:1, title:'S1' }]);
     (getSuggestionMessages as jest.Mock).mockResolvedValue([]);
@@ -95,7 +95,7 @@ describe('Suggestions screen', () => {
 
   it('handles load errors', async () => {
     const { getRole } = require('../role');
-    const { getSuggestions } = require('../api');
+    const { getSuggestions } = require('../services/suggestions');
     (getRole as jest.Mock).mockResolvedValue('student');
     (getSuggestions as jest.Mock).mockRejectedValue(new Error('fail'));
     i18n.locale = 'en';

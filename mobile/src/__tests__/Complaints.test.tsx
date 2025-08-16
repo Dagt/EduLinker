@@ -1,11 +1,11 @@
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import Complaints from '../screens/Complaints';
-import { getComplaints, createComplaint, getComplaintMessages, sendComplaintMessage } from '../api';
+import { getComplaints, createComplaint, getComplaintMessages, sendComplaintMessage } from '../services/complaints';
 import i18n from '../i18n';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
-jest.mock('../api', () => ({
+jest.mock('../services/complaints', () => ({
   getComplaints: jest.fn(),
   createComplaint: jest.fn(),
   getComplaintMessages: jest.fn(),

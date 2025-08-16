@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TextInput, Button, Alert } from "react-native";
-import { getComplaintMessages, sendComplaintMessage } from "../../api";
+import { getComplaintMessages, sendComplaintMessage } from "../../services/complaints";
 import i18n from "../../i18n";
 
 export default function ComplaintDetail({ complaint, onBack }: { complaint: any; onBack: () => void }) {

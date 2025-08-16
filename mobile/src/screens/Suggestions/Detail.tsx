@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TextInput, Button } from "react-native";
-import { getSuggestionMessages, sendSuggestionMessage } from "../../api";
+import { getSuggestionMessages, sendSuggestionMessage } from "../../services/suggestions";
 import i18n from "../../i18n";
 
 export default function SuggestionDetail({ suggestion, onBack }: { suggestion: any; onBack: () => void }) {
