@@ -8,15 +8,25 @@ export default function SurveyVote({ surveyId, onBack }: Props){
   const [survey, setSurvey] = useState<any|null>(null);
   const [results, setResults] = useState<Record<string, number>>({});
   const [msg,setMsg]=useState("");
+  const [hasVoted,setHasVoted]=useState(false);
 
   useEffect(()=>{ (async()=>{
     try{ const data = await getSurvey(surveyId); setSurvey(data); }catch{}
     try{ const res = await getSurveyResults(surveyId); setResults(res.results || {}); }catch{}
   })(); },[surveyId]);
 
+  function isActive(){
+    if(!survey) return false;
+    const now = new Date();
+    return survey.status === "ACTIVE" && new Date(survey.start_at) <= now && new Date(survey.end_at) >= now;
+  }
+
   async function vote(idx: number){
+    if(!isActive()){ setMsg("Encuesta no activa"); return; }
+    if(hasVoted){ setMsg("Ya votaste"); return; }
     try{
       await voteSurvey(surveyId, idx);
+      setHasVoted(true);
       setMsg("Voto registrado");
       const res = await getSurveyResults(surveyId);
       setResults(res.results || {});
@@ -24,13 +34,15 @@ export default function SurveyVote({ surveyId, onBack }: Props){
   }
 
   if(!survey) return <Text>Cargando...</Text>;
+  const active = isActive();
 
   return (
     <View style={{padding:16}}>
       {onBack ? <Button title="Volver" onPress={onBack} /> : null}
       <Text style={{fontSize:18, marginBottom:8}}>{survey.title}</Text>
+      {!active && <Text style={{marginBottom:8}}>Encuesta no activa</Text>}
       {survey.options.map((opt:string, idx:number)=>(
-        <Button key={idx} title={opt} onPress={()=>vote(idx)} />
+        <Button key={idx} title={opt} onPress={()=>vote(idx)} disabled={!active} />
       ))}
       {msg? <Text>{msg}</Text>: null}
       {Object.keys(results).length>0 && (
