@@ -61,3 +61,9 @@ Use JWT endpoints:
 - `POST /api/v1/auth/refresh/` with refresh token.
 
 All requests must include the `X-School-ID` header.
+
+### Rate Limiting
+
+- General: 1000 requests per day per user, 100 per day per IP.
+- Login: 5 attempts per minute per IP.
+- Complaint creation: 20 requests per day per user.

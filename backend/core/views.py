@@ -57,6 +57,7 @@ from .serializers import (
     VocalAssignmentSerializer,
     UserSerializer,
 )
+from .throttles import ComplaintCreateThrottle
 
 
 def _visible_group_ids(user):
@@ -226,6 +227,7 @@ class VocalAssignmentDeactivateView(generics.UpdateAPIView):
 class ComplaintCreateView(generics.CreateAPIView):
     serializer_class = ComplaintSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ComplaintCreateThrottle]
 
     def perform_create(self, serializer):
         serializer.save(
