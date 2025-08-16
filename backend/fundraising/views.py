@@ -5,9 +5,9 @@ from django.db.models import Sum
 from decimal import Decimal
 from core.permissions import (
     IsDirector,
+    IsDirectorOrReadOnly,
     can_record_fundraising_ledger,
     can_upload_expense,
-    is_director,
 )
 from .models import FundraisingEvent, FundraisingGroupLedger, ExpenseEvidence
 from .serializers import FundraisingEventSerializer, FundraisingGroupLedgerSerializer, ExpenseEvidenceSerializer
@@ -29,28 +29,18 @@ class FundraisingEventListCreateView(generics.ListCreateAPIView):
 
 class FundraisingEventDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = FundraisingEventSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsDirectorOrReadOnly]
 
     def get_queryset(self):
         return FundraisingEvent.objects.filter(school_id=self.request.school_id)
-
-    def destroy(self, request, *args, **kwargs):
-        if not is_director(request.user):
-            raise PermissionDenied("Only directors can delete fundraising events")
-        return super().destroy(request, *args, **kwargs)
 
 
 class FundraisingEventUpdateView(generics.UpdateAPIView):
     serializer_class = FundraisingEventSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
 
     def get_queryset(self):
         return FundraisingEvent.objects.filter(school_id=self.request.school_id)
-
-    def update(self, request, *args, **kwargs):
-        if not is_director(request.user):
-            raise PermissionDenied("Only directors can update fundraising events")
-        return super().update(request, *args, **kwargs)
 
 
 class FundraisingEventSummaryView(generics.RetrieveAPIView):

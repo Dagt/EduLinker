@@ -166,3 +166,51 @@ def test_ledger_creation_rejects_wrong_school_event(setup_entities):
         format="json",
     )
     assert res.status_code == 403
+
+
+@pytest.mark.django_db
+def test_parent_cannot_modify_event(setup_entities):
+    school, director, parent, group = setup_entities
+    director_client = _client_for(director, school)
+    res = director_client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    event_id = res.json()["id"]
+
+    parent_client = _client_for(parent, school)
+    # parent can view event detail
+    res = parent_client.get(f"/api/v1/fundraising-events/{event_id}/")
+    assert res.status_code == 200
+    # parent cannot update
+    res = parent_client.put(
+        f"/api/v1/fundraising-events/{event_id}/update/",
+        {"name": "New", "date": "2025-10-11"},
+        format="json",
+    )
+    assert res.status_code == 403
+    # parent cannot delete
+    res = parent_client.delete(f"/api/v1/fundraising-events/{event_id}/")
+    assert res.status_code == 403
+
+
+@pytest.mark.django_db
+def test_director_can_modify_event(setup_entities):
+    school, director, parent, group = setup_entities
+    director_client = _client_for(director, school)
+    res = director_client.post(
+        "/api/v1/fundraising-events/",
+        {"name": "Kermes", "date": "2025-10-10"},
+        format="json",
+    )
+    event_id = res.json()["id"]
+
+    res = director_client.put(
+        f"/api/v1/fundraising-events/{event_id}/update/",
+        {"name": "Updated", "date": "2025-10-11"},
+        format="json",
+    )
+    assert res.status_code in (200, 201)
+    res = director_client.delete(f"/api/v1/fundraising-events/{event_id}/")
+    assert res.status_code in (204, 200)

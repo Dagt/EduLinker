@@ -1,7 +1,7 @@
 """Permission helpers and classes for core app."""
 
 from django.db.models import Q
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 from .models import (
     User,
@@ -225,6 +225,16 @@ class IsDirector(BasePermission):
     """Allow access only to director users."""
 
     def has_permission(self, request, view):
+        user = request.user
+        return is_director(user) or is_admin_tenant(user)
+
+
+class IsDirectorOrReadOnly(BasePermission):
+    """Allow directors to modify objects; others have read-only access."""
+
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
         user = request.user
         return is_director(user) or is_admin_tenant(user)
 
