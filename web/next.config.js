@@ -1,4 +1,7 @@
-const withNextIntl = require('next-intl/plugin')('./src/i18n/request.ts');
+const withNextIntl = require('next-intl/plugin')(
+  './src/i18n/request.ts',
+  {locales: ['en', 'es'], defaultLocale: 'en'}
+);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {reactStrictMode: true};

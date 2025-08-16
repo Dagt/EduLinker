@@ -12,8 +12,22 @@ import NotifSettings from './settings/notifications/page';
 import SurveyCreate from './surveys/create/page';
 import SurveyVote from './surveys/vote/page';
 import FundraisingCreateEvent from './fundraising/create-event/page';
+import FundraisingPage from './fundraising/page';
+import FundraisingLedger from './fundraising/ledger/page';
+import FundraisingExpense from './fundraising/expense/page';
+import FundraisingSummary from './fundraising/summary/page';
 import AnalyticsDashboard from './dashboard/analytics/page';
+import DashboardPage from './dashboard/page';
 import Login from './(auth)/login/page';
+import SuggestionsPage from './suggestions/page';
+import SuggestionCreate from './suggestions/create/page';
+import SuggestionStatus from './suggestions/status/page';
+import GroupList from './groups/page';
+import GroupCreate from './groups/create/page';
+import GroupEdit from './groups/edit/page';
+import AssignHomeroom from './groups/assign-homeroom/page';
+import AssignSpecialist from './groups/assign-specialist/page';
+import AssignVocal from './groups/assign-vocal/page';
 import { apiGet, getAnalytics } from '@/lib/api';
 
 beforeAll(() => {
@@ -73,15 +87,91 @@ describe('internationalized pages render', () => {
     expect(screen.getByRole('heading', { name: 'Crear evento de recaudación' })).toBeInTheDocument();
   });
 
+  it('renders FundraisingPage', async () => {
+    (apiGet as jest.Mock).mockResolvedValue([]);
+    render(<FundraisingPage />);
+    expect(await screen.findByRole('heading', { name: 'Recaudación' })).toBeInTheDocument();
+  });
+
+  it('renders FundraisingLedger', () => {
+    render(<FundraisingLedger />);
+    expect(screen.getByRole('heading', { name: 'Registrar recaudación por grupo' })).toBeInTheDocument();
+  });
+
+  it('renders FundraisingExpense', () => {
+    render(<FundraisingExpense />);
+    expect(screen.getByRole('heading', { name: 'Registrar evidencia de gasto' })).toBeInTheDocument();
+  });
+
+  it('renders FundraisingSummary', () => {
+    render(<FundraisingSummary />);
+    expect(screen.getByRole('heading', { name: 'Resumen de recaudación' })).toBeInTheDocument();
+  });
+
   it('renders AnalyticsDashboard', async () => {
     (getAnalytics as jest.Mock).mockResolvedValue({});
     render(<AnalyticsDashboard />);
     expect(await screen.findByText('Dashboard Analítico')).toBeInTheDocument();
   });
 
+  it('renders DashboardPage', async () => {
+    (apiGet as jest.Mock)
+      .mockResolvedValueOnce({ first_name: 'Juan', last_name: 'Pérez' })
+      .mockResolvedValueOnce({});
+    render(<DashboardPage />);
+    expect(await screen.findByText('Bienvenido, Juan Pérez')).toBeInTheDocument();
+  });
+
   it('renders Login', () => {
     render(<Login />);
     expect(screen.getByRole('heading', { name: 'EduLinker — Dirección' })).toBeInTheDocument();
+  });
+
+  it('renders SuggestionsPage', async () => {
+    (apiGet as jest.Mock).mockResolvedValue([]);
+    render(<SuggestionsPage />);
+    expect(await screen.findByRole('heading', { name: 'Sugerencias' })).toBeInTheDocument();
+  });
+
+  it('renders SuggestionCreate', () => {
+    render(<SuggestionCreate />);
+    expect(screen.getByRole('heading', { name: 'Crear sugerencia' })).toBeInTheDocument();
+  });
+
+  it('renders SuggestionStatus', () => {
+    render(<SuggestionStatus />);
+    expect(screen.getByRole('heading', { name: 'Actualizar estado de sugerencia' })).toBeInTheDocument();
+  });
+
+  it('renders GroupList', async () => {
+    (apiGet as jest.Mock).mockResolvedValue([]);
+    render(<GroupList />);
+    expect(await screen.findByRole('heading', { name: 'Lista de grupos' })).toBeInTheDocument();
+  });
+
+  it('renders GroupCreate', () => {
+    render(<GroupCreate />);
+    expect(screen.getByRole('heading', { name: 'Crear grupo' })).toBeInTheDocument();
+  });
+
+  it('renders GroupEdit', () => {
+    render(<GroupEdit />);
+    expect(screen.getByRole('heading', { name: 'Editar grupo' })).toBeInTheDocument();
+  });
+
+  it('renders AssignHomeroom', () => {
+    render(<AssignHomeroom />);
+    expect(screen.getByRole('heading', { name: 'Asignar maestro titular' })).toBeInTheDocument();
+  });
+
+  it('renders AssignSpecialist', () => {
+    render(<AssignSpecialist />);
+    expect(screen.getByRole('heading', { name: 'Asignar especialista' })).toBeInTheDocument();
+  });
+
+  it('renders AssignVocal', () => {
+    render(<AssignVocal />);
+    expect(screen.getByRole('heading', { name: 'Asignar vocal' })).toBeInTheDocument();
   });
 });
 

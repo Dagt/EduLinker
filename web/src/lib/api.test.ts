@@ -68,7 +68,7 @@ describe('api helpers', () => {
   it('getAnalytics fetches', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     await api.getAnalytics();
-    expect(global.fetch).toHaveBeenCalledWith('http://api/analytics', expect.any(Object));
+    expect(global.fetch).toHaveBeenCalledWith('http://api/analytics/overview', expect.any(Object));
   });
 
   it('voteSurvey posts', async () => {
