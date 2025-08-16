@@ -36,6 +36,12 @@ const translations = {
     suggestions: {
       title: 'Suggestions',
       unauthorized: 'Unauthorized',
+      fieldTitle: 'Title',
+      fieldDescription: 'Description',
+      send: 'Send',
+      messagesNone: 'No messages',
+      messagePlaceholder: 'Message',
+      back: 'Back',
     },
   },
   es: {
@@ -72,6 +78,12 @@ const translations = {
     suggestions: {
       title: 'Sugerencias',
       unauthorized: 'No autorizado',
+      fieldTitle: 'Título',
+      fieldDescription: 'Descripción',
+      send: 'Enviar',
+      messagesNone: 'Sin mensajes',
+      messagePlaceholder: 'Mensaje',
+      back: 'Volver',
     },
   },
 };
