@@ -6,11 +6,10 @@ import i18n from '../i18n';
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
 jest.mock('../role', () => ({ getRole: jest.fn() }));
 jest.mock('../api', () => ({
-  apiGet: jest.fn(),
+  getSuggestions: jest.fn(),
   createSuggestion: jest.fn(),
+  getSuggestionMessages: jest.fn(),
   sendSuggestionMessage: jest.fn(),
-  getNotificationChannels: jest.fn(),
-  updateNotificationChannels: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -23,8 +22,8 @@ describe('Suggestions screen', () => {
   it('restricts guest users', async () => {
     const { getRole } = require('../role');
     (getRole as jest.Mock).mockResolvedValue('guest');
-    const { apiGet } = require('../api');
-    (apiGet as jest.Mock).mockResolvedValue([]);
+    const { getSuggestions } = require('../api');
+    (getSuggestions as jest.Mock).mockResolvedValue([]);
     i18n.locale = 'es';
     const { getByText } = render(<Suggestions />);
     await waitFor(() => getByText(i18n.t('suggestions.unauthorized')));
@@ -32,9 +31,9 @@ describe('Suggestions screen', () => {
 
   it('allows creating suggestions', async () => {
     const { getRole } = require('../role');
-    const { apiGet, createSuggestion } = require('../api');
+    const { getSuggestions, createSuggestion } = require('../api');
     (getRole as jest.Mock).mockResolvedValue('student');
-    (apiGet as jest.Mock).mockResolvedValue([]);
+    (getSuggestions as jest.Mock).mockResolvedValue([]);
     (createSuggestion as jest.Mock).mockImplementation(async (body: any) => ({ id: 1, ...body }));
     i18n.locale = 'en';
     const { getByPlaceholderText, getByText } = render(<Suggestions />);
@@ -58,9 +57,9 @@ describe('Suggestions screen', () => {
 
   it('validates required fields', async () => {
     const { getRole } = require('../role');
-    const { apiGet, createSuggestion } = require('../api');
+    const { getSuggestions, createSuggestion } = require('../api');
     (getRole as jest.Mock).mockResolvedValue('student');
-    (apiGet as jest.Mock).mockResolvedValue([]);
+    (getSuggestions as jest.Mock).mockResolvedValue([]);
     i18n.locale = 'en';
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByPlaceholderText, getByText } = render(<Suggestions />);
@@ -71,6 +70,24 @@ describe('Suggestions screen', () => {
     await waitFor(() => {
       expect(createSuggestion).not.toHaveBeenCalled();
       expect(alertSpy).toHaveBeenCalled();
+    });
+  });
+  it('sends messages in suggestions', async () => {
+    const { getRole } = require('../role');
+    const { getSuggestions, getSuggestionMessages, sendSuggestionMessage } = require('../api');
+    (getRole as jest.Mock).mockResolvedValue('student');
+    (getSuggestions as jest.Mock).mockResolvedValue([{ id:1, title:'S1' }]);
+    (getSuggestionMessages as jest.Mock).mockResolvedValue([]);
+    (sendSuggestionMessage as jest.Mock).mockImplementation(async (_id: number, body: any) => ({ id: 1, ...body }));
+    i18n.locale = 'en';
+    const { getByText, getByPlaceholderText } = render(<Suggestions />);
+    await waitFor(() => getByText(/S1/));
+    fireEvent.press(getByText(/S1/));
+    await waitFor(() => getByPlaceholderText(i18n.t('suggestions.messagePlaceholder')));
+    fireEvent.changeText(getByPlaceholderText(i18n.t('suggestions.messagePlaceholder')), 'Hi');
+    fireEvent.press(getByText(i18n.t('suggestions.send')));
+    await waitFor(() => {
+      expect(sendSuggestionMessage).toHaveBeenCalledWith(1, { content: 'Hi' });
     });
   });
 });

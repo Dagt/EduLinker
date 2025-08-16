@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TextInput, Button, Alert } from "react-native";
-import { apiGet, createSuggestion, sendSuggestionMessage } from "../api";
-import { getRole } from "../role";
-import i18n from "../i18n";
+import {
+  getSuggestions,
+  createSuggestion,
+  getSuggestionMessages,
+  sendSuggestionMessage,
+} from "../../api";
+import { getRole } from "../../role";
+import i18n from "../../i18n";
 
 export default function Suggestions(){
   const [items,setItems]=useState<any[]>([]);
@@ -17,7 +22,7 @@ export default function Suggestions(){
 
   const load = async () => {
     try{
-      const r = await apiGet("/suggestions/");
+      const r = await getSuggestions();
       setItems(r);
     }catch{
       setItems([]);
@@ -49,7 +54,7 @@ export default function Suggestions(){
   const openSuggestion = async (s: any) => {
     setSelected(s);
     try{
-      const msgs = await apiGet(`/suggestions/${s.id}/messages/`);
+      const msgs = await getSuggestionMessages(s.id);
       setSelected({ ...s, messages: msgs });
     }catch{
       setSelected({ ...s, messages: [] });
