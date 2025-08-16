@@ -68,7 +68,25 @@ describe('api helpers', () => {
   it('getAnalytics fetches', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     await api.getAnalytics();
-    expect(global.fetch).toHaveBeenCalledWith('http://api/analytics/overview', expect.any(Object));
+    expect(global.fetch).toHaveBeenCalledWith('http://api/analytics/overview/', expect.any(Object));
+  });
+
+  it('getComplaintsAnalytics fetches', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.getComplaintsAnalytics();
+    expect(global.fetch).toHaveBeenCalledWith('http://api/analytics/complaints/', expect.any(Object));
+  });
+
+  it('getFundraisingAnalytics fetches', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.getFundraisingAnalytics();
+    expect(global.fetch).toHaveBeenCalledWith('http://api/analytics/fundraising/', expect.any(Object));
+  });
+
+  it('getEngagementAnalytics fetches', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.getEngagementAnalytics(1);
+    expect(global.fetch).toHaveBeenCalledWith('http://api/analytics/engagement/?group_id=1', expect.any(Object));
   });
 
   it('voteSurvey posts', async () => {
