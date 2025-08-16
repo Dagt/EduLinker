@@ -5,7 +5,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }), { virtual: true });
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { headers, setSchoolId } from './api';
+import { headers, setSchoolId, uploadFile } from './api';
 
 beforeEach(() => {
   (AsyncStorage.getItem as jest.Mock).mockReset();
@@ -30,4 +30,30 @@ test('derives school id from domain when not stored', async () => {
 test('setSchoolId stores provided value', async () => {
   await setSchoolId('9');
   expect(AsyncStorage.setItem).toHaveBeenCalledWith('schoolId', '9');
+});
+
+describe('uploadFile', () => {
+  beforeEach(() => {
+    (global as any).fetch = jest.fn();
+  });
+
+  test('uploads file and returns url', async () => {
+    (fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ upload_url: 'https://u', file_url: 'https://f' }) })
+      .mockResolvedValueOnce({ blob: async () => 'B' })
+      .mockResolvedValueOnce({ ok: true });
+    const url = await uploadFile('file://a.jpg', 'image/jpeg');
+    expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/storage/presign-upload/');
+    expect((fetch as jest.Mock).mock.calls[1][0]).toBe('file://a.jpg');
+    expect((fetch as jest.Mock).mock.calls[2][0]).toBe('https://u');
+    expect(url).toBe('https://f');
+  });
+
+  test('throws on upload failure', async () => {
+    (fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ upload_url: 'https://u', file_url: 'https://f' }) })
+      .mockResolvedValueOnce({ blob: async () => 'B' })
+      .mockResolvedValueOnce({ ok: false });
+    await expect(uploadFile('file://a.jpg', 'image/jpeg')).rejects.toThrow('upload failed');
+  });
 });
