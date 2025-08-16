@@ -50,6 +50,7 @@ import {
   getComplaintsAnalytics,
   getFundraisingAnalytics,
   getEngagementAnalytics,
+  listFundraisingEvents,
 } from '@/lib/api';
 
 beforeAll(() => {
@@ -113,7 +114,7 @@ describe('internationalized pages render', () => {
   });
 
   it('renders FundraisingPage', async () => {
-    (apiGet as jest.Mock).mockResolvedValue([]);
+    (listFundraisingEvents as jest.Mock).mockResolvedValue([]);
     render(<FundraisingPage />);
     expect(await screen.findByRole('heading', { name: 'Recaudación' })).toBeInTheDocument();
   });

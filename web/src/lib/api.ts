@@ -43,6 +43,23 @@ export async function updateSuggestionStatus(id: number, status: string, token?:
   return apiPost(`/suggestions/${id}/status`, { status }, token);
 }
 
+// Fundraising endpoints
+export async function listFundraisingEvents(token?: string): Promise<any> {
+  return apiGet<any>(`/fundraising-events/`, token);
+}
+
+export async function createFundraisingEvent(body: any, token?: string): Promise<any> {
+  return apiPost<any>(`/fundraising-events/`, body, token);
+}
+
+export async function createFundraisingLedger(body: any, token?: string): Promise<any> {
+  return apiPost<any>(`/fundraising-ledger/`, body, token);
+}
+
+export async function createExpenseEvidence(body: any, token?: string): Promise<any> {
+  return apiPost<any>(`/expense-evidences/`, body, token);
+}
+
 // Fundraising event summary
 export async function getFundraisingEventSummary(eventId: number, token?: string) {
   return apiGet(`/fundraising-events/${eventId}/summary/`, token);
