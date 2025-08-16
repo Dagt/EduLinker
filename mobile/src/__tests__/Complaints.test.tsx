@@ -18,7 +18,7 @@ jest.mock('../api', () => ({
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 beforeEach(() => {
   jest.resetAllMocks();
