@@ -22,6 +22,7 @@ from .permissions import (
     CanAccessComplaint,
     can_post_activity_photo,
     can_view_event,
+    user_can_view_event,
     is_director,
     is_maestro_itinerante,
     is_maestro_titular,
@@ -171,7 +172,9 @@ class EventListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
         qs = Event.objects.filter(school_id=self.request.school_id)
+        qs = qs.filter(user_can_view_event(user)).distinct()
         params = self.request.query_params
         start = params.get("from")
         end = params.get("to")
@@ -189,7 +192,7 @@ class EventListCreateView(generics.ListCreateAPIView):
             qs = qs.filter(group_audiences__group_id=group_id)
         if scope:
             qs = qs.filter(scope=scope)
-        return qs
+        return qs.distinct()
 
     def perform_create(self, serializer):
         user = self.request.user
