@@ -9,6 +9,7 @@ def test_overview_serializer_structure():
         "complaints_by_group": [],
         "fundraising_by_group": [],
         "fundraising_by_event": [],
+        "fundraising_total": 0,
         "surveys_participation": [],
         "surveys_participation_by_survey": [],
         "suggestions_by_status": [],

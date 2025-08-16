@@ -199,3 +199,11 @@ def test_engagement_analytics_filters_by_group():
     assert data["participation_rate_by_group"] == [
         {"group_id": group1.id, "rate": 1.0}
     ]
+
+    res = client.get("/api/v1/analytics/engagement/")
+    assert res.status_code == 200
+    data = res.json()
+    assert sorted(data["participation_rate_by_group"], key=lambda x: x["group_id"]) == [
+        {"group_id": group1.id, "rate": 1.0},
+        {"group_id": group2.id, "rate": 1.0},
+    ]

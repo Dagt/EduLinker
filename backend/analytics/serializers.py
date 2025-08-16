@@ -12,6 +12,7 @@ class OverviewAnalyticsSerializer(serializers.Serializer):
     complaints_by_group = serializers.ListField(child=serializers.JSONField())
     fundraising_by_group = serializers.ListField(child=serializers.JSONField())
     fundraising_by_event = serializers.ListField(child=serializers.JSONField())
+    fundraising_total = serializers.FloatField()
     surveys_participation = serializers.ListField(child=serializers.JSONField())
     surveys_participation_by_survey = serializers.ListField(
         child=serializers.JSONField()
@@ -39,6 +40,7 @@ class FundraisingAnalyticsSerializer(serializers.Serializer):
 
     fundraising_by_group = serializers.ListField(child=serializers.JSONField())
     fundraising_by_event = serializers.ListField(child=serializers.JSONField())
+    fundraising_total = serializers.FloatField()
 
 
 class EngagementAnalyticsSerializer(serializers.Serializer):
