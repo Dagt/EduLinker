@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Dashboard matches snapshot 1`] = `
+<DocumentFragment>
+  <nav
+    style="display: flex; gap: 12px; padding: 12px; border-bottom: 1px solid rgb(238, 238, 238);"
+  >
+    <a
+      href="/dashboard"
+    >
+      Dashboard
+    </a>
+    <a
+      href="/calendar"
+    >
+      Calendario
+    </a>
+    <a
+      href="/complaints"
+    >
+      Quejas
+    </a>
+    <a
+      href="/suggestions"
+    >
+      Sugerencias
+    </a>
+    <a
+      href="/surveys"
+    >
+      Encuestas
+    </a>
+    <a
+      href="/fundraising"
+    >
+      Recaudación
+    </a>
+  </nav>
+  <main
+    style="padding: 16px;"
+  >
+    <h2>
+      Bienvenido, Juan Pérez
+    </h2>
+    <button>
+      Actualizar
+    </button>
+    <div
+      style="display: grid; gap: 32px;"
+    >
+      <section>
+        <h3>
+          Quejas por grupo
+        </h3>
+        <div
+          class="recharts-responsive-container"
+          style="width: 100%; height: 300px; min-width: 0;"
+        />
+      </section>
+      <section>
+        <h3>
+          Recaudaciones por grupo
+        </h3>
+        <div
+          class="recharts-responsive-container"
+          style="width: 100%; height: 300px; min-width: 0;"
+        />
+      </section>
+      <section>
+        <h3>
+          Participación en encuestas
+        </h3>
+        <div
+          class="recharts-responsive-container"
+          style="width: 100%; height: 300px; min-width: 0;"
+        />
+      </section>
+    </div>
+  </main>
+</DocumentFragment>
+`;

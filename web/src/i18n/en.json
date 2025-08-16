@@ -8,7 +8,11 @@
     "fundraising": "Fundraising"
   },
   "Dashboard": {
-    "welcome": "Welcome, {name}"
+    "welcome": "Welcome, {name}",
+    "refresh": "Refresh",
+    "complaintsByGroup": "Complaints by group",
+    "fundraisingByGroup": "Fundraising by group",
+    "surveysParticipation": "Survey participation"
   },
   "SuggestionStatus": {
     "unauthorized": "Unauthorized",
