@@ -10,12 +10,13 @@ from core.models import (
     School, SchoolYear, User, Student, Group, GroupMembership,
     SpecialistAssignment, VocalAssignment,
     Complaint, ComplaintMessage,
-    Event, EventGroupAudience, Homework, ActivityPhoto
+    Event, EventGroupAudience, EventPhoto, Homework, ActivityPhoto
 )
 from chat.models import GroupChat, ChatMessage
 from suggestions.models import Suggestion, SuggestionMessage
 from fundraising.models import FundraisingEvent, FundraisingGroupLedger, ExpenseEvidence
 from notifications.models import NotificationPreference
+from surveys.models import Survey
 
 FIRST_NAMES = ["Ana","Luis","María","Jorge","Sofía","Carlos","Lucía","Pedro","Daniela","Héctor","Irene","Valeria"]
 LAST_NAMES = ["García","López","Martínez","Hernández","González","Pérez","Sánchez","Ramírez","Cruz","Flores"]
@@ -112,21 +113,70 @@ class Command(BaseCommand):
             p = random.choice(parents)
             VocalAssignment.objects.get_or_create(school=school, group=g, parent=p, defaults={"assigned_by": g.homeroom_teacher, "active": True})
 
-        # Eventos (2 globales, 4 de grupo)
+        # Eventos (globales y de grupo)
         now = datetime.now(dt_tz.utc)
-        e1 = Event.objects.create(school=school, school_year=sy, scope="GLOBAL", title="Kermés Escolar",
-                                  description="Recaudación general", location="Patio", start_at=utc(now+timedelta(days=7)),
-                                  end_at=utc(now+timedelta(days=7, hours=3)), created_by=director, status="ACTIVE")
-        e2 = Event.objects.create(school=school, school_year=sy, scope="GLOBAL", title="Festival de Invierno",
-                                  description="Programa artístico", location="Auditorio", start_at=utc(now+timedelta(days=40)),
-                                  end_at=utc(now+timedelta(days=40, hours=2)), created_by=director, status="ACTIVE")
+        events = []
+        e1 = Event.objects.create(
+            school=school,
+            school_year=sy,
+            scope="GLOBAL",
+            title="Kermés Escolar",
+            description="Recaudación general",
+            location="Patio",
+            start_at=utc(now + timedelta(days=7)),
+            end_at=utc(now + timedelta(days=7, hours=3)),
+            created_by=director,
+            status="ACTIVE",
+        )
+        events.append(e1)
+        e2 = Event.objects.create(
+            school=school,
+            school_year=sy,
+            scope="GLOBAL",
+            title="Festival de Invierno",
+            description="Programa artístico",
+            location="Auditorio",
+            start_at=utc(now + timedelta(days=40)),
+            end_at=utc(now + timedelta(days=40, hours=2)),
+            created_by=director,
+            status="ACTIVE",
+        )
+        events.append(e2)
+        e3 = Event.objects.create(
+            school=school,
+            school_year=sy,
+            scope="GLOBAL",
+            title="Feria de Ciencias",
+            description="Exhibición de proyectos",
+            location="Gimnasio",
+            start_at=utc(now + timedelta(days=15)),
+            end_at=utc(now + timedelta(days=15, hours=4)),
+            created_by=director,
+            status="CANCELLED",
+        )
+        events.append(e3)
         for g in groups[:4]:
-            eg = Event.objects.create(school=school, school_year=sy, scope="GROUP", title=f"Junta {g.name}",
-                                      description="Información a padres", location=g.name,
-                                      start_at=utc(now+timedelta(days=random.randint(5,20))),
-                                      end_at=utc(now+timedelta(days=random.randint(5,20), hours=1)),
-                                      created_by=g.homeroom_teacher, status="ACTIVE")
+            eg = Event.objects.create(
+                school=school,
+                school_year=sy,
+                scope="GROUP",
+                title=f"Junta {g.name}",
+                description="Información a padres",
+                location=g.name,
+                start_at=utc(now + timedelta(days=random.randint(5, 20))),
+                end_at=utc(now + timedelta(days=random.randint(5, 20), hours=1)),
+                created_by=g.homeroom_teacher,
+                status="ACTIVE",
+            )
             EventGroupAudience.objects.create(event=eg, group=g)
+            events.append(eg)
+
+        for ev in events:
+            EventPhoto.objects.create(
+                event=ev,
+                photo_url="https://via.placeholder.com/400",
+                caption=f"{ev.title} foto",
+            )
 
         # Tareas
         for g in groups:
@@ -137,6 +187,33 @@ class Command(BaseCommand):
         for g in groups:
             ActivityPhoto.objects.create(school=school, group=g, uploaded_by=g.homeroom_teacher,
                                          photo_url="https://via.placeholder.com/300", caption=f"Actividad {g.name}")
+
+        # Encuestas
+        Survey.objects.create(
+            school=school,
+            created_by=director,
+            scope=Survey.Scope.SCHOOL,
+            title="Satisfacción general",
+            description="¿Cómo evalúas la escuela?",
+            options=["Excelente", "Buena", "Regular"],
+            is_anonymous=True,
+            start_at=utc(now - timedelta(days=1)),
+            end_at=utc(now + timedelta(days=14)),
+            status=Survey.Status.ACTIVE,
+        )
+        Survey.objects.create(
+            school=school,
+            created_by=groups[0].homeroom_teacher,
+            scope=Survey.Scope.GROUP,
+            group=groups[0],
+            title="Destino excursión",
+            description="Elige el destino",
+            options=["Museo", "Parque"],
+            is_anonymous=False,
+            start_at=utc(now - timedelta(days=1)),
+            end_at=utc(now + timedelta(days=7)),
+            status=Survey.Status.ACTIVE,
+        )
 
         # Quejas y mensajes
         c = Complaint.objects.create(
