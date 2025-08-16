@@ -54,6 +54,7 @@ def test_announcements_homework_feed_visibility():
 
     ann1 = Announcement.objects.create(
         school=school,
+        scope="GRUPO",
         group=g1,
         teacher=teacher1,
         title="A1",
@@ -61,10 +62,18 @@ def test_announcements_homework_feed_visibility():
     )
     ann2 = Announcement.objects.create(
         school=school,
+        scope="GRUPO",
         group=g2,
         teacher=teacher2,
         title="A2",
         message="x",
+    )
+    ann_global = Announcement.objects.create(
+        school=school,
+        scope="GLOBAL",
+        teacher=teacher1,
+        title="AG",
+        message="g",
     )
     hw1 = Homework.objects.create(
         school=school,
@@ -95,7 +104,14 @@ def test_announcements_homework_feed_visibility():
     assert res.status_code == 200
     ids = [item["id"] for item in res.json()]
     assert ann1.id in ids
+    assert ann_global.id in ids
     assert ann2.id not in ids
+
+    res = client.get("/api/v1/announcements/?scope=GLOBAL")
+    assert res.status_code == 200
+    ids = [item["id"] for item in res.json()]
+    assert ann_global.id in ids
+    assert ann1.id not in ids
 
     res = client.get("/api/v1/homeworks/")
     assert res.status_code == 200
@@ -108,6 +124,7 @@ def test_announcements_homework_feed_visibility():
     items = res.json()
     feed_ids = {(item["type"], item["id"]) for item in items}
     assert ("announcement", ann1.id) in feed_ids
+    assert ("announcement", ann_global.id) in feed_ids
     assert ("homework", hw1.id) in feed_ids
     assert ("announcement", ann2.id) not in feed_ids
     assert ("homework", hw2.id) not in feed_ids

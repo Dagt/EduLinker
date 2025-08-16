@@ -219,6 +219,11 @@ paths:
       operationId: v1_announcements_list
       tags:
       - v1
+      parameters:
+      - in: query
+        name: scope
+        schema:
+          $ref: '#/components/schemas/AnnouncementScopeEnum'
       security:
       - jwtAuth: []
       responses:
@@ -1608,6 +1613,8 @@ components:
         id:
           type: integer
           readOnly: true
+        scope:
+          $ref: '#/components/schemas/AnnouncementScopeEnum'
         group:
           type: integer
         teacher:
@@ -1625,8 +1632,8 @@ components:
           readOnly: true
       required:
       - created_at
-      - group
       - id
+      - scope
       - teacher
       - title
     AuditLog:
@@ -1904,6 +1911,14 @@ components:
       description: |-
         * `ACTIVE` - Active
         * `CANCELLED` - Cancelled
+    AnnouncementScopeEnum:
+      enum:
+      - GLOBAL
+      - GRUPO
+      type: string
+      description: |-
+        * `GLOBAL` - Global
+        * `GRUPO` - Grupo
     ExpenseEvidence:
       type: object
       properties:
@@ -2048,6 +2063,8 @@ components:
         id:
           type: integer
           readOnly: true
+        scope:
+          $ref: '#/components/schemas/AnnouncementScopeEnum'
         group:
           type: integer
         teacher:

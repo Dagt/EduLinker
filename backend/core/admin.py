@@ -87,12 +87,13 @@ class AnnouncementAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "school",
+        "scope",
         "group",
         "teacher",
         "title",
         "created_at",
     )
-    list_filter = ("school", "group")
+    list_filter = ("school", "scope", "group")
     search_fields = ("title", "message")
 
 @admin.register(Homework)
