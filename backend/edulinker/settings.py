@@ -1,11 +1,22 @@
+import logging
 import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+from pythonjsonlogger import jsonlogger
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    environment=os.getenv("SENTRY_ENVIRONMENT", "development"),
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.0")),
+)
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'change-me')
 DEBUG = os.getenv('DEBUG', '0') == '1'
@@ -165,4 +176,50 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+class RequestContextFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        request = getattr(record, "request", None)
+        record.request_id = None
+        record.school_id = None
+        record.user_id = None
+        if request:
+            headers = getattr(request, "headers", {})
+            record.request_id = (
+                headers.get("X-Request-ID")
+                or getattr(getattr(request, "META", {}), "get", lambda k: None)("HTTP_X_REQUEST_ID")
+            )
+            record.school_id = getattr(request, "school_id", None)
+            user = getattr(request, "user", None)
+            record.user_id = getattr(user, "id", None)
+        return True
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "request_context": {
+            "()": "edulinker.settings.RequestContextFilter",
+        }
+    },
+    "formatters": {
+        "json": {
+            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            "format": "%(levelname)s %(name)s %(message)s %(request_id)s %(school_id)s %(user_id)s",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "filters": ["request_context"],
+            "formatter": "json",
+        }
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
 
