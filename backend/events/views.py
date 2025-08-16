@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 from icalendar import Calendar, Event as ICalEvent
 from rest_framework import permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 
 from core.models import Event
@@ -11,9 +12,11 @@ class EventsICSView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        school_id = request.headers.get("X-SCHOOL-ID")
+        school_id = request.school_id
         if not school_id:
             return HttpResponseBadRequest("Missing X-SCHOOL-ID header")
+        if request.user.school_id != school_id:
+            raise PermissionDenied("Invalid school")
 
         events_qs = Event.objects.filter(school_id=school_id).filter(
             user_can_view_event(request.user)

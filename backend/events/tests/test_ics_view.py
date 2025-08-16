@@ -160,7 +160,7 @@ def test_events_ics_filters_events_by_user():
 
 
 @pytest.mark.django_db
-def test_events_ics_rejects_other_school_events():
+def test_events_ics_forbids_cross_school_access():
     school1 = School.objects.create(name="S1", slug="s1", subdomain="s1", active=True)
     sy1 = SchoolYear.objects.create(
         school=school1,
@@ -206,5 +206,4 @@ def test_events_ics_rejects_other_school_events():
         HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school2.id)
     )
     res = client.get("/api/v1/events/ics/")
-    assert res.status_code == 200
-    assert b"SUMMARY:Other" not in res.content
+    assert res.status_code == 403

@@ -19,10 +19,10 @@ escuela (`school_id`) enviado mediante el encabezado `X-SCHOOL-ID`.
 
 ## Reglas clave
 
-- Todas las consultas de la API filtran por `school_id`.
-- La exportación ICS de eventos exige el encabezado `X-SCHOOL-ID` y sólo
-  devuelve eventos de la escuela indicada y filtrados según la audiencia del
-  usuario; intentar usar el encabezado de otra escuela no expone eventos.
+- Todas las vistas establecen `permission_classes` y filtran por `school_id`.
+- La exportación ICS de eventos exige el encabezado `X-SCHOOL-ID` y
+  valida que corresponda con la escuela del usuario autenticado. Un
+  encabezado de otra escuela produce un error de permiso.
 - Los registros de recaudación y las evidencias de gasto requieren que el
   evento, el grupo y el usuario pertenezcan a la misma escuela, y sólo pueden
   ser registrados por directores, maestros de grupo o vocals asignados.
