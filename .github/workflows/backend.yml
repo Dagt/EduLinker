@@ -33,4 +33,4 @@ jobs:
       - run: |
           cd backend
           python manage.py migrate --noinput
-          pytest -q
+          pytest --cov=. --cov-report=term-missing
