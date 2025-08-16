@@ -6,6 +6,7 @@ import pytest
 from core.models import School, User
 from notifications.models import DeviceToken, ExpoTicket
 from notifications import tasks
+from notifications.tasks import push_to_users
 from notifications.providers import expo
 
 
@@ -50,6 +51,55 @@ def test_cleanup_deletes_invalid_tokens():
         result = tasks.cleanup_invalid_tokens.run()
 
     assert result["deleted"] == 1
+    assert DeviceToken.objects.filter(token="tok1").exists()
+    assert not DeviceToken.objects.filter(token="tok2").exists()
+    assert ExpoTicket.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_send_then_cleanup_cycle():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    user1 = User.objects.create_user(
+        username="u1@x.com", email="u1@x.com", password="p", role="PADRE", school=school
+    )
+    user2 = User.objects.create_user(
+        username="u2@x.com", email="u2@x.com", password="p", role="PADRE", school=school
+    )
+    DeviceToken.objects.create(school=school, user=user1, token="tok1", platform="web")
+    DeviceToken.objects.create(school=school, user=user2, token="tok2", platform="web")
+
+    send_payload = {"data": [{"id": "t1"}, {"id": "t2"}]}
+    first_receipts = {"data": {}}
+
+    def fake_send(req, data=None):
+        if req.full_url == expo.EXPO_PUSH_URL:
+            return FakeResponse(json.dumps(send_payload))
+        if req.full_url == expo.EXPO_RECEIPTS_URL:
+            return FakeResponse(json.dumps(first_receipts))
+        raise AssertionError("Unexpected URL")
+
+    with patch("notifications.providers.expo.urllib.request.urlopen", side_effect=fake_send):
+        send_result = push_to_users.run(school.id, [user1.id, user2.id], "T", "B")
+
+    assert send_result["invalid"] == 0
+    assert ExpoTicket.objects.count() == 2
+
+    second_receipts = {
+        "data": {
+            "t1": {"status": "ok"},
+            "t2": {"status": "error", "details": {"error": "DeviceNotRegistered"}},
+        }
+    }
+
+    def fake_cleanup(req, data=None):
+        assert req.full_url == expo.EXPO_RECEIPTS_URL
+        return FakeResponse(json.dumps(second_receipts))
+
+    with patch("notifications.tasks.urllib.request.urlopen", side_effect=fake_cleanup):
+        cleanup_result = tasks.cleanup_invalid_tokens.run()
+
+    assert cleanup_result["processed"] == 2
+    assert cleanup_result["deleted"] == 1
     assert DeviceToken.objects.filter(token="tok1").exists()
     assert not DeviceToken.objects.filter(token="tok2").exists()
     assert ExpoTicket.objects.count() == 0

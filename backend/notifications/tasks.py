@@ -74,6 +74,14 @@ def send_notification(
         token_ticket_pairs, _, invalid_tokens = provider_obj.send_and_get_receipts(
             tokens, title=title, body=body, data=data or {}
         )
+        if token_ticket_pairs:
+            ExpoTicket.objects.bulk_create(
+                [
+                    ExpoTicket(ticket_id=tid, token=tok)
+                    for tid, tok in token_ticket_pairs
+                    if tok not in invalid_tokens
+                ]
+            )
         if invalid_tokens:
             DeviceToken.objects.filter(token__in=invalid_tokens).delete()
         return {
@@ -112,11 +120,11 @@ def push_to_users(
 
 @shared_task
 def cleanup_invalid_tokens():
-    tickets = list(ExpoTicket.objects.all())
+    tickets = list(ExpoTicket.objects.values_list("ticket_id", "token"))
     if not tickets:
         return {"processed": 0, "deleted": 0}
 
-    ticket_map = {t.ticket_id: t.token for t in tickets}
+    ticket_map = {tid: tok for tid, tok in tickets}
     invalid_tokens: list[str] = []
 
     try:
@@ -140,7 +148,7 @@ def cleanup_invalid_tokens():
                 if token:
                     invalid_tokens.append(token)
 
-    ExpoTicket.objects.filter(ticket_id__in=ticket_map.keys()).delete()
+    ExpoTicket.objects.filter(ticket_id__in=list(ticket_map.keys())).delete()
 
     if invalid_tokens:
         DeviceToken.objects.filter(token__in=invalid_tokens).delete()
