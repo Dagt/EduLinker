@@ -1,5 +1,6 @@
 """Permission helpers and classes for core app."""
 
+from django.db.models import Q
 from rest_framework.permissions import BasePermission
 
 from .models import (
@@ -77,6 +78,36 @@ def can_view_event(user: User, event: Event) -> bool:
         ).exists()
 
     return False
+
+
+def user_can_view_event(user: User):
+    """Return a Q filter to limit events visible to ``user``."""
+    if is_director(user):
+        return Q()
+
+    if is_maestro_titular(user):
+        group_ids = Group.objects.filter(homeroom_teacher_id=user.id).values_list(
+            "id", flat=True
+        )
+    elif is_maestro_itinerante(user):
+        group_ids = SpecialistAssignment.objects.filter(teacher_id=user.id).values_list(
+            "group_id", flat=True
+        )
+    elif is_vocal(user):
+        group_ids = VocalAssignment.objects.filter(
+            parent_id=user.id, active=True
+        ).values_list("group_id", flat=True)
+    elif is_padre(user):
+        student_ids = ParentStudent.objects.filter(parent_id=user.id).values_list(
+            "student_id", flat=True
+        )
+        group_ids = GroupMembership.objects.filter(
+            student_id__in=student_ids
+        ).values_list("group_id", flat=True)
+    else:
+        group_ids = Group.objects.none().values_list("id", flat=True)
+
+    return Q(scope=Event.Scope.GLOBAL) | Q(group_audiences__group_id__in=group_ids)
 
 
 def can_post_activity_photo(user: User, group: Group) -> bool:
