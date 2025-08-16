@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, Button } from "react-native";
 import * as Notifications from "expo-notifications";
-import { apiGet } from "../api";
+import { getEvents } from "../api";
 import { getRole } from "../role";
 
 interface EventItem {
@@ -17,14 +17,19 @@ export default function EventCalendar() {
   useEffect(() => {
     (async () => {
       setRole(await getRole());
-      const r = await apiGet("/events/");
-      setEvents(r);
+      try {
+        const r = await getEvents();
+        setEvents(r);
+      } catch {
+        setEvents([]);
+      }
     })();
   }, []);
 
   async function remind(ev: EventItem) {
     try {
-      await Notifications.requestPermissionsAsync();
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") return;
       await Notifications.scheduleNotificationAsync({
         content: { title: ev.title },
         trigger: new Date(ev.start_at),

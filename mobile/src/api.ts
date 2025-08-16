@@ -119,6 +119,11 @@ export async function postEventPhoto(id: number, body: any){
   return apiPost(`/events/${id}/photos/`, body);
 }
 
+// Events API helpers
+export async function getEvents(){
+  return apiGet("/events/");
+}
+
 // Surveys API helpers
 export async function getSurveys(){
   return apiGet("/surveys/");

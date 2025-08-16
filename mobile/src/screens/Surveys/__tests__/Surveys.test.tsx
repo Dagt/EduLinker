@@ -1,14 +1,23 @@
-import { render, waitFor } from '@testing-library/react-native';
-import Surveys from '..';
-import { getSurveys } from '../../../api';
+import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { Text } from 'react-native';
+import Surveys from '../index';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
 jest.mock('../../../api', () => ({ getSurveys: jest.fn() }));
+jest.mock('../../SurveyVote', () => () => <Text>VoteScreen</Text>);
 
-(getSurveys as jest.Mock).mockResolvedValue([{ id:1, title:'Survey 1'}]);
+const api = require('../../../api');
 
-test('loads surveys from API', async () => {
+(api.getSurveys as jest.Mock).mockResolvedValue([
+  { id: 1, title: 'Survey 1' }
+]);
+
+test('loads surveys and navigates to vote', async () => {
   const { getByText } = render(<Surveys />);
+  await waitFor(() => getByText('Encuestas'));
   await waitFor(() => getByText(/Survey 1/));
-  expect(getSurveys).toHaveBeenCalled();
+  fireEvent.press(getByText(/Survey 1/));
+  await waitFor(() => getByText('VoteScreen'));
+  expect(api.getSurveys).toHaveBeenCalled();
 });
