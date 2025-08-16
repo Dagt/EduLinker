@@ -3,6 +3,7 @@
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "types": ["jest", "@testing-library/jest-dom"],
     "module": "commonjs",
     "target": "es6",
