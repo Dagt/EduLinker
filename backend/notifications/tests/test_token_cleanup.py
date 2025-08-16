@@ -26,7 +26,8 @@ class FakeResponse:
 
 
 @pytest.mark.django_db
-def test_cleanup_deletes_invalid_tokens():
+@pytest.mark.parametrize("error_code", ["DeviceNotRegistered", "InvalidCredentials"])
+def test_cleanup_deletes_invalid_tokens(error_code):
     school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
     user = User.objects.create_user(
         username="u@x.com", email="u@x.com", password="p", role="PADRE", school=school
@@ -40,7 +41,7 @@ def test_cleanup_deletes_invalid_tokens():
     receipts_payload = {
         "data": {
             "t1": {"status": "ok"},
-            "t2": {"status": "error", "details": {"error": "DeviceNotRegistered"}},
+            "t2": {"status": "error", "details": {"error": error_code}},
         }
     }
 
