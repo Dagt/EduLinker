@@ -110,3 +110,20 @@ export async function postActivityPhoto(body: any){
 export async function postEventPhoto(id: number, body: any){
   return apiPost(`/events/${id}/photos/`, body);
 }
+
+// Surveys API helpers
+export async function getSurveys(){
+  return apiGet("/surveys/");
+}
+
+export async function getSurvey(id: number){
+  return apiGet(`/surveys/${id}/`);
+}
+
+export async function voteSurvey(id: number, option_index: number){
+  return apiPost(`/surveys/${id}/vote/`, { option_index });
+}
+
+export async function getSurveyResults(id: number){
+  return apiGet(`/surveys/${id}/results/`);
+}
