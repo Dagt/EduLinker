@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from .models import (
     School,
@@ -19,6 +20,8 @@ from .models import (
     Homework,
     ActivityPhoto,
 )
+
+from .permissions import is_director, is_maestro_itinerante, is_maestro_titular
 
 
 class SchoolSerializer(serializers.ModelSerializer):
@@ -140,12 +143,8 @@ class EventGroupAudienceSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    group_ids = serializers.PrimaryKeyRelatedField(
-        source="groups",
-        queryset=Group.objects.none(),
-        many=True,
-        write_only=True,
-        required=False,
+    group_ids = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=False
     )
     audiences = EventGroupAudienceSerializer(
         source="group_audiences", many=True, read_only=True
@@ -174,11 +173,6 @@ class EventSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request:
-            self.fields["group_ids"].queryset = Group.objects.filter(
-                school_id=request.school_id
-            )
 
     def create(self, validated_data):
         groups = validated_data.pop("groups", [])
@@ -189,11 +183,47 @@ class EventSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         scope = attrs.get("scope")
-        groups = attrs.get("groups", [])
-        if scope == Event.Scope.GROUP and not groups:
-            raise serializers.ValidationError("group_ids required for group scope")
-        if scope == Event.Scope.GLOBAL and groups:
-            raise serializers.ValidationError("group_ids not allowed for global scope")
+        group_ids = attrs.pop("group_ids", [])
+        groups = list(Group.objects.filter(id__in=group_ids))
+        attrs["groups"] = groups
+
+        if scope == Event.Scope.GROUP:
+            if not groups:
+                raise serializers.ValidationError(
+                    "group_ids required for group scope"
+                )
+            request = self.context.get("request")
+            user = getattr(request, "user", None)
+            school_id = getattr(request, "school_id", None)
+            if school_id is not None:
+                if {g.id for g in groups} != set(group_ids) or any(
+                    g.school_id != school_id for g in groups
+                ):
+                    raise PermissionDenied("Group mismatch for school")
+            if user and not is_director(user):
+                if is_maestro_titular(user):
+                    for group in groups:
+                        if group.homeroom_teacher_id != user.id:
+                            raise PermissionDenied(
+                                "Cannot create event for this group"
+                            )
+                elif is_maestro_itinerante(user):
+                    allowed = set(
+                        SpecialistAssignment.objects.filter(teacher=user)
+                        .values_list("group_id", flat=True)
+                    )
+                    for group in groups:
+                        if group.id not in allowed:
+                            raise PermissionDenied(
+                                "Cannot create event for this group"
+                            )
+                else:
+                    raise PermissionDenied("Not allowed to create group events")
+
+        if scope == Event.Scope.GLOBAL and group_ids:
+            raise serializers.ValidationError(
+                "group_ids not allowed for global scope"
+            )
         return attrs
 
     def get_attachments(self, obj):

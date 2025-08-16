@@ -8,7 +8,7 @@ from rest_framework.exceptions import PermissionDenied
 from .models import Event
 from .serializers import EventSerializer
 from .permissions import can_view_event, is_director
-from .models import Group, Complaint, ComplaintMessage, Event, SchoolYear
+from .models import Group, Complaint, ComplaintMessage, Event, SchoolYear, SpecialistAssignment
 from .permissions import (
     CanAccessComplaint,
     can_post_activity_photo,
@@ -116,10 +116,28 @@ class EventListCreateView(generics.ListCreateAPIView):
         scope = serializer.validated_data.get("scope")
         if scope == Event.Scope.GLOBAL and not is_director(user):
             raise PermissionDenied("Only directors can create global events")
-        if scope == Event.Scope.GROUP and not (
-            is_director(user) or is_maestro_titular(user) or is_maestro_itinerante(user)
-        ):
-            raise PermissionDenied("Not allowed to create group events")
+        if scope == Event.Scope.GROUP:
+            if not (
+                is_director(user)
+                or is_maestro_titular(user)
+                or is_maestro_itinerante(user)
+            ):
+                raise PermissionDenied("Not allowed to create group events")
+            groups = serializer.validated_data.get("groups", [])
+            if is_maestro_titular(user):
+                for group in groups:
+                    if group.homeroom_teacher_id != user.id:
+                        raise PermissionDenied(
+                            "Cannot create event for this group"
+                        )
+            if is_maestro_itinerante(user):
+                for group in groups:
+                    if not SpecialistAssignment.objects.filter(
+                        group=group, teacher=user
+                    ).exists():
+                        raise PermissionDenied(
+                            "Cannot create event for this group"
+                        )
 
         school_year = SchoolYear.objects.filter(
             school_id=self.request.school_id, is_current=True
