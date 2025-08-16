@@ -97,6 +97,24 @@ describe('api helpers', () => {
     expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/2/summary/', expect.any(Object));
   });
 
+  it('getFundraisingEvent fetches', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.getFundraisingEvent(5);
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/5', expect.any(Object));
+  });
+
+  it('updateFundraisingEvent patches', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.updateFundraisingEvent(5, { name: 'x' });
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/5', expect.objectContaining({ method: 'PATCH' }));
+  });
+
+  it('deleteFundraisingEvent deletes', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.deleteFundraisingEvent(5);
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/5', expect.objectContaining({ method: 'DELETE' }));
+  });
+
   it('getAnalytics fetches', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     await api.getAnalytics();

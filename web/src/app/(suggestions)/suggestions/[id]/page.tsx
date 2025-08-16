@@ -35,6 +35,8 @@ export default function SuggestionDetail({ params }:{ params:{ id:string } }){
         <p><strong>{t("description")}</strong> {sug.description}</p>
         {sug.status && <p><strong>{t("status")}</strong> {sug.status}</p>}
         <Link href={`/suggestions/${sug.id}/edit`}>{t("edit")}</Link>
+        <br />
+        <Link href={`/suggestions/${sug.id}/delete`}>{t("delete")}</Link>
       </main>
     </>
   );

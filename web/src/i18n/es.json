@@ -47,7 +47,8 @@
     "title": "Título:",
     "description": "Descripción:",
     "status": "Estado:",
-    "edit": "Editar"
+    "edit": "Editar",
+    "delete": "Eliminar"
   },
   "SuggestionEdit": {
     "header": "Editar sugerencia",
@@ -57,6 +58,13 @@
     "updated": "Sugerencia actualizada",
     "error": "Error",
     "confirm": "¿Está seguro de actualizar esta sugerencia?"
+  },
+  "SuggestionDelete": {
+    "header": "Eliminar sugerencia",
+    "delete": "Eliminar",
+    "deleted": "Sugerencia eliminada",
+    "error": "Error",
+    "confirm": "¿Está seguro de eliminar esta sugerencia?"
   },
   "Fundraising": {
     "header": "Recaudación",
@@ -102,6 +110,32 @@
     "amount": "Monto",
     "file": "Archivo",
     "unauthorized": "No autorizado"
+  },
+  "FundraisingDetail": {
+    "loading": "Cargando...",
+    "header": "Evento de recaudación #{id}",
+    "name": "Nombre:",
+    "date": "Fecha:",
+    "description": "Descripción:",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "FundraisingEdit": {
+    "header": "Editar evento de recaudación",
+    "name": "Nombre",
+    "date": "Fecha",
+    "description": "Descripción",
+    "update": "Actualizar",
+    "updated": "Evento actualizado",
+    "error": "Error",
+    "confirm": "¿Está seguro de actualizar este evento?"
+  },
+  "FundraisingDelete": {
+    "header": "Eliminar evento de recaudación",
+    "delete": "Eliminar",
+    "deleted": "Evento eliminado",
+    "error": "Error",
+    "confirm": "¿Está seguro de eliminar este evento?"
   },
   "Suggestions": {
     "header": "Sugerencias",
