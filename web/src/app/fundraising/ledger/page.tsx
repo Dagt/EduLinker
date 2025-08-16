@@ -18,6 +18,14 @@ export default function FundraisingLedger(){
 
   async function submit(e:React.FormEvent){
     e.preventDefault(); setMsg("");
+    if(!eventId || !groupId || !amount){
+      setMsg(t('Validation.required'));
+      return;
+    }
+    if([eventId,groupId,amount].some(v=>isNaN(Number(v)))){
+      setMsg(t('Validation.invalidNumber'));
+      return;
+    }
     try{
       const tk = getToken();
       const res = await createFundraisingLedger({

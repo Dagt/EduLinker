@@ -21,6 +21,18 @@ export default function FundraisingExpense(){
   async function submit(e:React.FormEvent){
     e.preventDefault(); setMsg("");
     if (!fileUrl) { setMsg(t("FundraisingExpense.uploadFirst")); return; }
+    if(!amount || !concept){
+      setMsg(t('Validation.required'));
+      return;
+    }
+    if(
+      isNaN(Number(amount)) ||
+      (ledgerId && isNaN(Number(ledgerId))) ||
+      (groupId && isNaN(Number(groupId)))
+    ){
+      setMsg(t('Validation.invalidNumber'));
+      return;
+    }
     try{
       const tk = getToken();
       const body:any = { amount: Number(amount), concept, file_url: fileUrl };
