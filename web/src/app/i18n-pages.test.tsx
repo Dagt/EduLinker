@@ -21,6 +21,8 @@ import DashboardPage from './dashboard/page';
 import Login from './(auth)/login/page';
 import SuggestionsPage from './suggestions/page';
 import SuggestionCreate from './suggestions/create/page';
+import SuggestionDetail from './suggestions/[id]/page';
+import SuggestionEdit from './suggestions/[id]/edit/page';
 import SuggestionStatus from './suggestions/status/page';
 import GroupList from './groups/page';
 import GroupCreate from './groups/create/page';
@@ -148,6 +150,18 @@ describe('internationalized pages render', () => {
   it('renders SuggestionCreate', () => {
     render(<SuggestionCreate />);
     expect(screen.getByRole('heading', { name: 'Crear sugerencia' })).toBeInTheDocument();
+  });
+
+  it('renders SuggestionDetail', async () => {
+    (apiGet as jest.Mock).mockResolvedValue({id:1,title:'t',description:'d'});
+    render(<SuggestionDetail params={{id:'1'}} />);
+    expect(await screen.findByText('Sugerencia #1')).toBeInTheDocument();
+  });
+
+  it('renders SuggestionEdit', async () => {
+    (apiGet as jest.Mock).mockResolvedValue({title:'t',description:'d'});
+    render(<SuggestionEdit params={{id:'1'}} />);
+    expect(await screen.findByRole('heading', { name: 'Editar sugerencia' })).toBeInTheDocument();
   });
 
   it('renders SuggestionStatus', () => {

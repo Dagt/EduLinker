@@ -53,6 +53,16 @@ describe('api helpers', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 400, statusText: 'bad' });
     await expect(api.apiPost('/y', {})).rejects.toThrow('400 bad');
   });
+  it('apiPatch sends body and returns json', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({ c: 3 }) });
+    const data = await api.apiPatch('/z', { c: 3 });
+    expect(data).toEqual({ c: 3 });
+    expect(global.fetch).toHaveBeenCalledWith('http://api/z', expect.objectContaining({ method: 'PATCH' }));
+  });
+  it('apiPatch throws on error status', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 404, statusText: 'nf' });
+    await expect(api.apiPatch('/z', {})).rejects.toThrow('404 nf');
+  });
   it('updateSuggestionStatus posts', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     await api.updateSuggestionStatus(1, 'closed');
