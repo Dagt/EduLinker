@@ -1,0 +1,22 @@
+{
+  "Nav": {
+    "dashboard": "Dashboard",
+    "calendar": "Calendar",
+    "complaints": "Complaints",
+    "suggestions": "Suggestions",
+    "surveys": "Surveys",
+    "fundraising": "Fundraising"
+  },
+  "Dashboard": {
+    "welcome": "Welcome, {name}"
+  },
+  "SuggestionStatus": {
+    "unauthorized": "Unauthorized",
+    "title": "Update suggestion status",
+    "id": "ID",
+    "status": "Status",
+    "update": "Update",
+    "updated": "Status updated",
+    "error": "Error"
+  }
+}

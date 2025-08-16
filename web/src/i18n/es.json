@@ -1,0 +1,22 @@
+{
+  "Nav": {
+    "dashboard": "Dashboard",
+    "calendar": "Calendario",
+    "complaints": "Quejas",
+    "suggestions": "Sugerencias",
+    "surveys": "Encuestas",
+    "fundraising": "Recaudación"
+  },
+  "Dashboard": {
+    "welcome": "Bienvenido, {name}"
+  },
+  "SuggestionStatus": {
+    "unauthorized": "No autorizado",
+    "title": "Actualizar estado de sugerencia",
+    "id": "ID",
+    "status": "Estado",
+    "update": "Actualizar",
+    "updated": "Estado actualizado",
+    "error": "Error"
+  }
+}
