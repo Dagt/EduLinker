@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { getSurveys } from "../../api";
 import SurveyVote from "./Vote";
+import SurveyResults from "./Results";
 
 export default function Surveys(){
   const [items, setItems] = useState<any[]>([]);
-  const [selected, setSelected] = useState<number|null>(null);
+  const [selected, setSelected] = useState<{id:number,type:'vote'|'results'}|null>(null);
 
   useEffect(()=>{
     (async()=>{
@@ -26,8 +27,10 @@ export default function Surveys(){
       new Date(item.end_at) >= now
     );
   }
-  if(selected!==null){
-    return <SurveyVote surveyId={selected} onBack={()=>setSelected(null)} />;
+  if(selected){
+    return selected.type === 'vote'
+      ? <SurveyVote surveyId={selected.id} onBack={()=>setSelected(null)} />
+      : <SurveyResults surveyId={selected.id} onBack={()=>setSelected(null)} />;
   }
   return (
     <View style={{padding:16}}>
@@ -37,7 +40,7 @@ export default function Surveys(){
         renderItem={({item})=> {
           const active = isActive(item);
           return (
-            <TouchableOpacity onPress={()=>active && setSelected(item.id)} disabled={!active}>
+            <TouchableOpacity onPress={()=>setSelected({id:item.id, type: active ? 'vote' : 'results'})}>
               <Text>
                 - {item.title || item.name}
                 {!active ? " (cerrada)" : ""}

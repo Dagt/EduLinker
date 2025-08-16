@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TextInput, Button } from "react-native";
-import { getSuggestionMessages, sendSuggestionMessage } from "../../services/suggestions";
+import { getSuggestionMessages, sendSuggestionMessage, updateSuggestion, deleteSuggestion } from "../../api";
 import i18n from "../../i18n";
 
 export default function SuggestionDetail({ suggestion, onBack }: { suggestion: any; onBack: () => void }) {
   const [data, setData] = useState<any>(suggestion);
   const [message, setMessage] = useState("");
+  const [title, setTitle] = useState(suggestion.title || "");
+  const [description, setDescription] = useState(suggestion.description || "");
 
   useEffect(() => {
     (async () => {
@@ -26,7 +28,20 @@ export default function SuggestionDetail({ suggestion, onBack }: { suggestion: a
 
   return (
     <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>{data.title}</Text>
+      <TextInput
+        style={{ fontSize: 18, marginBottom: 8 }}
+        value={title}
+        onChangeText={setTitle}
+      />
+      <TextInput
+        style={{ marginBottom: 8 }}
+        value={description}
+        onChangeText={setDescription}
+      />
+      <Button title={i18n.t('suggestions.save')} onPress={async () => {
+        await updateSuggestion(data.id, { title, description });
+        setData({ ...data, title, description });
+      }} />
       <FlatList
         data={data.messages || []}
         keyExtractor={(x) => String(x.id)}
@@ -40,6 +55,7 @@ export default function SuggestionDetail({ suggestion, onBack }: { suggestion: a
       />
       <Button title={i18n.t('suggestions.send')} onPress={sendMsg} />
       <Button title={i18n.t('suggestions.back')} onPress={onBack} />
+      <Button title={i18n.t('suggestions.delete')} onPress={async () => { await deleteSuggestion(data.id); onBack(); }} />
     </View>
   );
 }

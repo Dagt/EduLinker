@@ -31,7 +31,7 @@ describe('EventPhotoUploader', () => {
     fireEvent.press(getByTestId('photo-1'));
     await waitFor(() => {
       expect(uploadFile).toHaveBeenCalledWith('photo.jpg', 'image/jpeg');
-      expect(postEventPhoto).toHaveBeenCalledWith(1, { url: 'http://example.com/photo.jpg' });
+      expect(postEventPhoto).toHaveBeenCalledWith(1, { photo_url: 'http://example.com/photo.jpg' });
     });
   });
 

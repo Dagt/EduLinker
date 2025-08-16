@@ -57,6 +57,14 @@ export async function apiPutAuth(path: string, body: any){
   return r.json();
 }
 
+export async function apiDeleteAuth(path: string){
+  const tk = await getToken();
+  const r = await fetch(`${BASE}${path}`, { method: "DELETE", headers: await headers(tk) });
+  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+  if(r.status === 204) return;
+  return r.json();
+}
+
 export async function getNotificationPreferences(){
   return apiGet("/notifications/preferences/");
 }
@@ -91,6 +99,10 @@ export async function sendComplaintMessage(id: number, body: any){
   return apiPost(`/complaints/${id}/messages/`, body);
 }
 
+export async function deleteComplaint(id: number){
+  return apiDeleteAuth(`/complaints/${id}/`);
+}
+
 // Suggestions API helpers
 export async function getSuggestions(){
   return apiGet("/suggestions/");
@@ -116,6 +128,10 @@ export async function getSuggestionMessages(id: number){
 
 export async function sendSuggestionMessage(id: number, body: any){
   return apiPost(`/suggestions/${id}/messages/`, body);
+}
+
+export async function deleteSuggestion(id: number){
+  return apiDeleteAuth(`/suggestions/${id}/`);
 }
 
 // Photos API helpers
