@@ -167,3 +167,62 @@ def test_cannot_access_suggestion_other_school():
     )
     res = client.get(f"/api/v1/suggestions/{suggestion.id}/")
     assert res.status_code == 404
+
+
+@pytest.mark.django_db
+def test_other_parent_cannot_read_or_update_suggestion():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    group = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+    parent1 = User.objects.create_user(
+        username="p1@x.com",
+        email="p1@x.com",
+        password="p",
+        role="PADRE",
+        school=school,
+    )
+    parent2 = User.objects.create_user(
+        username="p2@x.com",
+        email="p2@x.com",
+        password="p",
+        role="PADRE",
+        school=school,
+    )
+    suggestion = Suggestion.objects.create(
+        school=school,
+        group=group,
+        target_teacher=teacher,
+        title="Idea",
+        description="Mas excursiones",
+        created_by=parent1,
+    )
+    client = APIClient()
+    token = str(RefreshToken.for_user(parent2).access_token)
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id))
+    res = client.get(f"/api/v1/suggestions/{suggestion.id}/")
+    assert res.status_code == 403
+    res = client.patch(
+        f"/api/v1/suggestions/{suggestion.id}/",
+        {"title": "New"},
+        format="json",
+    )
+    assert res.status_code == 403
