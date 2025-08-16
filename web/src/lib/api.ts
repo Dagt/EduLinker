@@ -43,7 +43,7 @@ export async function getFundraisingEventSummary(eventId: number, token?: string
 
 // Analytics dashboard
 export async function getAnalytics(token?: string) {
-  return apiGet(`/analytics`, token);
+  return apiGet(`/analytics/overview`, token);
 }
 
 // Survey voting
