@@ -1,3 +1,7 @@
+import io
+
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -12,6 +16,7 @@ from .models import (
     Complaint,
     ComplaintMessage,
     Event,
+    School,
     SchoolYear,
     SpecialistAssignment,
     GroupMembership,
@@ -28,8 +33,10 @@ from .permissions import (
     is_maestro_titular,
     is_padre,
     is_vocal,
+    IsDirector,
 )
 from .serializers import (
+    SchoolSerializer,
     AnnouncementSerializer,
     HomeworkSerializer,
     ComplaintMessageSerializer,
@@ -92,6 +99,36 @@ class MeView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class CurrentSchoolView(generics.RetrieveAPIView):
+    serializer_class = SchoolSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return get_object_or_404(School, pk=self.request.school_id)
+
+
+class SchoolYearRolloverView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+
+    def post(self, request, *args, **kwargs):
+        from_year = get_object_or_404(
+            SchoolYear, pk=request.data.get("from_year"), school_id=request.school_id
+        )
+        to_year = get_object_or_404(
+            SchoolYear, pk=request.data.get("to_year"), school_id=request.school_id
+        )
+        dry_run = request.data.get("dry_run")
+        args = [from_year.id, to_year.id, "--confirm"]
+        if dry_run:
+            args.append("--dry-run")
+        output = io.StringIO()
+        try:
+            call_command("rollover_school_year", *args, stdout=output)
+        except CommandError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": output.getvalue().strip()})
 
 
 class GroupListView(generics.ListAPIView):
