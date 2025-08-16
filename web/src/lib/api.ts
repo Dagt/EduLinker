@@ -36,9 +36,9 @@ export async function updateSuggestionStatus(id: number, status: string, token?:
   return apiPost(`/suggestions/${id}/status`, { status }, token);
 }
 
-// Fundraising summaries
-export async function getFundraisingSummary(token?: string) {
-  return apiGet(`/fundraising/summary`, token);
+// Fundraising event summary
+export async function getFundraisingEventSummary(eventId: number, token?: string) {
+  return apiGet(`/fundraising-events/${eventId}/summary/`, token);
 }
 
 // Analytics dashboard

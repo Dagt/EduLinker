@@ -4,12 +4,14 @@ import Nav from "@/components/Nav";
 import { useForm } from "react-hook-form";
 import { apiGet, apiPost } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { useTranslations } from "next-intl";
 
 type Event = { id: number; name: string; date: string; description: string };
 
 type FormData = { name: string; date: string; description: string };
 
 export default function FundraisingPage(){
+  const t = useTranslations("Fundraising");
   const [events, setEvents] = useState<Event[]>([]);
   const { register, handleSubmit, reset } = useForm<FormData>();
 
@@ -40,15 +42,15 @@ export default function FundraisingPage(){
     <>
       <Nav />
       <main style={{ padding:16, maxWidth:680 }}>
-        <h2>Recaudación</h2>
+        <h2>{t("header")}</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <input placeholder="Nombre" {...register("name", {required:true})}
+          <input placeholder={t("name")} {...register("name", {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <input placeholder="Fecha" {...register("date", {required:true})}
+          <input placeholder={t("date")} {...register("date", {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <textarea placeholder="Descripción" {...register("description")}
+          <textarea placeholder={t("description")} {...register("description")}
                     style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
-          <button>Crear</button>
+          <button>{t("create")}</button>
         </form>
         <ul>
           {events.map(ev => (
