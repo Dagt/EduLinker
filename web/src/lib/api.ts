@@ -1,7 +1,17 @@
+export function schoolIdFromHost(host?: string): string {
+  if (!host) {
+    if (typeof window === "undefined") return "1";
+    host = window.location.host;
+  }
+  const withoutPort = host.split(":")[0];
+  const subdomain = withoutPort.split(".")[0];
+  return subdomain || "1";
+}
+
 export function authHeaders(token?: string) {
-  const h: Record<string,string> = {
+  const h: Record<string, string> = {
     "Content-Type": "application/json",
-    "X-School-ID": process.env.NEXT_PUBLIC_SCHOOL_ID || "1",
+    "X-School-ID": schoolIdFromHost(),
   };
   if (token) h["Authorization"] = `Bearer ${token}`;
   return h;
