@@ -50,7 +50,20 @@ export async function getFundraisingEventSummary(eventId: number, token?: string
 
 // Analytics dashboard
 export async function getAnalytics(token?: string) {
-  return apiGet(`/analytics/overview`, token);
+  return apiGet(`/analytics/overview/`, token);
+}
+
+export async function getComplaintsAnalytics(token?: string) {
+  return apiGet(`/analytics/complaints/`, token);
+}
+
+export async function getFundraisingAnalytics(token?: string) {
+  return apiGet(`/analytics/fundraising/`, token);
+}
+
+export async function getEngagementAnalytics(groupId?: number, token?: string) {
+  const q = groupId ? `?group_id=${groupId}` : "";
+  return apiGet(`/analytics/engagement/${q}`, token);
 }
 
 // Survey voting

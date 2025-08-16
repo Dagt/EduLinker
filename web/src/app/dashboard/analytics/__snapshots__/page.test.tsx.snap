@@ -50,36 +50,52 @@ exports[`AnalyticsDashboard matches snapshot 1`] = `
           Quejas por grupo
         </h3>
         <div
-          class="recharts-responsive-container"
-          style="width: 100%; height: 300px; min-width: 0;"
-        />
+          style="height: 300px;"
+        >
+          <canvas
+            data="[object Object]"
+            options="[object Object]"
+          />
+        </div>
       </section>
       <section>
         <h3>
           Recaudación por grupo
         </h3>
         <div
-          class="recharts-responsive-container"
-          style="width: 100%; height: 300px; min-width: 0;"
-        />
+          style="height: 300px;"
+        >
+          <canvas
+            data="[object Object]"
+            options="[object Object]"
+          />
+        </div>
       </section>
       <section>
         <h3>
           Eventos por alcance
         </h3>
         <div
-          class="recharts-responsive-container"
-          style="width: 100%; height: 300px; min-width: 0;"
-        />
+          style="height: 300px;"
+        >
+          <canvas
+            data="[object Object]"
+            options="[object Object]"
+          />
+        </div>
       </section>
       <section>
         <h3>
           Participación en encuestas
         </h3>
         <div
-          class="recharts-responsive-container"
-          style="width: 100%; height: 300px; min-width: 0;"
-        />
+          style="height: 300px;"
+        >
+          <canvas
+            data="[object Object]"
+            options="[object Object]"
+          />
+        </div>
       </section>
     </div>
   </main>

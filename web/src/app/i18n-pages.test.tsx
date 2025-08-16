@@ -28,7 +28,13 @@ import GroupEdit from './groups/edit/page';
 import AssignHomeroom from './groups/assign-homeroom/page';
 import AssignSpecialist from './groups/assign-specialist/page';
 import AssignVocal from './groups/assign-vocal/page';
-import { apiGet, getAnalytics } from '@/lib/api';
+import {
+  apiGet,
+  getAnalytics,
+  getComplaintsAnalytics,
+  getFundraisingAnalytics,
+  getEngagementAnalytics,
+} from '@/lib/api';
 
 beforeAll(() => {
   (global as any).ResizeObserver = class {
@@ -42,6 +48,9 @@ describe('internationalized pages render', () => {
   beforeEach(() => {
     (apiGet as jest.Mock).mockReset();
     (getAnalytics as jest.Mock).mockReset();
+    (getComplaintsAnalytics as jest.Mock).mockReset();
+    (getFundraisingAnalytics as jest.Mock).mockReset();
+    (getEngagementAnalytics as jest.Mock).mockReset();
   });
 
   it('renders ComplaintCreate', () => {
@@ -110,6 +119,9 @@ describe('internationalized pages render', () => {
 
   it('renders AnalyticsDashboard', async () => {
     (getAnalytics as jest.Mock).mockResolvedValue({});
+    (getComplaintsAnalytics as jest.Mock).mockResolvedValue({});
+    (getFundraisingAnalytics as jest.Mock).mockResolvedValue({});
+    (getEngagementAnalytics as jest.Mock).mockResolvedValue({});
     render(<AnalyticsDashboard />);
     expect(await screen.findByText('Dashboard Analítico')).toBeInTheDocument();
   });
