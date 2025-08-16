@@ -5,6 +5,7 @@ const translations = {
   en: {
     general: {
       error: 'Error',
+      unauthorized: 'Unauthorized',
     },
     menu: {
       feed: 'Feed',
@@ -48,6 +49,7 @@ const translations = {
   es: {
     general: {
       error: 'Error',
+      unauthorized: 'No autorizado',
     },
     menu: {
       feed: 'Feed',
