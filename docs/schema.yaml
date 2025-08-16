@@ -1,0 +1,2313 @@
+openapi: 3.0.3
+info:
+  title: EduLinker API
+  version: 1.0.0
+paths:
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/activity-photos/:
+    post:
+      operationId: v1_activity_photos_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityPhoto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActivityPhoto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActivityPhoto'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityPhoto'
+          description: ''
+  /api/v1/analytics/complaints/:
+    get:
+      operationId: v1_analytics_complaints_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/analytics/engagement/:
+    get:
+      operationId: v1_analytics_engagement_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/analytics/fundraising/:
+    get:
+      operationId: v1_analytics_fundraising_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/analytics/overview/:
+    get:
+      operationId: v1_analytics_overview_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/announcements/:
+    get:
+      operationId: v1_announcements_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Announcement'
+          description: ''
+    post:
+      operationId: v1_announcements_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+          description: ''
+  /api/v1/announcements/{id}/:
+    get:
+      operationId: v1_announcements_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+          description: ''
+    put:
+      operationId: v1_announcements_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+          description: ''
+    patch:
+      operationId: v1_announcements_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAnnouncement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAnnouncement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAnnouncement'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+          description: ''
+    delete:
+      operationId: v1_announcements_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/audit-logs/:
+    get:
+      operationId: v1_audit_logs_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: v1_auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/auth/refresh/:
+    post:
+      operationId: v1_auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/chats/{group_id}/messages/:
+    get:
+      operationId: v1_chats_messages_list
+      parameters:
+      - in: path
+        name: group_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessage'
+          description: ''
+    post:
+      operationId: v1_chats_messages_create
+      parameters:
+      - in: path
+        name: group_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+          description: ''
+  /api/v1/complaints/:
+    post:
+      operationId: v1_complaints_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Complaint'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Complaint'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Complaint'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Complaint'
+          description: ''
+  /api/v1/complaints/{id}/:
+    get:
+      operationId: v1_complaints_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Complaint'
+          description: ''
+  /api/v1/complaints/{id}/messages/:
+    post:
+      operationId: v1_complaints_messages_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplaintMessage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ComplaintMessage'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComplaintMessage'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplaintMessage'
+          description: ''
+  /api/v1/complaints/{id}/participants/:
+    post:
+      operationId: v1_complaints_participants_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplaintParticipant'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ComplaintParticipant'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComplaintParticipant'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplaintParticipant'
+          description: ''
+  /api/v1/complaints/{id}/status/:
+    put:
+      operationId: v1_complaints_status_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplaintStatus'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ComplaintStatus'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComplaintStatus'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplaintStatus'
+          description: ''
+    patch:
+      operationId: v1_complaints_status_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedComplaintStatus'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedComplaintStatus'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedComplaintStatus'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplaintStatus'
+          description: ''
+  /api/v1/events/:
+    get:
+      operationId: v1_events_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+          description: ''
+    post:
+      operationId: v1_events_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Event'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Event'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/v1/events/{id}/:
+    get:
+      operationId: v1_events_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/v1/events/{id}/attachments/:
+    post:
+      operationId: v1_events_attachments_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventAttachment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventAttachment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventAttachment'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventAttachment'
+          description: ''
+  /api/v1/events/{id}/cancel/:
+    put:
+      operationId: v1_events_cancel_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Event'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Event'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+    patch:
+      operationId: v1_events_cancel_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEvent'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/v1/events/{id}/edit/:
+    put:
+      operationId: v1_events_edit_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Event'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Event'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+    patch:
+      operationId: v1_events_edit_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEvent'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/v1/events/{id}/photos/:
+    post:
+      operationId: v1_events_photos_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventPhoto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventPhoto'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventPhoto'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventPhoto'
+          description: ''
+  /api/v1/expense-evidences/:
+    post:
+      operationId: v1_expense_evidences_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseEvidence'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExpenseEvidence'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExpenseEvidence'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseEvidence'
+          description: ''
+  /api/v1/feed/:
+    get:
+      operationId: v1_feed_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/fundraising-events/:
+    get:
+      operationId: v1_fundraising_events_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FundraisingEvent'
+          description: ''
+    post:
+      operationId: v1_fundraising_events_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundraisingEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FundraisingEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FundraisingEvent'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundraisingEvent'
+          description: ''
+  /api/v1/fundraising-events/{id}/summary/:
+    get:
+      operationId: v1_fundraising_events_summary_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundraisingEvent'
+          description: ''
+  /api/v1/fundraising-ledger/:
+    post:
+      operationId: v1_fundraising_ledger_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: No response body
+  /api/v1/groups/:
+    get:
+      operationId: v1_groups_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+          description: ''
+  /api/v1/homeworks/:
+    get:
+      operationId: v1_homeworks_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Homework'
+          description: ''
+    post:
+      operationId: v1_homeworks_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Homework'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Homework'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Homework'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+          description: ''
+  /api/v1/homeworks/{id}/:
+    get:
+      operationId: v1_homeworks_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+          description: ''
+    put:
+      operationId: v1_homeworks_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Homework'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Homework'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Homework'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+          description: ''
+    patch:
+      operationId: v1_homeworks_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedHomework'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedHomework'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedHomework'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+          description: ''
+    delete:
+      operationId: v1_homeworks_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/:
+    get:
+      operationId: v1_me_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/notifications/device-tokens/:
+    post:
+      operationId: v1_notifications_device_tokens_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceToken'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeviceToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeviceToken'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceToken'
+          description: ''
+  /api/v1/notifications/device-tokens/{token}/:
+    delete:
+      operationId: v1_notifications_device_tokens_destroy
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/notifications/device-tokens/list/:
+    get:
+      operationId: v1_notifications_device_tokens_list_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceToken'
+          description: ''
+  /api/v1/notifications/prefs/:
+    get:
+      operationId: v1_notifications_prefs_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+    post:
+      operationId: v1_notifications_prefs_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationPreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationPreference'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+  /api/v1/notifications/prefs/{id}/:
+    get:
+      operationId: v1_notifications_prefs_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+    put:
+      operationId: v1_notifications_prefs_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationPreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationPreference'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+    patch:
+      operationId: v1_notifications_prefs_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+  /api/v1/storage/presign-upload/:
+    post:
+      operationId: v1_storage_presign_upload_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/suggestions/:
+    get:
+      operationId: v1_suggestions_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: v1_suggestions_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: No response body
+  /api/v1/suggestions/{id}/:
+    get:
+      operationId: v1_suggestions_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/suggestions/{id}/messages/:
+    post:
+      operationId: v1_suggestions_messages_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuggestionMessage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SuggestionMessage'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SuggestionMessage'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestionMessage'
+          description: ''
+  /api/v1/suggestions/{id}/status/:
+    put:
+      operationId: v1_suggestions_status_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuggestionStatus'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SuggestionStatus'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SuggestionStatus'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestionStatus'
+          description: ''
+    patch:
+      operationId: v1_suggestions_status_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSuggestionStatus'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSuggestionStatus'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSuggestionStatus'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestionStatus'
+          description: ''
+  /api/v1/surveys/:
+    get:
+      operationId: v1_surveys_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: v1_surveys_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: No response body
+  /api/v1/surveys/{id}/:
+    get:
+      operationId: v1_surveys_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/surveys/{id}/results/:
+    get:
+      operationId: v1_surveys_results_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/surveys/{id}/vote/:
+    post:
+      operationId: v1_surveys_vote_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveyVote'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SurveyVote'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SurveyVote'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyVote'
+          description: ''
+components:
+  schemas:
+    ActivityPhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        group:
+          type: integer
+          nullable: true
+        homework:
+          type: integer
+          nullable: true
+        photo_url:
+          type: string
+          format: uri
+          maxLength: 200
+        caption:
+          type: string
+          maxLength: 255
+        uploaded_by:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - photo_url
+      - uploaded_by
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        group:
+          type: integer
+        teacher:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        message:
+          type: string
+        attachments: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - group
+      - id
+      - teacher
+      - title
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        school:
+          type: integer
+        actor:
+          type: integer
+        action:
+          type: string
+          maxLength: 100
+        entity_type:
+          type: string
+          maxLength: 100
+        entity_id:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        metadata: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - action
+      - actor
+      - created_at
+      - entity_id
+      - entity_type
+      - id
+      - school
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          type: integer
+        author_role:
+          type: string
+          readOnly: true
+        message_text:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - author_role
+      - created_at
+      - id
+      - message_text
+    Complaint:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        group:
+          type: integer
+        created_by:
+          type: integer
+          readOnly: true
+        target_teacher:
+          type: integer
+        about_student:
+          type: integer
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/Status230Enum'
+          readOnly: true
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintMessage'
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - description
+      - group
+      - id
+      - messages
+      - status
+      - target_teacher
+      - updated_at
+    ComplaintMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        message:
+          type: string
+        attachments: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - created_at
+      - id
+      - message
+    ComplaintParticipant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        complaint:
+          type: integer
+          readOnly: true
+      required:
+      - complaint
+      - id
+      - user
+    ComplaintStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status230Enum'
+    DeviceToken:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        token:
+          type: string
+          maxLength: 255
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+      required:
+      - id
+      - platform
+      - token
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/ScopeEnum'
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        location:
+          type: string
+          maxLength: 255
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        created_by:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EventStatusEnum'
+          readOnly: true
+        group_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+        audiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventGroupAudience'
+          readOnly: true
+        attachments:
+          type: string
+          readOnly: true
+        photos:
+          type: string
+          readOnly: true
+      required:
+      - attachments
+      - audiences
+      - created_by
+      - end_at
+      - id
+      - photos
+      - scope
+      - start_at
+      - status
+      - title
+    EventAttachment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        file_url:
+          type: string
+          format: uri
+          maxLength: 200
+        filename:
+          type: string
+          maxLength: 255
+        mime:
+          type: string
+          maxLength: 100
+      required:
+      - file_url
+      - filename
+      - id
+      - mime
+    EventGroupAudience:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        group:
+          type: integer
+      required:
+      - group
+      - id
+    EventPhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        photo_url:
+          type: string
+          format: uri
+          maxLength: 200
+        caption:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - photo_url
+    EventStatusEnum:
+      enum:
+      - ACTIVE
+      - CANCELLED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `CANCELLED` - Cancelled
+    ExpenseEvidence:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ledger:
+          type: integer
+          nullable: true
+        group:
+          type: integer
+          nullable: true
+        file_url:
+          type: string
+          format: uri
+          maxLength: 200
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        concept:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        uploader:
+          type: integer
+          readOnly: true
+      required:
+      - amount
+      - concept
+      - created_at
+      - file_url
+      - id
+      - uploader
+    FundraisingEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+      required:
+      - date
+      - id
+      - name
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 50
+        grade_level:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        school_year:
+          type: integer
+        homeroom_teacher:
+          type: integer
+          nullable: true
+      required:
+      - grade_level
+      - id
+      - name
+      - school_year
+    Homework:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        group:
+          type: integer
+        subject:
+          type: string
+          maxLength: 50
+        teacher:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        due_date:
+          type: string
+          format: date
+        attachments: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - due_date
+      - group
+      - id
+      - subject
+      - teacher
+      - title
+    KindEnum:
+      enum:
+      - event
+      - survey
+      - complaint
+      - complaint_message
+      type: string
+      description: |-
+        * `event` - Eventos
+        * `survey` - Encuestas
+        * `complaint` - Quejas
+        * `complaint_message` - Mensajes de queja
+    NotificationPreference:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        enabled:
+          type: boolean
+      required:
+      - id
+      - kind
+    PatchedAnnouncement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        group:
+          type: integer
+        teacher:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        message:
+          type: string
+        attachments: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedComplaintStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status230Enum'
+    PatchedEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        scope:
+          $ref: '#/components/schemas/ScopeEnum'
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        location:
+          type: string
+          maxLength: 255
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        created_by:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EventStatusEnum'
+          readOnly: true
+        group_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+        audiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventGroupAudience'
+          readOnly: true
+        attachments:
+          type: string
+          readOnly: true
+        photos:
+          type: string
+          readOnly: true
+    PatchedHomework:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        group:
+          type: integer
+        subject:
+          type: string
+          maxLength: 50
+        teacher:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        due_date:
+          type: string
+          format: date
+        attachments: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedNotificationPreference:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        enabled:
+          type: boolean
+    PatchedSuggestionStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/SuggestionStatusStatusEnum'
+    PlatformEnum:
+      enum:
+      - android
+      - ios
+      - web
+      type: string
+      description: |-
+        * `android` - Android
+        * `ios` - iOS
+        * `web` - Web
+    RoleEnum:
+      enum:
+      - DIRECTOR
+      - MAESTRO_TITULAR
+      - MAESTRO_ITINERANTE
+      - VOCAL
+      - PADRE
+      type: string
+      description: |-
+        * `DIRECTOR` - Director
+        * `MAESTRO_TITULAR` - Maestro Titular
+        * `MAESTRO_ITINERANTE` - Maestro Itinerante
+        * `VOCAL` - Vocal
+        * `PADRE` - Padre
+    ScopeEnum:
+      enum:
+      - GLOBAL
+      - GROUP
+      type: string
+      description: |-
+        * `GLOBAL` - Global
+        * `GROUP` - Group
+    Status230Enum:
+      enum:
+      - OPEN
+      - IN_REVIEW
+      - ESCALATED
+      - RESOLVED
+      - CLOSED
+      type: string
+      description: |-
+        * `OPEN` - Open
+        * `IN_REVIEW` - In Review
+        * `ESCALATED` - Escalated
+        * `RESOLVED` - Resolved
+        * `CLOSED` - Closed
+    SuggestionMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          type: string
+          readOnly: true
+        message:
+          type: string
+        attachments: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - created_at
+      - id
+      - message
+    SuggestionStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/SuggestionStatusStatusEnum'
+    SuggestionStatusStatusEnum:
+      enum:
+      - OPEN
+      - IN_REVIEW
+      - RESOLVED
+      - CLOSED
+      type: string
+      description: |-
+        * `OPEN` - Open
+        * `IN_REVIEW` - In Review
+        * `RESOLVED` - Resolved
+        * `CLOSED` - Closed
+    SurveyVote:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        option_index:
+          type: integer
+          maximum: 32767
+          minimum: 0
+      required:
+      - id
+      - option_index
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - email
+      - id
+      - role
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
