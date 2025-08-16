@@ -8,7 +8,11 @@
     "fundraising": "Recaudación"
   },
   "Dashboard": {
-    "welcome": "Bienvenido, {name}"
+    "welcome": "Bienvenido, {name}",
+    "refresh": "Actualizar",
+    "complaintsByGroup": "Quejas por grupo",
+    "fundraisingByGroup": "Recaudaciones por grupo",
+    "surveysParticipation": "Participación en encuestas"
   },
   "SuggestionStatus": {
     "unauthorized": "No autorizado",
