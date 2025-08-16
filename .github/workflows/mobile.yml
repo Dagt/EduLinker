@@ -9,4 +9,4 @@ jobs:
         with: { node-version: "20" }
       - run: cd mobile && npm ci
       - run: cd mobile && npm run lint
-      - run: cd mobile && npm test
+      - run: cd mobile && npm test -- --coverage
