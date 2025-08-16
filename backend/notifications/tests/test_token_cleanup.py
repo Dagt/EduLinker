@@ -49,7 +49,7 @@ def test_cleanup_deletes_invalid_tokens(error_code):
         assert req.full_url == expo.EXPO_RECEIPTS_URL
         return FakeResponse(json.dumps(receipts_payload))
 
-    with patch("notifications.tasks.urllib.request.urlopen", side_effect=fake_urlopen):
+    with patch("notifications.providers.expo.urllib.request.urlopen", side_effect=fake_urlopen):
         result = tasks.cleanup_invalid_tokens.run()
 
     assert result["disabled"] == 1
@@ -71,7 +71,7 @@ def test_cleanup_handles_http_error():
     def fake_urlopen(req, data=None):
         raise urllib.error.HTTPError(req.full_url, 500, "err", None, None)
 
-    with patch("notifications.tasks.urllib.request.urlopen", side_effect=fake_urlopen):
+    with patch("notifications.providers.expo.urllib.request.urlopen", side_effect=fake_urlopen):
         result = tasks.cleanup_invalid_tokens.run()
 
     assert result == {"processed": 0, "disabled": 0}
@@ -92,14 +92,10 @@ def test_send_then_cleanup_cycle():
     DeviceToken.objects.create(school=school, user=user2, token="tok2", platform="web")
 
     send_payload = {"data": [{"id": "t1"}, {"id": "t2"}]}
-    first_receipts = {"data": {}}
 
     def fake_send(req, data=None):
-        if req.full_url == expo.EXPO_PUSH_URL:
-            return FakeResponse(json.dumps(send_payload))
-        if req.full_url == expo.EXPO_RECEIPTS_URL:
-            return FakeResponse(json.dumps(first_receipts))
-        raise AssertionError("Unexpected URL")
+        assert req.full_url == expo.EXPO_PUSH_URL
+        return FakeResponse(json.dumps(send_payload))
 
     with patch("notifications.providers.expo.urllib.request.urlopen", side_effect=fake_send):
         send_result = push_to_users.run(school.id, [user1.id, user2.id], "T", "B")
@@ -118,7 +114,7 @@ def test_send_then_cleanup_cycle():
         assert req.full_url == expo.EXPO_RECEIPTS_URL
         return FakeResponse(json.dumps(second_receipts))
 
-    with patch("notifications.tasks.urllib.request.urlopen", side_effect=fake_cleanup):
+    with patch("notifications.providers.expo.urllib.request.urlopen", side_effect=fake_cleanup):
         cleanup_result = tasks.cleanup_invalid_tokens.run()
 
     assert cleanup_result["processed"] == 2

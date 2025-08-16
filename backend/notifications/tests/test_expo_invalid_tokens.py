@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from core.models import School, User
-from notifications.models import DeviceToken
+from notifications.models import DeviceToken, ExpoTicket
 from notifications.providers import expo
 from notifications.tasks import push_to_users
 
@@ -25,7 +25,7 @@ class FakeResponse:
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("error_code", ["DeviceNotRegistered", "InvalidCredentials"])
-def test_invalid_tokens_removed_after_receipt_error(error_code):
+def test_invalid_tokens_removed_after_send_error(error_code):
     school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
     user1 = User.objects.create_user(
         username="u1@x.com", email="u1@x.com", password="p", role="PADRE", school=school
@@ -36,25 +36,22 @@ def test_invalid_tokens_removed_after_receipt_error(error_code):
     DeviceToken.objects.create(school=school, user=user1, token="tok1", platform="web")
     DeviceToken.objects.create(school=school, user=user2, token="tok2", platform="web")
 
-    send_payload = {"data": [{"id": "t1"}, {"id": "t2"}]}
-    receipts_payload = {
-        "data": {
-            "t1": {"status": "ok"},
-            "t2": {"status": "error", "details": {"error": error_code}},
-        }
+    send_payload = {
+        "data": [
+            {"status": "error", "details": {"error": error_code}},
+            {"id": "t2"},
+        ]
     }
 
     def fake_urlopen(req, data=None):
-        if req.full_url == expo.EXPO_PUSH_URL:
-            return FakeResponse(json.dumps(send_payload))
-        if req.full_url == expo.EXPO_RECEIPTS_URL:
-            return FakeResponse(json.dumps(receipts_payload))
-        raise AssertionError("Unexpected URL")
+        assert req.full_url == expo.EXPO_PUSH_URL
+        return FakeResponse(json.dumps(send_payload))
 
     with patch("notifications.providers.expo.urllib.request.urlopen", side_effect=fake_urlopen):
         result = push_to_users.run(school.id, [user1.id, user2.id], "T", "B")
 
     assert result["invalid"] == 1
-    assert DeviceToken.objects.get(token="tok1").active is True
-    assert DeviceToken.objects.get(token="tok2").active is False
+    assert DeviceToken.objects.get(token="tok1").active is False
+    assert DeviceToken.objects.get(token="tok2").active is True
+    assert ExpoTicket.objects.filter(ticket_id="t2", token="tok2").exists()
 
