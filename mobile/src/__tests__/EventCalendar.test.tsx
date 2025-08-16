@@ -1,14 +1,13 @@
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import EventCalendar from '../screens/EventCalendar';
-import { apiGet, postEventPhoto, uploadFile } from '../api';
+import { apiGet, postEventPhoto } from '../api';
 import { getRole } from '../role';
 import * as Notifications from 'expo-notifications';
-import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
-jest.mock('../api', () => ({ apiGet: jest.fn(), postEventPhoto: jest.fn(), uploadFile: jest.fn() }));
+jest.mock('../api', () => ({ apiGet: jest.fn(), postEventPhoto: jest.fn() }));
 jest.mock('../role', () => ({ getRole: jest.fn() }));
 jest.mock(
   'expo-notifications',
@@ -18,11 +17,11 @@ jest.mock(
   }),
   { virtual: true }
 );
-jest.mock('expo-image-picker', () => ({ launchImageLibraryAsync: jest.fn(), MediaTypeOptions: { Images: 'Images' } }));
+jest.mock('../services/uploads', () => ({ pickAndUpload: jest.fn() }));
 
 const role = require('../role');
 const notifs = require('expo-notifications');
-const picker = require('expo-image-picker');
+const uploader = require('../services/uploads');
 
 (apiGet as jest.Mock).mockResolvedValue([
   { id: 1, title: 'Event 1', start_at: '2025-01-01T10:00:00Z' },
@@ -42,17 +41,15 @@ test('loads events and schedules reminder', async () => {
 });
 
 test('uploads photo for event', async () => {
-  (picker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({ canceled: false, assets: [{ uri: 'file://e.jpg' }] });
-  (uploadFile as jest.Mock).mockResolvedValue('https://p');
+  (uploader.pickAndUpload as jest.Mock).mockResolvedValue('https://p');
   const { getByTestId } = render(<EventCalendar />);
   await waitFor(() => getByTestId('photo-1'));
   fireEvent.press(getByTestId('photo-1'));
-  await waitFor(() => expect(postEventPhoto).toHaveBeenCalledWith(1, { url: 'https://p' }));
+  await waitFor(() => expect(postEventPhoto).toHaveBeenCalledWith(1, { photo_url: 'https://p' }));
 });
 
 test('shows alert on photo error', async () => {
-  (picker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({ canceled: false, assets: [{ uri: 'file://e.jpg' }] });
-  (uploadFile as jest.Mock).mockRejectedValue(new Error('err'));
+  (uploader.pickAndUpload as jest.Mock).mockRejectedValue(new Error('err'));
   const spy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   const { getByTestId } = render(<EventCalendar />);
   await waitFor(() => getByTestId('photo-1'));
