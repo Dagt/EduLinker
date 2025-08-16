@@ -5,7 +5,8 @@
     "complaints": "Quejas",
     "suggestions": "Sugerencias",
     "surveys": "Encuestas",
-    "fundraising": "Recaudación"
+    "fundraising": "Recaudación",
+    "analytics": "Analíticas"
   },
   "UploadButton": {
     "presignError": "Error de presign",
@@ -163,6 +164,14 @@
     "create": "Crear evento",
     "created": "Evento creado #{id}",
     "error": "Error al crear evento"
+  },
+  "Analytics": {
+    "unauthorized": "No autorizado",
+    "header": "Analíticas",
+    "complaintsByGroup": "Quejas por grupo",
+    "fundraisingByGroup": "Recaudación por grupo",
+    "eventsByScope": "Eventos por alcance",
+    "surveysParticipation": "Participación en encuestas"
   },
   "AnalyticsDashboard": {
     "unauthorized": "No autorizado",
