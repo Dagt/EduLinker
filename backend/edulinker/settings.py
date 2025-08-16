@@ -77,6 +77,7 @@ CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER") == "1"
 EVENT_REMINDER_HOURS_AHEAD = int(os.getenv("EVENT_REMINDER_HOURS_AHEAD", "24"))
 SURVEY_REMINDER_HOURS_AHEAD = int(os.getenv("SURVEY_REMINDER_HOURS_AHEAD", "24"))
 COMPLAINT_ESCALATION_DAYS = int(os.getenv("COMPLAINT_ESCALATION_DAYS", "5"))
+HOMEWORK_REMINDER_DAYS_AHEAD = int(os.getenv("HOMEWORK_REMINDER_DAYS_AHEAD", "1"))
 
 from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
@@ -91,6 +92,10 @@ CELERY_BEAT_SCHEDULE = {
     "surveys-reminder-every-3h": {
         "task": "core.tasks.remind_surveys_to_close",
         "schedule": 10800.0,
+    },
+    "homework-reminders-daily": {
+        "task": "core.tasks.send_homework_reminders",
+        "schedule": crontab(hour=7, minute=0),
     },
     "fundraising-weekly-summary": {
         "task": "fundraising.tasks.weekly_fundraising_summary",

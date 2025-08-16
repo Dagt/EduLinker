@@ -3,7 +3,17 @@ from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
 
-from core.models import Event, Complaint, User, Group, GroupMembership, ParentStudent, SpecialistAssignment, VocalAssignment
+from core.models import (
+    Event,
+    Complaint,
+    User,
+    Group,
+    GroupMembership,
+    ParentStudent,
+    SpecialistAssignment,
+    VocalAssignment,
+    Homework,
+)
 from surveys.models import Survey
 from notifications.tasks import push_to_users
 
@@ -56,6 +66,41 @@ def send_event_reminders():
             push_to_users.delay(ev.school_id, user_ids, f"Recordatorio: {ev.title}", f"Inicia {ev.start_at:%Y-%m-%d %H:%M}", {"type": "event", "event_id": ev.id})
             total_push += len(user_ids)
     return {"events": events.count(), "recipients": total_push}
+
+@shared_task
+def send_homework_reminders():
+    today = timezone.now().date()
+    soon = today + timedelta(days=getattr(settings, "HOMEWORK_REMINDER_DAYS_AHEAD", 1))
+    homeworks = Homework.objects.filter(due_date__range=(today, soon))
+    total_push = 0
+    for hw in homeworks:
+        g = hw.group
+        ids = set()
+        ids.update([hw.teacher_id] if hw.teacher_id else [])
+        ids.update([g.homeroom_teacher_id] if g.homeroom_teacher_id else [])
+        ids.update(
+            SpecialistAssignment.objects.filter(
+                group=g, school_id=hw.school_id
+            ).values_list("teacher_id", flat=True)
+        )
+        student_ids = GroupMembership.objects.filter(
+            group=g, school_id=hw.school_id
+        ).values("student_id")
+        parent_ids = ParentStudent.objects.filter(
+            student_id__in=student_ids, school_id=hw.school_id
+        ).values_list("parent_id", flat=True)
+        ids.update(parent_ids)
+        user_ids = [uid for uid in ids if uid]
+        if user_ids:
+            push_to_users.delay(
+                hw.school_id,
+                user_ids,
+                f"Tarea próxima: {hw.title}",
+                f"Entrega el {hw.due_date:%Y-%m-%d}",
+                {"type": "homework", "homework_id": hw.id},
+            )
+            total_push += len(user_ids)
+    return {"homeworks": homeworks.count(), "recipients": total_push}
 
 @shared_task
 def escalate_stale_complaints():
