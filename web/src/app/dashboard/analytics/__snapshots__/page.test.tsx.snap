@@ -39,12 +39,12 @@ exports[`AnalyticsDashboard matches snapshot 1`] = `
       <option
         value="en"
       >
-        EN
+        Inglés
       </option>
       <option
         value="es"
       >
-        ES
+        Español
       </option>
     </select>
   </nav>

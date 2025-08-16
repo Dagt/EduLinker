@@ -44,6 +44,13 @@ describe('api helpers', () => {
     expect(global.fetch).toHaveBeenCalledWith('http://api/y', expect.objectContaining({ method: 'POST' }));
   });
 
+  it('apiPatch sends body and returns json', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({ c: 3 }) });
+    const data = await api.apiPatch('/z', { c: 3 });
+    expect(data).toEqual({ c: 3 });
+    expect(global.fetch).toHaveBeenCalledWith('http://api/z', expect.objectContaining({ method: 'PATCH' }));
+  });
+
   it('apiGet throws on error status', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500, statusText: 'err' });
     await expect(api.apiGet('/x')).rejects.toThrow('500 err');

@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 jest.mock('next-intl');
+const { setLocale } = require('next-intl');
 jest.mock('@/lib/api');
 jest.mock('@/lib/auth', () => ({ getToken: () => 'token' }));
 jest.mock('@/lib/roles', () => ({ requireRole: () => true }));
@@ -46,6 +47,7 @@ beforeAll(() => {
 
 describe('internationalized pages render', () => {
   beforeEach(() => {
+    setLocale('es');
     (apiGet as jest.Mock).mockReset();
     (getAnalytics as jest.Mock).mockReset();
     (getComplaintsAnalytics as jest.Mock).mockReset();
@@ -73,6 +75,13 @@ describe('internationalized pages render', () => {
     (apiGet as jest.Mock).mockResolvedValue([]);
     render(<CalendarPage />);
     expect(await screen.findByRole('heading', { name: 'Calendario' })).toBeInTheDocument();
+  });
+
+  it('renders Calendar in English', async () => {
+    setLocale('en');
+    (apiGet as jest.Mock).mockResolvedValue([]);
+    render(<CalendarPage />);
+    expect(await screen.findByRole('heading', { name: 'Calendar' })).toBeInTheDocument();
   });
 
   it('renders NotificationSettings', async () => {

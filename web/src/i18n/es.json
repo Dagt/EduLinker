@@ -11,6 +11,10 @@
     "presignError": "Error de presign",
     "s3Error": "Error de S3"
   },
+  "LanguageSwitcher": {
+    "english": "Inglés",
+    "spanish": "Español"
+  },
   "Dashboard": {
     "welcome": "Bienvenido, {name}",
     "refresh": "Actualizar",
