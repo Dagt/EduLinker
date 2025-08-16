@@ -13,6 +13,8 @@ Repositorio monorepo con:
    ```bash
    pip install -r backend/requirements.txt
    python backend/manage.py migrate
+   # Datos de demostración
+   python backend/manage.py loaddata_demo
    python backend/manage.py runserver
    ```
 3. Web:
