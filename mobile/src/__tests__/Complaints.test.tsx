@@ -1,11 +1,11 @@
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import { Alert } from 'react-native';
-import Complaints from '..';
-import { getComplaints, createComplaint } from '../../../api';
-import i18n from '../../../i18n';
+import Complaints from '../screens/Complaints';
+import { getComplaints, createComplaint, getComplaintMessages, sendComplaintMessage } from '../api';
+import i18n from '../i18n';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
-jest.mock('../../../api', () => ({
+jest.mock('../api', () => ({
   getComplaints: jest.fn(),
   createComplaint: jest.fn(),
   getComplaintMessages: jest.fn(),
@@ -57,6 +57,22 @@ test('validates required fields before creating complaint', async () => {
   await waitFor(() => {
     expect(createComplaint).not.toHaveBeenCalled();
     expect(alertSpy).toHaveBeenCalled();
+  });
+});
+
+test('sends messages in complaints', async () => {
+  i18n.locale = 'es';
+  (getComplaints as jest.Mock).mockResolvedValue([{ id:1, content:'Hola' }]);
+  (getComplaintMessages as jest.Mock).mockResolvedValue([]);
+  (sendComplaintMessage as jest.Mock).mockImplementation(async (_id:number, body:any)=>({ id:1, ...body }));
+  const { getByText, getByPlaceholderText } = render(<Complaints />);
+  await waitFor(() => getByText(/Hola/));
+  fireEvent.press(getByText(/Hola/));
+  await waitFor(() => getByPlaceholderText(i18n.t('complaints.messagePlaceholder')));
+  fireEvent.changeText(getByPlaceholderText(i18n.t('complaints.messagePlaceholder')), 'Msg');
+  fireEvent.press(getByText(i18n.t('complaints.send')));
+  await waitFor(() => {
+    expect(sendComplaintMessage).toHaveBeenCalledWith(1, { content:'Msg' });
   });
 });
 

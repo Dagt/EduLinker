@@ -88,6 +88,10 @@ export async function sendComplaintMessage(id: number, body: any){
 }
 
 // Suggestions API helpers
+export async function getSuggestions(){
+  return apiGet("/suggestions/");
+}
+
 export async function createSuggestion(body: {
   title: string;
   description: string;
@@ -96,6 +100,10 @@ export async function createSuggestion(body: {
   about_student_id?: number;
 }){
   return apiPost("/suggestions/", body);
+}
+
+export async function getSuggestionMessages(id: number){
+  return apiGet(`/suggestions/${id}/messages/`);
 }
 
 export async function sendSuggestionMessage(id: number, body: any){
