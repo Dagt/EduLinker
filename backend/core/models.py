@@ -338,11 +338,22 @@ class EventPhoto(models.Model):
 
 
 class Announcement(models.Model):
+    class Scope(models.TextChoices):
+        GLOBAL = "GLOBAL", "Global"
+        GRUPO = "GRUPO", "Grupo"
+
     school = models.ForeignKey(
         School, on_delete=models.CASCADE, related_name="announcements"
     )
+    scope = models.CharField(
+        max_length=10, choices=Scope.choices, default=Scope.GRUPO
+    )
     group = models.ForeignKey(
-        Group, on_delete=models.CASCADE, related_name="announcements"
+        Group,
+        on_delete=models.CASCADE,
+        related_name="announcements",
+        null=True,
+        blank=True,
     )
     teacher = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="announcements"

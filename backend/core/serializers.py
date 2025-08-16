@@ -305,6 +305,7 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         model = Announcement
         fields = [
             "id",
+            "scope",
             "group",
             "teacher",
             "title",
@@ -314,12 +315,19 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["teacher", "created_at"]
 
-    def validate_group(self, value):
+    def validate(self, attrs):
+        scope = attrs.get("scope", Announcement.Scope.GRUPO)
+        group = attrs.get("group")
         request = self.context.get("request")
         school_id = getattr(request, "school_id", None)
-        if school_id is not None and value.school_id != school_id:
-            raise serializers.ValidationError("Group mismatch for school")
-        return value
+        if group is not None:
+            if school_id is not None and group.school_id != school_id:
+                raise serializers.ValidationError({"group": "Group mismatch for school"})
+        if scope == Announcement.Scope.GRUPO and group is None:
+            raise serializers.ValidationError({"group": "Group required for group scope"})
+        if scope == Announcement.Scope.GLOBAL:
+            attrs["group"] = None
+        return attrs
 
 
 class HomeworkSerializer(serializers.ModelSerializer):

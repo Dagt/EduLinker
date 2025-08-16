@@ -2,6 +2,7 @@ import io
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -448,18 +449,27 @@ class AnnouncementListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        qs = Announcement.objects.filter(school_id=self.request.school_id)
         group_ids = _visible_group_ids(self.request.user)
-        return Announcement.objects.filter(
-            school_id=self.request.school_id, group_id__in=group_ids
-        )
+        scope = self.request.query_params.get("scope")
+        if scope == Announcement.Scope.GLOBAL:
+            qs = qs.filter(scope=Announcement.Scope.GLOBAL)
+        elif scope == Announcement.Scope.GRUPO:
+            qs = qs.filter(scope=Announcement.Scope.GRUPO, group_id__in=group_ids)
+        else:
+            qs = qs.filter(
+                Q(scope=Announcement.Scope.GLOBAL)
+                | Q(group_id__in=group_ids)
+            )
+        return qs
 
     def perform_create(self, serializer):
+        scope = serializer.validated_data.get("scope")
         group = serializer.validated_data.get("group")
-        if not _can_manage_group(self.request.user, group):
-            raise PermissionDenied("Cannot create announcement for this group")
-        serializer.save(
-            school_id=self.request.school_id, teacher=self.request.user
-        )
+        if scope == Announcement.Scope.GRUPO:
+            if not _can_manage_group(self.request.user, group):
+                raise PermissionDenied("Cannot create announcement for this group")
+        serializer.save(school_id=self.request.school_id, teacher=self.request.user)
 
 
 class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -467,15 +477,17 @@ class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        qs = Announcement.objects.filter(school_id=self.request.school_id)
         group_ids = _visible_group_ids(self.request.user)
-        return Announcement.objects.filter(
-            school_id=self.request.school_id, group_id__in=group_ids
+        return qs.filter(
+            Q(scope=Announcement.Scope.GLOBAL) | Q(group_id__in=group_ids)
         )
 
     def perform_update(self, serializer):
         announcement = self.get_object()
-        if not _can_manage_group(self.request.user, announcement.group):
-            raise PermissionDenied("Cannot edit this announcement")
+        if announcement.scope == Announcement.Scope.GRUPO:
+            if not _can_manage_group(self.request.user, announcement.group):
+                raise PermissionDenied("Cannot edit this announcement")
         serializer.save()
 
 
@@ -521,7 +533,9 @@ class FeedView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         group_ids = _visible_group_ids(request.user)
         announcements = Announcement.objects.filter(
-            school_id=request.school_id, group_id__in=group_ids
+            school_id=request.school_id
+        ).filter(
+            Q(scope=Announcement.Scope.GLOBAL) | Q(group_id__in=group_ids)
         )
         homeworks = Homework.objects.filter(
             school_id=request.school_id, group_id__in=group_ids
