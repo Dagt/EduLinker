@@ -2,7 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from django.db.models import Count, Sum
-from core.models import Complaint, User
+from django.utils import timezone
+from core.models import Complaint, User, Event
 from fundraising.models import FundraisingGroupLedger
 from surveys.models import SurveyVote
 from suggestions.models import Suggestion
@@ -52,6 +53,23 @@ def analytics_overview(request):
         .annotate(total=Count("id"))
     )
 
+    events_total = Event.objects.filter(school_id=school_id).count()
+    events_upcoming = (
+        Event.objects.filter(
+            school_id=school_id,
+            status=Event.Status.ACTIVE,
+            start_at__gte=timezone.now(),
+        ).count()
+    )
+    events_cancelled = Event.objects.filter(
+        school_id=school_id, status=Event.Status.CANCELLED
+    ).count()
+    events_by_scope = (
+        Event.objects.filter(school_id=school_id)
+        .values("scope")
+        .annotate(total=Count("id"))
+    )
+
     return Response({
         "complaints_total": total_complaints,
         "complaints_open": open_complaints,
@@ -59,7 +77,11 @@ def analytics_overview(request):
         "complaints_by_group": list(complaints_by_group),
         "fundraising_by_group": list(fundraising_totals),
         "surveys_participation": list(survey_participation),
-        "suggestions_by_status": list(suggestions_by_status)
+        "suggestions_by_status": list(suggestions_by_status),
+        "events_total": events_total,
+        "events_upcoming": events_upcoming,
+        "events_cancelled": events_cancelled,
+        "events_by_scope": list(events_by_scope),
     })
 
 
