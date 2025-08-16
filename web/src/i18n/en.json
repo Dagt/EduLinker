@@ -162,7 +162,11 @@
   },
   "AnalyticsDashboard": {
     "unauthorized": "Unauthorized",
-    "header": "Analytics Dashboard"
+    "header": "Analytics Dashboard",
+    "complaintsByGroup": "Complaints by group",
+    "fundraisingByGroup": "Fundraising by group",
+    "eventsByScope": "Events by scope",
+    "surveysParticipation": "Survey participation"
   },
   "Login": {
     "invalid": "Invalid credentials",

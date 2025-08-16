@@ -162,7 +162,11 @@
   },
   "AnalyticsDashboard": {
     "unauthorized": "No autorizado",
-    "header": "Dashboard Analítico"
+    "header": "Dashboard Analítico",
+    "complaintsByGroup": "Quejas por grupo",
+    "fundraisingByGroup": "Recaudación por grupo",
+    "eventsByScope": "Eventos por alcance",
+    "surveysParticipation": "Participación en encuestas"
   },
   "Login": {
     "invalid": "Credenciales inválidas",

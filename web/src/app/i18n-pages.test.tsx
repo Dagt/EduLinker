@@ -16,6 +16,14 @@ import AnalyticsDashboard from './dashboard/analytics/page';
 import Login from './(auth)/login/page';
 import { apiGet, getAnalytics } from '@/lib/api';
 
+beforeAll(() => {
+  (global as any).ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+});
+
 describe('internationalized pages render', () => {
   beforeEach(() => {
     (apiGet as jest.Mock).mockReset();
