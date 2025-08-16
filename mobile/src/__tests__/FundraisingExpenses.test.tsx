@@ -4,16 +4,12 @@ import i18n from '../i18n';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
 jest.mock('../role', () => ({ getRole: jest.fn() }));
-jest.mock('expo-image-picker', () => ({
-  launchImageLibraryAsync: jest.fn(),
-  MediaTypeOptions: { Images: {} },
-}));
 jest.mock('../api', () => ({
   getFundraisingSummary: jest.fn(),
   createExpenseEvidence: jest.fn(),
-  uploadFile: jest.fn(),
   postActivityPhoto: jest.fn(),
 }));
+jest.mock('../services/uploads', () => ({ pickAndUpload: jest.fn() }));
 
 jest.setTimeout(10000);
 
@@ -35,15 +31,14 @@ describe('FundraisingExpenses screen', () => {
 
   it('creates and lists expenses', async () => {
     const { getRole } = require('../role');
-    const { getFundraisingSummary, createExpenseEvidence, uploadFile, postActivityPhoto } = require('../api');
-    const { launchImageLibraryAsync } = require('expo-image-picker');
+    const { getFundraisingSummary, createExpenseEvidence, postActivityPhoto } = require('../api');
+    const { pickAndUpload } = require('../services/uploads');
     (getRole as jest.Mock).mockResolvedValue('treasurer');
     (getFundraisingSummary as jest.Mock)
       .mockResolvedValueOnce({ expenses: [] })
       .mockResolvedValueOnce({ expenses: [{ concept: 'Food', amount: '20', file_url: 'https://u' }] });
     (createExpenseEvidence as jest.Mock).mockResolvedValue({ id: 1 });
-    (launchImageLibraryAsync as jest.Mock).mockResolvedValue({ canceled: false, assets: [{ uri: 'file://pic.jpg' }] });
-    (uploadFile as jest.Mock).mockResolvedValue('https://u');
+    (pickAndUpload as jest.Mock).mockResolvedValue('https://u');
     (postActivityPhoto as jest.Mock).mockResolvedValue({});
     i18n.locale = 'en';
     const { getByPlaceholderText, getByText } = render(<FundraisingExpenses />);
