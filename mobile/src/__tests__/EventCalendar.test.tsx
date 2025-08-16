@@ -60,3 +60,18 @@ test('shows alert on photo error', async () => {
   await waitFor(() => expect(spy).toHaveBeenCalled());
 });
 
+test('shows unauthorized for guest role', async () => {
+  (role.getRole as jest.Mock).mockResolvedValueOnce('guest');
+  const { getByText } = render(<EventCalendar />);
+  await waitFor(() => getByText('No autorizado'));
+});
+
+test('alerts when notification permission denied', async () => {
+  (notifs.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({ status: 'denied' });
+  const spy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const { getByTestId } = render(<EventCalendar />);
+  await waitFor(() => getByTestId('remind-1'));
+  fireEvent.press(getByTestId('remind-1'));
+  await waitFor(() => expect(spy).toHaveBeenCalled());
+});
+
