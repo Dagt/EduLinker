@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-from core.models import School, SchoolYear, User, Group, Complaint
+from core.models import School, SchoolYear, User, Group, Complaint, Event
 from fundraising.models import FundraisingEvent, FundraisingGroupLedger
 from surveys.models import Survey, SurveyVote
 from suggestions.models import Suggestion
@@ -28,6 +28,27 @@ def test_analytics_view_permissions_and_results():
     FundraisingGroupLedger.objects.create(event=fe, group=group, amount_collected=100, created_by=director)
 
     now = timezone.now()
+    Event.objects.create(
+        school=school,
+        school_year=sy,
+        scope=Event.Scope.GROUP,
+        title="E1",
+        start_at=now + timedelta(days=1),
+        end_at=now + timedelta(days=2),
+        created_by=director,
+        status=Event.Status.ACTIVE,
+    )
+    Event.objects.create(
+        school=school,
+        school_year=sy,
+        scope=Event.Scope.GLOBAL,
+        title="E2",
+        start_at=now + timedelta(days=3),
+        end_at=now + timedelta(days=4),
+        created_by=director,
+        status=Event.Status.CANCELLED,
+    )
+
     survey = Survey.objects.create(
         school=school,
         created_by=director,
@@ -59,3 +80,8 @@ def test_analytics_view_permissions_and_results():
     assert any(float(item["total"]) == 100.0 and item["group__id"] == group.id for item in data["fundraising_by_group"])
     assert any(item["survey__group"] == group.id and item["votes"] == 1 for item in data["surveys_participation"])
     assert any(item["status"] == "OPEN" and item["total"] == 1 for item in data["suggestions_by_status"])
+    assert data["events_total"] == 2
+    assert data["events_upcoming"] == 1
+    assert data["events_cancelled"] == 1
+    assert any(item["scope"] == "GROUP" and item["total"] == 1 for item in data["events_by_scope"])
+    assert any(item["scope"] == "GLOBAL" and item["total"] == 1 for item in data["events_by_scope"])
