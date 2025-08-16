@@ -6,6 +6,7 @@ import { listFundraisingEvents, createFundraisingEvent } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { useTranslations } from "next-intl";
 import { requireRole } from "@/lib/roles";
+import Link from "next/link";
 
 type Event = { id: number; name: string; date: string; description: string };
 
@@ -59,7 +60,9 @@ export default function FundraisingPage(){
         </form>
         <ul>
           {events.map(ev => (
-            <li key={ev.id}><strong>{ev.name}</strong> - {ev.date}</li>
+            <li key={ev.id}>
+              <Link href={`/fundraising/${ev.id}`}><strong>{ev.name}</strong></Link> - {ev.date}
+            </li>
           ))}
         </ul>
       </main>

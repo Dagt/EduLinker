@@ -63,10 +63,37 @@ describe('api helpers', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 404, statusText: 'missing' });
     await expect(api.apiPatch('/z', {})).rejects.toThrow('404 missing');
   });
+  it('apiDelete sends delete', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
+    await api.apiDelete('/d');
+    expect(global.fetch).toHaveBeenCalledWith('http://api/d', expect.objectContaining({ method: 'DELETE' }));
+  });
+  it('apiDelete throws on error status', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 403, statusText: 'forbidden' });
+    await expect(api.apiDelete('/d')).rejects.toThrow('403 forbidden');
+  });
   it('updateSuggestionStatus posts', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     await api.updateSuggestionStatus(1, 'closed');
     expect(global.fetch).toHaveBeenCalledWith('http://api/suggestions/1/status', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('getFundraisingEvent fetches', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.getFundraisingEvent(1);
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/1', expect.any(Object));
+  });
+
+  it('updateFundraisingEvent patches', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    await api.updateFundraisingEvent(1, {});
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/1', expect.objectContaining({ method: 'PATCH' }));
+  });
+
+  it('deleteFundraisingEvent deletes', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
+    await api.deleteFundraisingEvent(1);
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/1', expect.objectContaining({ method: 'DELETE' }));
   });
 
   it('getFundraisingEventSummary fetches', async () => {

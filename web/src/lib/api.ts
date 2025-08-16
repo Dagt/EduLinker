@@ -38,6 +38,12 @@ export async function apiPatch<T>(path: string, body: any, token?: string): Prom
   return res.json();
 }
 
+export async function apiDelete(path: string, token?: string): Promise<void> {
+  const base = process.env.NEXT_PUBLIC_API_URL!;
+  const res = await fetch(`${base}${path}`, { method: "DELETE", headers: authHeaders(token) });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+}
+
 // Suggestion status update
 export async function updateSuggestionStatus(id: number, status: string, token?: string) {
   return apiPost(`/suggestions/${id}/status`, { status }, token);
@@ -58,6 +64,18 @@ export async function createFundraisingLedger(body: any, token?: string): Promis
 
 export async function createExpenseEvidence(body: any, token?: string): Promise<any> {
   return apiPost<any>(`/expense-evidences/`, body, token);
+}
+
+export async function getFundraisingEvent<T = any>(id: number, token?: string): Promise<T> {
+  return apiGet<T>(`/fundraising-events/${id}`, token);
+}
+
+export async function updateFundraisingEvent(id: number, body: any, token?: string) {
+  return apiPatch(`/fundraising-events/${id}`, body, token);
+}
+
+export async function deleteFundraisingEvent(id: number, token?: string) {
+  return apiDelete(`/fundraising-events/${id}`, token);
 }
 
 // Fundraising event summary
