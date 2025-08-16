@@ -6,7 +6,7 @@ from celery import shared_task
 
 from core.models import User
 
-from .models import DeviceToken, ExpoTicket, NotificationPreference
+from .models import DeviceToken, ExpoTicket, FailedExpoTicket, NotificationPreference
 from .providers import expo
 from .providers.expo import ExpoProvider
 from .providers.email import EmailProvider
@@ -134,6 +134,7 @@ def cleanup_invalid_tokens():
 
     ticket_map = {tid: tok for tid, tok in tickets}
     invalid_tokens: list[str] = []
+    failed: list[FailedExpoTicket] = []
 
     try:
         req = urllib.request.Request(
@@ -149,15 +150,22 @@ def cleanup_invalid_tokens():
         return {"processed": 0, "deleted": 0}
 
     for tid, info in (payload.get("data") or {}).items():
-        if info.get("status") == "error":
+        status = info.get("status")
+        if status == "error":
             details = info.get("details") or {}
-            if details.get("error") in expo.INVALID_TOKEN_ERRORS:
-                token = ticket_map.get(tid)
-                if token:
+            err = details.get("error") or "unknown"
+            token = ticket_map.get(tid)
+            if token:
+                failed.append(
+                    FailedExpoTicket(ticket_id=tid, token=token, error=err)
+                )
+                if err in expo.INVALID_TOKEN_ERRORS:
                     invalid_tokens.append(token)
 
     ExpoTicket.objects.filter(ticket_id__in=list(ticket_map.keys())).delete()
 
+    if failed:
+        FailedExpoTicket.objects.bulk_create(failed)
     if invalid_tokens:
         DeviceToken.objects.filter(token__in=set(invalid_tokens)).delete()
 

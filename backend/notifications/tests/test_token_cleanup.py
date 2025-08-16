@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from core.models import School, User
-from notifications.models import DeviceToken, ExpoTicket
+from notifications.models import DeviceToken, ExpoTicket, FailedExpoTicket
 from notifications import tasks
 from notifications.tasks import push_to_users
 from notifications.providers import expo
@@ -56,6 +56,7 @@ def test_cleanup_deletes_invalid_tokens(error_code):
     assert DeviceToken.objects.filter(token="tok1").exists()
     assert not DeviceToken.objects.filter(token="tok2").exists()
     assert ExpoTicket.objects.count() == 0
+    assert FailedExpoTicket.objects.filter(ticket_id="t2", token="tok2").exists()
 
 
 @pytest.mark.django_db
@@ -125,4 +126,5 @@ def test_send_then_cleanup_cycle():
     assert DeviceToken.objects.filter(token="tok1").exists()
     assert not DeviceToken.objects.filter(token="tok2").exists()
     assert ExpoTicket.objects.count() == 0
+    assert FailedExpoTicket.objects.filter(ticket_id="t2", token="tok2").exists()
 
