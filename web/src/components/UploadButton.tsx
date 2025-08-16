@@ -1,9 +1,11 @@
 "use client";
 import { getToken } from "@/lib/auth";
+import { useTranslations } from 'next-intl';
 
 type Props = { onUploaded: (fileUrl: string)=>void };
 
 export default function UploadButton({ onUploaded }: Props){
+  const t = useTranslations('UploadButton');
   async function handle(e: React.ChangeEvent<HTMLInputElement>){
     const file = e.target.files?.[0]; if(!file) return;
     const tk = getToken();
@@ -18,7 +20,7 @@ export default function UploadButton({ onUploaded }: Props){
       },
       body: JSON.stringify({ filename: file.name })
     });
-    if(!presignRes.ok) { alert("Error presign"); return; }
+    if(!presignRes.ok) { alert(t('presignError')); return; }
     const { upload, file_url } = await presignRes.json();
 
     // 2) subir a S3/MinIO con form-data
@@ -28,7 +30,7 @@ export default function UploadButton({ onUploaded }: Props){
     fd.append("file", file);
 
     const s3Res = await fetch(upload.url, { method: "POST", body: fd });
-    if(!s3Res.ok) { alert("Error S3"); return; }
+    if(!s3Res.ok) { alert(t('s3Error')); return; }
 
     onUploaded(file_url);
     (e.target as HTMLInputElement).value = "";

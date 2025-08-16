@@ -1,5 +1,9 @@
 const React = require('react');
-const messages = require('@/i18n/es.json');
+let messages = require('@/i18n/es.json');
+
+export function setMessages(m: any) {
+  messages = m;
+}
 
 export const NextIntlClientProvider = ({children}: any) => React.createElement(React.Fragment, null, children);
 

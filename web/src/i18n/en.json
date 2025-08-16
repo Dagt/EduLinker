@@ -170,5 +170,9 @@
     "email": "Email/username",
     "password": "Password",
     "login": "Login"
+  },
+  "UploadButton": {
+    "presignError": "Error getting upload URL",
+    "s3Error": "Error uploading file"
   }
 }
