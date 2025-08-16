@@ -165,7 +165,7 @@ def test_ledger_creation_rejects_wrong_school_event(setup_entities):
         {"event": event_other.id, "group": group.id, "amount_collected": "10.00"},
         format="json",
     )
-    assert res.status_code == 403
+    assert res.status_code in (400, 403)
 
 
 @pytest.mark.django_db

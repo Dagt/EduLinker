@@ -3,8 +3,10 @@ from .views import (
     FundraisingEventListCreateView,
     FundraisingEventDetailView,
     FundraisingEventUpdateView,
-    FundraisingLedgerCreateView,
-    ExpenseEvidenceCreateView,
+    FundraisingLedgerListCreateView,
+    FundraisingLedgerDetailView,
+    ExpenseEvidenceListCreateView,
+    ExpenseEvidenceDetailView,
     FundraisingEventSummaryView,
 )
 
@@ -13,6 +15,8 @@ urlpatterns = [
     path("fundraising-events/<int:pk>/", FundraisingEventDetailView.as_view(), name="fundraising-event-detail"),
     path("fundraising-events/<int:pk>/update/", FundraisingEventUpdateView.as_view(), name="fundraising-event-update"),
     path("fundraising-events/<int:pk>/summary/", FundraisingEventSummaryView.as_view(), name="fundraising-event-summary"),
-    path("fundraising-ledger/", FundraisingLedgerCreateView.as_view(), name="fundraising-ledger-create"),
-    path("expense-evidences/", ExpenseEvidenceCreateView.as_view(), name="expense-evidence-create"),
+    path("fundraising-ledger/", FundraisingLedgerListCreateView.as_view(), name="fundraising-ledger-list-create"),
+    path("fundraising-ledger/<int:pk>/", FundraisingLedgerDetailView.as_view(), name="fundraising-ledger-detail"),
+    path("expense-evidences/", ExpenseEvidenceListCreateView.as_view(), name="expense-evidence-list-create"),
+    path("expense-evidences/<int:pk>/", ExpenseEvidenceDetailView.as_view(), name="expense-evidence-detail"),
 ]

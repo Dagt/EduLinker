@@ -1,17 +1,39 @@
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from decimal import Decimal
 from core.permissions import (
     IsDirector,
     IsDirectorOrReadOnly,
     can_record_fundraising_ledger,
     can_upload_expense,
+    is_admin_tenant,
+    is_director,
+    is_maestro_titular,
+    is_vocal,
 )
 from .models import FundraisingEvent, FundraisingGroupLedger, ExpenseEvidence
-from .serializers import FundraisingEventSerializer, FundraisingGroupLedgerSerializer, ExpenseEvidenceSerializer
-from core.models import SchoolYear
+from .serializers import (
+    FundraisingEventSerializer,
+    FundraisingGroupLedgerSerializer,
+    ExpenseEvidenceSerializer,
+)
+from core.models import SchoolYear, Group, VocalAssignment
+
+
+def _user_group_ids(user, school_id):
+    if is_admin_tenant(user) or is_director(user):
+        return Group.objects.filter(school_id=school_id).values_list("id", flat=True)
+    if is_maestro_titular(user):
+        return Group.objects.filter(
+            school_id=school_id, homeroom_teacher_id=user.id
+        ).values_list("id", flat=True)
+    if is_vocal(user):
+        return VocalAssignment.objects.filter(
+            school_id=school_id, parent_id=user.id, active=True
+        ).values_list("group_id", flat=True)
+    return Group.objects.none().values_list("id", flat=True)
 
 class FundraisingEventListCreateView(generics.ListCreateAPIView):
     serializer_class = FundraisingEventSerializer
@@ -69,9 +91,15 @@ class FundraisingEventSummaryView(generics.RetrieveAPIView):
         }
         return Response(data)
 
-class FundraisingLedgerCreateView(generics.CreateAPIView):
+class FundraisingLedgerListCreateView(generics.ListCreateAPIView):
     serializer_class = FundraisingGroupLedgerSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_ids = _user_group_ids(self.request.user, self.request.school_id)
+        return FundraisingGroupLedger.objects.filter(
+            event__school_id=self.request.school_id, group_id__in=group_ids
+        )
 
     def perform_create(self, serializer):
         event = serializer.validated_data.get("event")
@@ -85,6 +113,7 @@ class FundraisingLedgerCreateView(generics.CreateAPIView):
             raise PermissionDenied("Not allowed to record ledger for this group")
         ledger = serializer.save(created_by=user)
         from audit.models import AuditLog
+
         AuditLog.objects.create(
             school_id=self.request.school_id,
             actor=user,
@@ -94,9 +123,38 @@ class FundraisingLedgerCreateView(generics.CreateAPIView):
             metadata={"amount_collected": str(ledger.amount_collected)},
         )
 
-class ExpenseEvidenceCreateView(generics.CreateAPIView):
+
+class FundraisingLedgerDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = FundraisingGroupLedgerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_ids = _user_group_ids(self.request.user, self.request.school_id)
+        return FundraisingGroupLedger.objects.filter(
+            event__school_id=self.request.school_id, group_id__in=group_ids
+        )
+
+    def perform_update(self, serializer):
+        ledger = self.get_object()
+        if not can_record_fundraising_ledger(self.request.user, ledger.group):
+            raise PermissionDenied("Not allowed to update ledger for this group")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not can_record_fundraising_ledger(self.request.user, instance.group):
+            raise PermissionDenied("Not allowed to delete ledger for this group")
+        instance.delete()
+
+class ExpenseEvidenceListCreateView(generics.ListCreateAPIView):
     serializer_class = ExpenseEvidenceSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_ids = _user_group_ids(self.request.user, self.request.school_id)
+        return ExpenseEvidence.objects.filter(
+            Q(ledger__event__school_id=self.request.school_id)
+            | Q(group__school_id=self.request.school_id)
+        ).filter(Q(group_id__in=group_ids) | Q(ledger__group_id__in=group_ids))
 
     def perform_create(self, serializer):
         ledger = serializer.validated_data.get("ledger")
@@ -109,3 +167,29 @@ class ExpenseEvidenceCreateView(generics.CreateAPIView):
         if not can_upload_expense(user, group):
             raise PermissionDenied("Not allowed to upload expenses for this group")
         serializer.save(uploader=user)
+
+
+class ExpenseEvidenceDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ExpenseEvidenceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group_ids = _user_group_ids(self.request.user, self.request.school_id)
+        return ExpenseEvidence.objects.filter(
+            Q(ledger__event__school_id=self.request.school_id)
+            | Q(group__school_id=self.request.school_id)
+        ).filter(Q(group_id__in=group_ids) | Q(ledger__group_id__in=group_ids))
+
+    def _check_permission(self, expense):
+        group = expense.group or expense.ledger.group
+        if not can_upload_expense(self.request.user, group):
+            raise PermissionDenied("Not allowed to modify expenses for this group")
+
+    def perform_update(self, serializer):
+        expense = self.get_object()
+        self._check_permission(expense)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        self._check_permission(instance)
+        instance.delete()
