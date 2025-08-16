@@ -12,6 +12,8 @@ import i18n from "../../i18n";
 export default function Suggestions(){
   const [items,setItems]=useState<any[]>([]);
   const [role,setRole]=useState("guest");
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [groupId, setGroupId] = useState("");
@@ -21,11 +23,16 @@ export default function Suggestions(){
   const [message, setMessage] = useState("");
 
   const load = async () => {
+    setLoading(true);
+    setError(false);
     try{
       const r = await getSuggestions();
       setItems(r);
     }catch{
       setItems([]);
+      setError(true);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -68,7 +75,9 @@ export default function Suggestions(){
     setSelected({ ...selected, messages: [ ...(selected.messages||[]), msg ] });
   };
 
+  if(loading) return <Text>Loading...</Text>;
   if(role==="guest") return <Text>{i18n.t('suggestions.unauthorized')}</Text>;
+  if(error) return <Text>{i18n.t('general.error')}</Text>;
 
   if(selected){
     return (

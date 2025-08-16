@@ -145,3 +145,26 @@ export async function voteSurvey(id: number, option_index: number){
 export async function getSurveyResults(id: number){
   return apiGet(`/surveys/${id}/results/`);
 }
+
+// Fundraising helpers
+export async function getFundraisingSummary(eventId: number){
+  return apiGet(`/fundraising-events/${eventId}/summary/`);
+}
+
+export async function createFundraisingLedger(body: {
+  event: number;
+  group: number;
+  amount_collected: string;
+}){
+  return apiPost("/fundraising-ledger/", body);
+}
+
+export async function createExpenseEvidence(body: {
+  ledger?: number;
+  group?: number;
+  file_url: string;
+  amount: string;
+  concept: string;
+}){
+  return apiPost("/expense-evidences/", body);
+}
