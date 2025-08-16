@@ -12,6 +12,7 @@ from suggestions.models import Suggestion
 
 @pytest.mark.django_db
 def test_director_accesses_analytics_endpoints():
+    """A director can access analytics endpoints and receives data scoped to their school."""
     school1 = School.objects.create(name="S1", slug="s1", subdomain="s1", active=True)
     school2 = School.objects.create(name="S2", slug="s2", subdomain="s2", active=True)
 
@@ -154,7 +155,7 @@ def test_director_accesses_analytics_endpoints():
     assert res.status_code == 200
     data = res.json()
     assert data["complaints_total"] == 1
-    assert data["fundraising_by_group"][0]["total"] == "100.00"
+    assert float(data["fundraising_by_group"][0]["total"]) == 100.0
 
     res = client.get("/api/v1/analytics/complaints/")
     assert res.status_code == 200
@@ -164,13 +165,7 @@ def test_director_accesses_analytics_endpoints():
     res = client.get("/api/v1/analytics/fundraising/")
     assert res.status_code == 200
     data = res.json()
-    assert data["fundraising_by_group"][0]["total"] == "100.00"
-
-    res = client.get("/api/v1/analytics/engagement/")
-    assert res.status_code == 200
-    data = res.json()
-    assert data["suggestions_total"] == 1
-    assert data["surveys_participation"][0]["votes"] == 1
+    assert float(data["fundraising_by_group"][0]["total"]) == 100.0
 
 
 @pytest.mark.django_db
@@ -190,7 +185,7 @@ def test_non_director_forbidden():
         role="MAESTRO_TITULAR",
         school=school,
     )
-    group = Group.objects.create(
+    Group.objects.create(
         school=school, school_year=sy, name="G", grade_level=1, homeroom_teacher=teacher
     )
 
@@ -200,7 +195,7 @@ def test_non_director_forbidden():
         HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
     )
 
-    for url in ["overview", "complaints", "fundraising", "engagement"]:
+    for url in ["overview", "complaints", "fundraising"]:
         res = client.get(f"/api/v1/analytics/{url}/")
         assert res.status_code == 403
 

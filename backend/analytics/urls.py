@@ -1,14 +1,24 @@
 from django.urls import path
 from .views import (
-    analytics_overview,
-    analytics_complaints,
-    analytics_fundraising,
-    analytics_engagement,
+    OverviewAnalyticsView,
+    ComplaintsAnalyticsView,
+    FundraisingAnalyticsView,
 )
 
 urlpatterns = [
-    path("analytics/overview/", analytics_overview, name="analytics-overview"),
-    path("analytics/complaints/", analytics_complaints, name="analytics-complaints"),
-    path("analytics/fundraising/", analytics_fundraising, name="analytics-fundraising"),
-    path("analytics/engagement/", analytics_engagement, name="analytics-engagement"),
+    path(
+        "analytics/overview/",
+        OverviewAnalyticsView.as_view(),
+        name="analytics-overview",
+    ),
+    path(
+        "analytics/complaints/",
+        ComplaintsAnalyticsView.as_view(),
+        name="analytics-complaints",
+    ),
+    path(
+        "analytics/fundraising/",
+        FundraisingAnalyticsView.as_view(),
+        name="analytics-fundraising",
+    ),
 ]
