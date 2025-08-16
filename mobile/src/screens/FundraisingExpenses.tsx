@@ -46,7 +46,7 @@ export default function FundraisingExpenses(){
     await load();
   };
 
-  if(role!=="treasurer" && role!=="admin") return <Text>Unauthorized</Text>;
+  if(role!=="treasurer" && role!=="admin") return <Text>{i18n.t('general.unauthorized')}</Text>;
   if(loading) return <Text>Loading...</Text>;
   if(error) return <Text>{i18n.t('general.error')}</Text>;
 

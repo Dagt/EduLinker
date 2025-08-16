@@ -22,7 +22,7 @@ describe('FundraisingLedger screen', () => {
     (getRole as jest.Mock).mockResolvedValue('student');
     (getFundraisingSummary as jest.Mock).mockResolvedValue({ ledgers: [] });
     const { getByText } = render(<FundraisingLedger />);
-    await waitFor(() => getByText(/Unauthorized/));
+    await waitFor(() => getByText(i18n.t('general.unauthorized')));
   });
 
   it('creates and lists ledger entries', async () => {
