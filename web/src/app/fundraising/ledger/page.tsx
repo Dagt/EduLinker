@@ -2,7 +2,8 @@
 import { useState } from "react";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
-import { apiPost } from "@/lib/api";
+import { createFundraisingLedger } from "@/lib/api";
+import { requireRole } from "@/lib/roles";
 import { useTranslations } from "next-intl";
 
 export default function FundraisingLedger(){
@@ -17,7 +18,7 @@ export default function FundraisingLedger(){
     e.preventDefault(); setMsg("");
     try{
       const tk = getToken();
-      const res = await apiPost<any>("/fundraising-ledger/", {
+      const res = await createFundraisingLedger({
         event_id: Number(eventId),
         group_id: Number(groupId),
         amount_collected: Number(amount),
@@ -27,6 +28,8 @@ export default function FundraisingLedger(){
       setAmount(""); setNotes("");
     }catch(e:any){ setMsg(e.message || t("error")); }
   }
+
+  if (!requireRole(["admin", "treasurer"])) return <p>{t("unauthorized")}</p>;
 
   return (
     <>

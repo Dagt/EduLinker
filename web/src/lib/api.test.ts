@@ -53,6 +53,14 @@ describe('api helpers', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 400, statusText: 'bad' });
     await expect(api.apiPost('/y', {})).rejects.toThrow('400 bad');
   });
+  it('apiPatch works and throws', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ c: 3 }) })
+      .mockResolvedValueOnce({ ok: false, status: 404, statusText: 'nf' });
+    const data = await api.apiPatch('/z', { c: 3 });
+    expect(data).toEqual({ c: 3 });
+    await expect(api.apiPatch('/z', { c: 3 })).rejects.toThrow('404 nf');
+  });
   it('updateSuggestionStatus posts', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     await api.updateSuggestionStatus(1, 'closed');
@@ -63,6 +71,18 @@ describe('api helpers', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     await api.getFundraisingEventSummary(2);
     expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/2/summary/', expect.any(Object));
+  });
+
+  it('fundraising helpers hit correct endpoints', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({}) });
+    await api.listFundraisingEvents();
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/', expect.any(Object));
+    await api.createFundraisingEvent({}, 'tk');
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-events/', expect.objectContaining({ method: 'POST' }));
+    await api.createFundraisingLedger({}, 'tk');
+    expect(global.fetch).toHaveBeenCalledWith('http://api/fundraising-ledger/', expect.objectContaining({ method: 'POST' }));
+    await api.createExpenseEvidence({}, 'tk');
+    expect(global.fetch).toHaveBeenCalledWith('http://api/expense-evidences/', expect.objectContaining({ method: 'POST' }));
   });
 
   it('getAnalytics fetches', async () => {

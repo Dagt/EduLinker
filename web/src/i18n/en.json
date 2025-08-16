@@ -45,7 +45,8 @@
     "name": "Name",
     "date": "Date",
     "description": "Description",
-    "create": "Create"
+    "create": "Create",
+    "unauthorized": "Unauthorized"
   },
   "FundraisingLedger": {
     "header": "Record collection by group",
@@ -55,7 +56,8 @@
     "notes": "Notes",
     "save": "Save",
     "success": "Record added #{id}",
-    "error": "Error while saving"
+    "error": "Error while saving",
+    "unauthorized": "Unauthorized"
   },
   "FundraisingExpense": {
     "header": "Register expense evidence",
@@ -67,7 +69,8 @@
     "uploadFirst": "Upload the file first",
     "fileReady": "File ready: {url}",
     "success": "Evidence recorded #{id}",
-    "error": "Error while registering evidence"
+    "error": "Error while registering evidence",
+    "unauthorized": "Unauthorized"
   },
   "FundraisingSummary": {
     "header": "Fundraising summary",
@@ -162,7 +165,8 @@
     "description": "Description",
     "create": "Create event",
     "created": "Event created #{id}",
-    "error": "Error creating event"
+    "error": "Error creating event",
+    "unauthorized": "Unauthorized"
   },
   "AnalyticsDashboard": {
     "unauthorized": "Unauthorized",
