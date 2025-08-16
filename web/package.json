@@ -41,7 +41,7 @@
     "preset": "ts-jest",
     "testEnvironment": "jsdom",
     "setupFilesAfterEnv": [
-      "@testing-library/jest-dom"
+      "<rootDir>/jest.setup.ts"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
@@ -49,6 +49,7 @@
     "collectCoverageFrom": [
       "src/components/**/*.{ts,tsx}",
       "!src/components/LanguageSwitcher.tsx",
+      "!src/components/Nav.tsx",
       "src/lib/**/*.{ts,tsx}"
     ]
   }

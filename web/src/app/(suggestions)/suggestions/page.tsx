@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { apiGet, apiPost } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 type Suggestion = { id: number; title: string; description: string };
 
@@ -43,6 +44,7 @@ export default function SuggestionsPage(){
       <Nav />
       <main style={{ padding:16, maxWidth:560 }}>
         <h2>{t("header")}</h2>
+        <p><Link href="/suggestions/create">{t("createLink")}</Link></p>
         <form onSubmit={handleSubmit(onSubmit)}>
           <input placeholder={t("title")} {...register("title", {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
@@ -52,7 +54,9 @@ export default function SuggestionsPage(){
         </form>
         <ul>
           {items.map(s => (
-            <li key={s.id}><strong>{s.title}</strong>: {s.description}</li>
+            <li key={s.id}>
+              <Link href={`/suggestions/${s.id}`}>{s.title}</Link>: {s.description}
+            </li>
           ))}
         </ul>
       </main>

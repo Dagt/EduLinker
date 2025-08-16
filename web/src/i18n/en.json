@@ -41,6 +41,23 @@
     "confirm": "Are you sure you want to create this suggestion?",
     "error": "Error"
   },
+  "SuggestionDetail": {
+    "loading": "Loading...",
+    "header": "Suggestion #{id}",
+    "title": "Title:",
+    "description": "Description:",
+    "status": "Status:",
+    "edit": "Edit"
+  },
+  "SuggestionEdit": {
+    "header": "Edit suggestion",
+    "title": "Title",
+    "description": "Description",
+    "update": "Update",
+    "updated": "Suggestion updated",
+    "error": "Error",
+    "confirm": "Are you sure you want to update this suggestion?"
+  },
   "Fundraising": {
     "header": "Fundraising",
     "name": "Name",
@@ -86,7 +103,8 @@
     "header": "Suggestions",
     "title": "Title",
     "description": "Description",
-    "send": "Send"
+    "send": "Send",
+    "createLink": "Create suggestion"
   },
   "ComplaintCreate": {
     "header": "Create private complaint",
