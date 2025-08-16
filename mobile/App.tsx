@@ -7,12 +7,13 @@ import Suggestions from "./src/screens/Suggestions";
 import Homeworks from "./src/screens/Homeworks";
 import Surveys from "./src/screens/Surveys";
 import EventCalendar from "./src/screens/EventCalendar";
+import Fundraising from "./src/screens/Fundraising";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
 
 export default function App(){
   const [logged,setLogged]=useState(false);
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"surveys"|"events">("feed");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"surveys"|"fundraising"|"events">("feed");
   return (
     <View style={{flex:1}}>
       {logged ? (
@@ -24,6 +25,7 @@ export default function App(){
             <Button title={i18n.t('menu.suggestions')} onPress={()=>setView("suggestions")} />
             <Button title={i18n.t('menu.homeworks')} onPress={()=>setView("homeworks")} />
             <Button title={i18n.t('menu.surveys')} onPress={()=>setView("surveys")} />
+            <Button title={i18n.t('menu.fundraising')} onPress={()=>setView("fundraising")} />
             <Button title={i18n.t('menu.events')} onPress={()=>setView("events")} />
           </View>
           {view==="feed" ? <Feed/> :
@@ -32,6 +34,7 @@ export default function App(){
            view==="suggestions" ? <Suggestions/> :
            view==="homeworks" ? <Homeworks/> :
            view==="surveys" ? <Surveys/> :
+           view==="fundraising" ? <Fundraising/> :
            <EventCalendar/>}
         </>
       ) : <Login onLoggedIn={()=>setLogged(true)}/> }
