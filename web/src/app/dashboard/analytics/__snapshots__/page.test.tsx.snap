@@ -35,6 +35,11 @@ exports[`AnalyticsDashboard matches snapshot 1`] = `
     >
       Recaudación
     </a>
+    <a
+      href="/analytics"
+    >
+      Analíticas
+    </a>
     <select>
       <option
         value="en"

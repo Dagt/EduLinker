@@ -1,5 +1,20 @@
 import { render, screen } from '@testing-library/react';
 jest.mock('next-intl');
+jest.mock('recharts', () => {
+  const React = require('react');
+  const Mock = ({ children }: any) => <div>{children}</div>;
+  return {
+    BarChart: Mock,
+    Bar: Mock,
+    XAxis: Mock,
+    YAxis: Mock,
+    Tooltip: Mock,
+    ResponsiveContainer: Mock,
+    PieChart: Mock,
+    Pie: Mock,
+    Cell: Mock,
+  };
+});
 jest.mock('@/lib/api');
 jest.mock('@/lib/auth', () => ({ getToken: () => 'token' }));
 jest.mock('@/lib/roles', () => ({ requireRole: () => true }));
@@ -17,6 +32,7 @@ import FundraisingLedger from './fundraising/ledger/page';
 import FundraisingExpense from './fundraising/expense/page';
 import FundraisingSummary from './fundraising/summary/page';
 import AnalyticsDashboard from './dashboard/analytics/page';
+import AnalyticsPage from './analytics/page';
 import DashboardPage from './dashboard/page';
 import Login from './(auth)/login/page';
 import SuggestionsPage from './suggestions/page';
@@ -124,6 +140,17 @@ describe('internationalized pages render', () => {
     (getEngagementAnalytics as jest.Mock).mockResolvedValue({});
     render(<AnalyticsDashboard />);
     expect(await screen.findByText('Dashboard Analítico')).toBeInTheDocument();
+  });
+
+  it('renders AnalyticsPage', async () => {
+    (getAnalytics as jest.Mock).mockResolvedValue({ events_by_scope: [] });
+    (getComplaintsAnalytics as jest.Mock).mockResolvedValue({ complaints_by_group: [] });
+    (getFundraisingAnalytics as jest.Mock).mockResolvedValue({ fundraising_by_group: [] });
+    (getEngagementAnalytics as jest.Mock).mockResolvedValue({ surveys_participation: [] });
+    render(<AnalyticsPage />);
+    expect(
+      await screen.findByRole('heading', { name: 'Analíticas' })
+    ).toBeInTheDocument();
   });
 
   it('renders DashboardPage', async () => {

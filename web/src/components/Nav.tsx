@@ -13,6 +13,7 @@ export default function Nav(){
       <Link href="/suggestions">{t('suggestions')}</Link>
       <Link href="/surveys">{t('surveys')}</Link>
       <Link href="/fundraising">{t('fundraising')}</Link>
+      <Link href="/analytics">{t('analytics')}</Link>
       <LanguageSwitcher/>
     </nav>
   );
