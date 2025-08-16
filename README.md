@@ -31,3 +31,5 @@ Repositorio monorepo con:
    ```
 
 Revisa la carpeta `docs/` para guías de despliegue, seeds y casos de uso.
+
+La documentación interactiva de la API se puede consultar en `/api/docs` y el esquema OpenAPI está disponible en `/api/schema` y en el archivo `docs/openapi.json`.

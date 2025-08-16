@@ -1,5 +1,7 @@
-# backend/core/urls.py.py
-from django.urls import path
+
+# backend/core/urls.py
+from django.urls import path, include
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from .storage_views import PresignUploadView
 from .views import (
     ComplaintCreateView,
@@ -31,7 +33,7 @@ from .views import (
     FeedView,
 )
 
-urlpatterns = [
+v1_patterns = [
     path("me/", MeView.as_view(), name="me"),
     path("schools/current/", CurrentSchoolView.as_view(), name="current-school"),
     path(
@@ -68,21 +70,67 @@ urlpatterns = [
     ),
     path("complaints/", ComplaintCreateView.as_view(), name="complaint-create"),
     path("complaints/<int:pk>/", ComplaintDetailView.as_view(), name="complaint-detail"),
-    path("complaints/<int:pk>/messages/", ComplaintMessageCreateView.as_view(), name="complaint-add-message"),
-    path("complaints/<int:pk>/participants/", ComplaintParticipantCreateView.as_view(), name="complaint-add-participant"),
-    path("complaints/<int:pk>/status/", ComplaintStatusUpdateView.as_view(), name="complaint-status"),
+    path(
+        "complaints/<int:pk>/messages/",
+        ComplaintMessageCreateView.as_view(),
+        name="complaint-add-message",
+    ),
+    path(
+        "complaints/<int:pk>/participants/",
+        ComplaintParticipantCreateView.as_view(),
+        name="complaint-add-participant",
+    ),
+    path(
+        "complaints/<int:pk>/status/",
+        ComplaintStatusUpdateView.as_view(),
+        name="complaint-status",
+    ),
     path("events/", EventListCreateView.as_view(), name="event-list-create"),
     path("events/<int:pk>/", EventDetailView.as_view(), name="event-detail"),
     path("events/<int:pk>/edit/", EventUpdateView.as_view(), name="event-update"),
     path("events/<int:pk>/cancel/", EventCancelView.as_view(), name="event-cancel"),
-    path("events/<int:pk>/attachments/", EventAttachmentCreateView.as_view(), name="event-attachment-create"),
-    path("events/<int:pk>/photos/", EventPhotoCreateView.as_view(), name="event-photo-create"),
-    path("activity-photos/", ActivityPhotoCreateView.as_view(), name="activity-photo-create"),
-    path("announcements/", AnnouncementListCreateView.as_view(), name="announcement-list-create"),
-    path("announcements/<int:pk>/", AnnouncementDetailView.as_view(), name="announcement-detail"),
+    path(
+        "events/<int:pk>/attachments/",
+        EventAttachmentCreateView.as_view(),
+        name="event-attachment-create",
+    ),
+    path(
+        "events/<int:pk>/photos/",
+        EventPhotoCreateView.as_view(),
+        name="event-photo-create",
+    ),
+    path(
+        "activity-photos/",
+        ActivityPhotoCreateView.as_view(),
+        name="activity-photo-create",
+    ),
+    path(
+        "announcements/",
+        AnnouncementListCreateView.as_view(),
+        name="announcement-list-create",
+    ),
+    path(
+        "announcements/<int:pk>/",
+        AnnouncementDetailView.as_view(),
+        name="announcement-detail",
+    ),
     path("homeworks/", HomeworkListCreateView.as_view(), name="homework-list-create"),
     path("homeworks/<int:pk>/", HomeworkDetailView.as_view(), name="homework-detail"),
     path("feed/", FeedView.as_view(), name="feed"),
-    path("storage/presign-upload/", PresignUploadView.as_view(), name="presign-upload"),
+    path(
+        "storage/presign-upload/",
+        PresignUploadView.as_view(),
+        name="presign-upload",
+    ),
+]
+
+urlpatterns = [
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="docs",
+    ),
+    path("v1/", include(v1_patterns)),
 ]
 
