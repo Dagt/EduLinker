@@ -35,5 +35,30 @@
     "missing": "Se requieren título y descripción",
     "confirm": "¿Está seguro de crear esta sugerencia?",
     "error": "Error"
+  },
+  "SuggestionsPage": {
+    "header": "Sugerencias",
+    "title": "Título",
+    "description": "Descripción",
+    "submit": "Enviar"
+  },
+  "Calendar": {
+    "title": "Calendario",
+    "uploaded": "Subido:",
+    "attachLast": "Adjuntar último archivo",
+    "attached": "Adjunto agregado"
+  },
+  "CalendarCreate": {
+    "header": "Crear evento",
+    "scopeGroup": "Por grupo",
+    "scopeGlobal": "Global",
+    "title": "Título",
+    "location": "Lugar",
+    "start": "Inicio (ISO)",
+    "end": "Fin (ISO)",
+    "groupIds": "IDs de grupo (coma)",
+    "description": "Descripción",
+    "create": "Crear",
+    "created": "Evento creado"
   }
 }

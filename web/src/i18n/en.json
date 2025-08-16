@@ -35,5 +35,30 @@
     "missing": "Title and description are required",
     "confirm": "Are you sure you want to create this suggestion?",
     "error": "Error"
+  },
+  "SuggestionsPage": {
+    "header": "Suggestions",
+    "title": "Title",
+    "description": "Description",
+    "submit": "Send"
+  },
+  "Calendar": {
+    "title": "Calendar",
+    "uploaded": "Uploaded:",
+    "attachLast": "Attach last file",
+    "attached": "Attachment added"
+  },
+  "CalendarCreate": {
+    "header": "Create event",
+    "scopeGroup": "By group",
+    "scopeGlobal": "Global",
+    "title": "Title",
+    "location": "Location",
+    "start": "Start (ISO)",
+    "end": "End (ISO)",
+    "groupIds": "Group IDs (comma)",
+    "description": "Description",
+    "create": "Create",
+    "created": "Event created"
   }
 }
