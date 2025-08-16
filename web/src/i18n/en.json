@@ -7,6 +7,10 @@
     "surveys": "Surveys",
     "fundraising": "Fundraising"
   },
+  "UploadButton": {
+    "presignError": "Presign error",
+    "s3Error": "Upload error"
+  },
   "Dashboard": {
     "welcome": "Welcome, {name}",
     "refresh": "Refresh",
@@ -170,7 +174,8 @@
   },
   "GroupList": {
     "header": "Group list",
-    "unauthorized": "Unauthorized"
+    "unauthorized": "Unauthorized",
+    "error": "Error loading groups"
   },
   "GroupCreate": {
     "unauthorized": "Unauthorized",

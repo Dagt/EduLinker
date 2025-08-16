@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import {useTranslations} from 'next-intl';
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Nav(){
   const t = useTranslations('Nav');
@@ -12,6 +13,7 @@ export default function Nav(){
       <Link href="/suggestions">{t('suggestions')}</Link>
       <Link href="/surveys">{t('surveys')}</Link>
       <Link href="/fundraising">{t('fundraising')}</Link>
+      <LanguageSwitcher/>
     </nav>
   );
 }
