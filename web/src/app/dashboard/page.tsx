@@ -3,8 +3,7 @@ import {useEffect, useState} from "react";
 import Nav from "@/components/Nav";
 import {getToken} from "@/lib/auth";
 import {apiGet} from "@/lib/api";
-import {NextIntlClientProvider, useTranslations} from 'next-intl';
-import esMessages from "@/i18n/es.json";
+import {useTranslations} from 'next-intl';
 
 function DashboardContent(){
   const [me,setMe]=useState<any>();
@@ -29,9 +28,5 @@ function DashboardContent(){
 }
 
 export default function Dashboard(){
-  return (
-    <NextIntlClientProvider locale="es" messages={esMessages}>
-      <DashboardContent/>
-    </NextIntlClientProvider>
-  );
+  return <DashboardContent/>;
 }
