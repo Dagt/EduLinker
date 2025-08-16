@@ -3,7 +3,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from django.db.models import Count, Sum
 from django.utils import timezone
-from core.models import Complaint, User, Event
+from core.models import Complaint, User, Event, Homework, EventGroupAudience
 from fundraising.models import FundraisingGroupLedger
 from surveys.models import SurveyVote
 from suggestions.models import Suggestion
@@ -126,4 +126,41 @@ class FundraisingAnalyticsView(APIView):
             .annotate(total=Sum("amount_collected"))
         )
         return Response({"fundraising_by_group": list(fundraising_totals)})
+
+
+class EngagementAnalyticsView(APIView):
+    permission_classes = [IsDirector]
+
+    def get(self, request):
+        school_id = request.school_id
+        group_id = request.query_params.get("group_id")
+
+        survey_qs = SurveyVote.objects.filter(survey__school_id=school_id)
+        if group_id:
+            survey_qs = survey_qs.filter(survey__group_id=group_id)
+        survey_data = (
+            survey_qs.values("survey__group_id").annotate(total=Count("id"))
+        )
+        survey_data = [
+            {"group_id": item["survey__group_id"], "total": item["total"]}
+            for item in survey_data
+        ]
+
+        homework_qs = Homework.objects.filter(school_id=school_id)
+        if group_id:
+            homework_qs = homework_qs.filter(group_id=group_id)
+        homework_data = homework_qs.values("group_id").annotate(total=Count("id"))
+
+        event_qs = EventGroupAudience.objects.filter(event__school_id=school_id)
+        if group_id:
+            event_qs = event_qs.filter(group_id=group_id)
+        event_data = event_qs.values("group_id").annotate(total=Count("id"))
+
+        return Response(
+            {
+                "surveys_participation": survey_data,
+                "homework_participation": list(homework_data),
+                "events_participation": list(event_data),
+            }
+        )
 
