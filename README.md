@@ -1,5 +1,10 @@
 # EduLinker
 
+[![CI](https://github.com/EduLinker/EduLinker/actions/workflows/test.yml/badge.svg)](https://github.com/EduLinker/EduLinker/actions/workflows/test.yml)
+[![Backend CI](https://github.com/EduLinker/EduLinker/actions/workflows/backend.yml/badge.svg)](https://github.com/EduLinker/EduLinker/actions/workflows/backend.yml)
+[![Web CI](https://github.com/EduLinker/EduLinker/actions/workflows/web.yml/badge.svg)](https://github.com/EduLinker/EduLinker/actions/workflows/web.yml)
+[![Mobile CI](https://github.com/EduLinker/EduLinker/actions/workflows/mobile.yml/badge.svg)](https://github.com/EduLinker/EduLinker/actions/workflows/mobile.yml)
+
 Repositorio monorepo con:
 
 - `backend/` - API Django REST
