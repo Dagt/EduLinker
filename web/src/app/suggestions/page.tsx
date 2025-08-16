@@ -4,6 +4,7 @@ import Nav from "@/components/Nav";
 import { useForm } from "react-hook-form";
 import { apiGet, apiPost } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { useTranslations } from "next-intl";
 
 type Suggestion = { id: number; title: string; description: string };
 
@@ -12,6 +13,7 @@ type FormData = { title: string; description: string };
 export default function SuggestionsPage(){
   const [items, setItems] = useState<Suggestion[]>([]);
   const { register, handleSubmit, reset } = useForm<FormData>();
+  const t = useTranslations("Suggestions");
 
   useEffect(() => {
     (async () => {
@@ -40,13 +42,13 @@ export default function SuggestionsPage(){
     <>
       <Nav />
       <main style={{ padding:16, maxWidth:560 }}>
-        <h2>Sugerencias</h2>
+        <h2>{t("header")}</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <input placeholder="Título" {...register("title", {required:true})}
+          <input placeholder={t("title")} {...register("title", {required:true})}
                  style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <textarea placeholder="Descripción" {...register("description")}
+          <textarea placeholder={t("description")} {...register("description")}
                     style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
-          <button>Enviar</button>
+          <button>{t("send")}</button>
         </form>
         <ul>
           {items.map(s => (
