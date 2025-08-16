@@ -260,5 +260,9 @@
     "email": "Email/usuario",
     "password": "Password",
     "login": "Entrar"
+  },
+  "LanguageSwitcher": {
+    "english": "Inglés",
+    "spanish": "Español"
   }
 }
