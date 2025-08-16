@@ -49,3 +49,44 @@ def test_chat_message_permissions():
     )
     assert res.status_code == 403
     assert ChatMessage.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_chat_message_other_school_forbidden():
+    school1 = School.objects.create(name="S1", slug="s1", subdomain="s1", active=True)
+    school2 = School.objects.create(name="S2", slug="s2", subdomain="s2", active=True)
+    sy = SchoolYear.objects.create(
+        school=school1,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school1,
+    )
+    group = Group.objects.create(
+        school=school1,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+    outsider = User.objects.create_user(
+        username="o@x.com",
+        email="o@x.com",
+        password="p",
+        role="PADRE",
+        school=school2,
+    )
+    client = APIClient()
+    token = str(RefreshToken.for_user(outsider).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school2.id)
+    )
+    res = client.get(f"/api/v1/chats/{group.id}/messages/")
+    assert res.status_code == 404

@@ -106,3 +106,57 @@ def test_teacher_cannot_create_event():
         format="json",
     )
     assert res.status_code == 403
+
+
+@pytest.mark.django_db
+def test_vocal_cannot_record_ledger_other_school():
+    school1 = School.objects.create(name="S1", slug="s1", subdomain="s1", active=True)
+    school2 = School.objects.create(name="S2", slug="s2", subdomain="s2", active=True)
+    sy = SchoolYear.objects.create(
+        school=school1,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school1,
+    )
+    parent = User.objects.create_user(
+        username="p@x.com",
+        email="p@x.com",
+        password="p",
+        role="VOCAL",
+        school=school1,
+    )
+    group = Group.objects.create(
+        school=school1,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+    VocalAssignment.objects.create(
+        school=school1, group=group, parent=parent, assigned_by=teacher, active=True
+    )
+    event = FundraisingEvent.objects.create(
+        school=school1,
+        school_year=sy,
+        name="Kermes",
+        date="2025-10-10",
+    )
+    client = APIClient()
+    token = str(RefreshToken.for_user(parent).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school2.id)
+    )
+    res = client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event.id, "group": group.id, "amount_collected": "50.00"},
+        format="json",
+    )
+    assert res.status_code == 403
