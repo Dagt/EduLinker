@@ -21,6 +21,8 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
         user = self.request.user
         qs = Suggestion.objects.filter(school_id=self.request.school_id)
         if not is_director(user):
@@ -35,6 +37,8 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
         user = self.request.user
         if not can_create_suggestion(user):
             raise PermissionDenied("Not allowed to create suggestions")
@@ -45,6 +49,8 @@ class SuggestionRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated, CanAccessSuggestion]
 
     def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
         return Suggestion.objects.filter(school_id=self.request.school_id)
 
     def perform_update(self, serializer):
@@ -58,6 +64,8 @@ class SuggestionMessageCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated, CanAccessSuggestion]
 
     def perform_create(self, serializer):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
         suggestion = get_object_or_404(
             Suggestion, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
@@ -71,6 +79,8 @@ class SuggestionStatusUpdateView(generics.UpdateAPIView):
     permission_classes = [permissions.IsAuthenticated, CanAccessSuggestion]
 
     def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
         return Suggestion.objects.filter(school_id=self.request.school_id)
 
     def perform_update(self, serializer):

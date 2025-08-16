@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from django.db.models import Count, Sum
 from django.utils import timezone
 
@@ -29,6 +30,8 @@ class OverviewAnalyticsView(APIView):
 
     def get(self, request):
         school_id = request.school_id
+        if request.user.school_id != school_id:
+            raise PermissionDenied("Invalid school")
         # Complaints
         total_complaints = Complaint.objects.filter(school_id=school_id).count()
         suggestions_total = Suggestion.objects.filter(school_id=school_id).count()
@@ -118,6 +121,8 @@ class ComplaintsAnalyticsView(APIView):
 
     def get(self, request):
         school_id = request.school_id
+        if request.user.school_id != school_id:
+            raise PermissionDenied("Invalid school")
         total_complaints = Complaint.objects.filter(school_id=school_id).count()
         open_complaints = Complaint.objects.filter(
             school_id=school_id, status=Complaint.Status.OPEN
@@ -152,6 +157,8 @@ class FundraisingAnalyticsView(APIView):
 
     def get(self, request):
         school_id = request.school_id
+        if request.user.school_id != school_id:
+            raise PermissionDenied("Invalid school")
         event_id = request.query_params.get("event_id")
 
         ledger_qs = FundraisingGroupLedger.objects.filter(event__school_id=school_id)
@@ -183,6 +190,8 @@ class EngagementAnalyticsView(APIView):
 
     def get(self, request):
         school_id = request.school_id
+        if request.user.school_id != school_id:
+            raise PermissionDenied("Invalid school")
         group_id = request.query_params.get("group_id")
 
         survey_qs = SurveyVote.objects.filter(survey__school_id=school_id)

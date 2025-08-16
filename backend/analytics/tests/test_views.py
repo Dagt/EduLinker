@@ -273,3 +273,23 @@ def test_non_director_forbidden():
         res = client.get(f"/api/v1/analytics/{url}/")
         assert res.status_code == 403
 
+
+@pytest.mark.django_db
+def test_analytics_forbids_cross_school_access():
+    school1 = School.objects.create(name="S1", slug="s1", subdomain="s1", active=True)
+    school2 = School.objects.create(name="S2", slug="s2", subdomain="s2", active=True)
+    director = User.objects.create_user(
+        username="d@x.com",
+        email="d@x.com",
+        password="p",
+        role="DIRECTOR",
+        school=school1,
+    )
+    client = APIClient()
+    token = str(RefreshToken.for_user(director).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school2.id)
+    )
+    res = client.get("/api/v1/analytics/overview/")
+    assert res.status_code == 403
+
