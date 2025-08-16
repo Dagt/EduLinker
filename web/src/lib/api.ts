@@ -17,25 +17,42 @@ export function authHeaders(token?: string) {
   return h;
 }
 
-export async function apiGet<T>(path: string, token?: string): Promise<T> {
-  const base = process.env.NEXT_PUBLIC_API_URL!;
-  const res = await fetch(`${base}${path}`, { headers: authHeaders(token), cache: "no-store" });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+async function handleResponse<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    let msg = `${res.status} ${res.statusText}`;
+    try {
+      const data = await res.json();
+      if (typeof (data as any).detail === "string") msg = (data as any).detail;
+    } catch {}
+    throw new Error(msg);
+  }
+  if (res.status === 204) return undefined as any;
   return res.json();
 }
 
-export async function apiPost<T>(path: string, body: any, token?: string): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
   const base = process.env.NEXT_PUBLIC_API_URL!;
-  const res = await fetch(`${base}${path}`, { method: "POST", headers: authHeaders(token), body: JSON.stringify(body) });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json();
+  const res = await fetch(`${base}${path}`, {
+    ...options,
+    headers: { ...authHeaders(token), ...(options.headers || {}) },
+  });
+  return handleResponse<T>(res);
 }
 
-export async function apiPatch<T>(path: string, body: any, token?: string): Promise<T> {
-  const base = process.env.NEXT_PUBLIC_API_URL!;
-  const res = await fetch(`${base}${path}`, { method: "PATCH", headers: authHeaders(token), body: JSON.stringify(body) });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json();
+export function apiGet<T>(path: string, token?: string): Promise<T> {
+  return request<T>(path, { cache: "no-store" }, token);
+}
+
+export function apiPost<T>(path: string, body: any, token?: string): Promise<T> {
+  return request<T>(path, { method: "POST", body: JSON.stringify(body) }, token);
+}
+
+export function apiPatch<T>(path: string, body: any, token?: string): Promise<T> {
+  return request<T>(path, { method: "PATCH", body: JSON.stringify(body) }, token);
+}
+
+export function apiDelete<T>(path: string, token?: string): Promise<T> {
+  return request<T>(path, { method: "DELETE" }, token);
 }
 
 // Suggestion status update

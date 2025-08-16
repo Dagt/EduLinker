@@ -108,7 +108,9 @@
     "title": "Title",
     "description": "Description",
     "send": "Send",
-    "createLink": "Create suggestion"
+    "createLink": "Create suggestion",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this suggestion?"
   },
   "ComplaintCreate": {
     "header": "Create private complaint",

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import { useForm } from "react-hook-form";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -39,6 +39,17 @@ export default function SuggestionsPage(){
     }
   }
 
+  async function handleDelete(id: number){
+    if (typeof window !== 'undefined' && !window.confirm(t('deleteConfirm'))) return;
+    try {
+      const tk = getToken();
+      await apiDelete(`/suggestions/${id}/`, tk);
+      setItems(items.filter(s => s.id !== id));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <Nav />
@@ -56,6 +67,7 @@ export default function SuggestionsPage(){
           {items.map(s => (
             <li key={s.id}>
               <Link href={`/suggestions/${s.id}`}>{s.title}</Link>: {s.description}
+              <button onClick={() => handleDelete(s.id)} style={{marginLeft:8}}>{t('delete')}</button>
             </li>
           ))}
         </ul>
