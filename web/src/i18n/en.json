@@ -239,5 +239,9 @@
     "email": "Email/username",
     "password": "Password",
     "login": "Login"
+  },
+  "LanguageSwitcher": {
+    "english": "English",
+    "spanish": "Spanish"
   }
 }
