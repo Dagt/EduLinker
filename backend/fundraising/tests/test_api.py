@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import School, SchoolYear, Group, User, VocalAssignment
-from fundraising.models import FundraisingGroupLedger, ExpenseEvidence
+from fundraising.models import FundraisingEvent, FundraisingGroupLedger, ExpenseEvidence
 
 
 def _client_for(user, school):
@@ -113,3 +113,29 @@ def test_vocal_can_upload_expense_evidence(setup_entities):
     assert res.status_code == 200
     data = res.json()
     assert len(data["expenses"]) == 1
+
+
+@pytest.mark.django_db
+def test_ledger_creation_rejects_wrong_school_event(setup_entities):
+    school, director, parent, group = setup_entities
+    other_school = School.objects.create(name="O", slug="o", subdomain="o", active=True)
+    sy2 = SchoolYear.objects.create(
+        school=other_school,
+        name="2025",
+        start_date="2025-01-01",
+        end_date="2025-12-31",
+        is_current=True,
+    )
+    event_other = FundraisingEvent.objects.create(
+        school=other_school,
+        school_year=sy2,
+        name="Rifa",
+        date="2025-09-09",
+    )
+    client = _client_for(parent, school)
+    res = client.post(
+        "/api/v1/fundraising-ledger/",
+        {"event": event_other.id, "group": group.id, "amount_collected": "10.00"},
+        format="json",
+    )
+    assert res.status_code == 403
