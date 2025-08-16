@@ -1,5 +1,6 @@
 # backend/core/urls.py.py
 from django.urls import path, include
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from .storage_views import PresignUploadView
 from .views import (
     ComplaintCreateView,
@@ -30,6 +31,15 @@ from .views import (
     HomeworkDetailView,
     FeedView,
 )
+
+api_docs_urlpatterns = [
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="docs",
+    ),
+]
 
 urlpatterns = [
     path("me/", MeView.as_view(), name="me"),

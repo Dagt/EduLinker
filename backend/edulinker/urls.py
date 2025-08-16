@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 from core.auth_views import LoginView
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from core.urls import api_docs_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,8 +15,8 @@ urlpatterns = [
     path('api/v1/', include('chat.urls')),
     path('api/v1/', include('suggestions.urls')),
     path('api/v1/', include('audit.urls')),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
     path('api/v1/', include('notifications.urls')),
     path('api/v1/', include('events.urls')),
 ]
+
+urlpatterns += api_docs_urlpatterns
