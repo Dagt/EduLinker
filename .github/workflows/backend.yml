@@ -39,7 +39,7 @@ jobs:
       - run: |
           cd backend
           python manage.py migrate --noinput
-          pytest --cov=. --cov-report=xml
+          pytest
       - uses: actions/upload-artifact@v4
         with:
           name: backend-coverage

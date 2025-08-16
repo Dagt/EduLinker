@@ -2,4 +2,6 @@ from django.apps import apps
 
 
 def test_app_config():
-    assert apps.get_app_config("core").name == "core"
+    config = apps.get_app_config("core")
+    assert config.name == "core"
+    assert config.default_auto_field == "django.db.models.BigAutoField"
