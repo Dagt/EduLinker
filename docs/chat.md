@@ -13,5 +13,7 @@ Gestión de mensajes dentro de un grupo.
 
 ## Endpoints
 
-- `GET /api/v1/chats/{group_id}/messages/` – Lista los mensajes del grupo.
+- `GET /api/v1/chats/{group_id}/messages/` – Lista los mensajes del grupo. Acepta el
+  parámetro opcional `audit`, que si se incluye y el usuario es Director, registra
+  la lectura en el registro de auditoría.
 - `POST /api/v1/chats/{group_id}/messages/` – Envía un nuevo mensaje.
