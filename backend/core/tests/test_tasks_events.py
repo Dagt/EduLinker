@@ -8,7 +8,7 @@ from core.tasks import send_event_reminders
 
 @pytest.mark.django_db
 def test_send_event_reminders_with_offsets(monkeypatch, settings):
-    settings.EVENT_REMINDER_OFFSETS = [24, 48]
+    settings.EVENT_REMINDER_OFFSETS = [24, 1]
 
     fixed_now = timezone.now()
     monkeypatch.setattr(timezone, "now", lambda: fixed_now)
@@ -40,8 +40,8 @@ def test_send_event_reminders_with_offsets(monkeypatch, settings):
         school_year=year,
         scope="GLOBAL",
         title="E2",
-        start_at=fixed_now + timedelta(hours=48),
-        end_at=fixed_now + timedelta(hours=49),
+        start_at=fixed_now + timedelta(hours=1),
+        end_at=fixed_now + timedelta(hours=2),
         created_by=creator,
     )
 

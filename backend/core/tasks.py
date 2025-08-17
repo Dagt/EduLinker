@@ -11,7 +11,7 @@ from core.utils import get_group_audience_user_ids, get_event_audience_user_ids
 @shared_task
 def send_event_reminders():
     now = timezone.now()
-    offsets = getattr(settings, "EVENT_REMINDER_OFFSETS", [24])
+    offsets = getattr(settings, "EVENT_REMINDER_OFFSETS", [24, 1])
     total_events = 0
     total_push = 0
     for offset in offsets:
