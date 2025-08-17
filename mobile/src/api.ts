@@ -239,3 +239,12 @@ export async function createExpenseEvidence(body: {
 }){
   return apiPost("/expense-evidences/", body);
 }
+
+// Vocal assignments
+export async function assignVocal(group: number, parent: number){
+  return apiPost("/groups/vocal-assignments/", { group, parent });
+}
+
+export async function deactivateVocal(id: number){
+  return apiPost(`/groups/vocal-assignments/${id}/deactivate/`, {});
+}

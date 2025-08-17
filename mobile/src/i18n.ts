@@ -19,6 +19,7 @@ const translations = {
       surveys: 'Surveys',
       fundraising: 'Fundraising',
       events: 'Calendar',
+      vocalAssignments: 'Vocals',
     },
     surveys: {
       title: 'Surveys',
@@ -70,6 +71,15 @@ const translations = {
       ledger: 'Ledger',
       expenses: 'Expenses',
     },
+    vocalAssignments: {
+      title: 'Vocal assignments',
+      active: 'Active vocals',
+      available: 'Available parents',
+      assign: 'Assign',
+      revoke: 'Revoke',
+      noneActive: 'No active vocals',
+      noneAvailable: 'No available parents',
+    },
     homeworkCreate: {
       title: 'Create homework',
       fieldTitle: 'Title',
@@ -116,6 +126,7 @@ const translations = {
       surveys: 'Encuestas',
       fundraising: 'Recaudación',
       events: 'Calendario',
+      vocalAssignments: 'Vocales',
     },
     surveys: {
       title: 'Encuestas',
@@ -166,6 +177,15 @@ const translations = {
     fundraising: {
       ledger: 'Ingresos',
       expenses: 'Gastos',
+    },
+    vocalAssignments: {
+      title: 'Asignar vocales',
+      active: 'Vocales activos',
+      available: 'Padres disponibles',
+      assign: 'Asignar',
+      revoke: 'Revocar',
+      noneActive: 'Sin vocales activos',
+      noneAvailable: 'Sin padres disponibles',
     },
     homeworkCreate: {
       title: 'Crear tarea',

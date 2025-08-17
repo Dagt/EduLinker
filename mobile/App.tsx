@@ -11,6 +11,7 @@ import Surveys from "./src/screens/Surveys";
 import SurveyCreate from "./src/screens/Surveys/Create";
 import EventCalendar from "./src/screens/EventCalendar";
 import Fundraising from "./src/screens/Fundraising";
+import VocalAssignments from "./src/screens/VocalAssignments";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
 import { getRole } from "./src/role";
@@ -27,7 +28,7 @@ if (process.env.NODE_ENV !== "test") {
 export default function App(){
   const [logged,setLogged]=useState(false);
   const [role,setRole]=useState("guest");
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events">("feed");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events"|"vocalAssignments">("feed");
 
   useEffect(()=>{ if(logged){ (async()=> setRole(await getRole()))(); } },[logged]);
 
@@ -50,6 +51,9 @@ export default function App(){
             <Button title={i18n.t('menu.surveys')} onPress={()=>setView("surveys")} />
             <Button title={i18n.t('menu.fundraising')} onPress={()=>setView("fundraising")} />
             <Button title={i18n.t('menu.events')} onPress={()=>setView("events")} />
+            {(role==="MAESTRO_TITULAR"||role==="DIRECTOR") && (
+              <Button title={i18n.t('menu.vocalAssignments')} onPress={()=>setView("vocalAssignments")} />
+            )}
           </View>
           {view==="feed" ? <Feed/> :
            view==="chat" ? <GroupChat/> :
@@ -61,6 +65,7 @@ export default function App(){
            view==="surveys" ? <Surveys onCreate={()=>setView("createSurvey")} /> :
            view==="createSurvey" ? <SurveyCreate/> :
            view==="fundraising" ? <Fundraising/> :
+           view==="vocalAssignments" ? <VocalAssignments/> :
            <EventCalendar/>}
         </>
       ) : <Login onLoggedIn={()=>setLogged(true)}/> }

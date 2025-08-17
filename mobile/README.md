@@ -53,3 +53,12 @@ Los roles **MAESTRO_TITULAR**, **MAESTRO_ITINERANTE**, **VOCAL** activo y **DIRE
 3. Completa título, descripción, opciones, alcance (escuela o grupo), anonimato y fechas.
 4. Al guardar se envía una petición `POST` al API mediante la función `createSurvey`.
 
+## Vocales del grupo
+
+Los roles **MAESTRO_TITULAR** y **DIRECTOR** pueden gestionar los vocales activos de un grupo.
+
+1. Abre el menú principal y selecciona *Vocales*.
+2. Elige el grupo deseado.
+3. La pantalla muestra los vocales activos y los padres disponibles del grupo.
+4. Usa los botones *Asignar* o *Revocar* para activar o desactivar a un vocal mediante las funciones `assignVocal` y `deactivateVocal`.
+
