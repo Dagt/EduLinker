@@ -303,6 +303,12 @@
     "assigned": "Vocal assigned",
     "error": "Error"
   },
+  "ActivityPhotos": {
+    "title": "Activity photos",
+    "upload": "Upload photo",
+    "empty": "No photos",
+    "error": "Error"
+  },
   "Validation": {
     "required": "Required",
     "invalidEmail": "Invalid email",

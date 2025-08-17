@@ -71,6 +71,11 @@ const translations = {
       ledger: 'Ledger',
       expenses: 'Expenses',
     },
+    activityPhotos: {
+      title: 'Activity photos',
+      upload: 'Upload photo',
+      empty: 'No photos',
+    },
     vocalAssignments: {
       title: 'Vocal assignments',
       active: 'Active vocals',
@@ -177,6 +182,11 @@ const translations = {
     fundraising: {
       ledger: 'Ingresos',
       expenses: 'Gastos',
+    },
+    activityPhotos: {
+      title: 'Fotos de actividades',
+      upload: 'Subir foto',
+      empty: 'Sin fotos',
     },
     vocalAssignments: {
       title: 'Asignar vocales',
