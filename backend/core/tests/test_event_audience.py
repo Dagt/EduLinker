@@ -2,7 +2,7 @@ import pytest
 from django.utils import timezone
 from datetime import date, timedelta
 
-from core.tasks import _event_audience_user_ids
+from core.utils import get_event_audience_user_ids
 from core.models import (
     School,
     SchoolYear,
@@ -151,7 +151,7 @@ def test_event_audience_excludes_other_school_users():
         school=s2, parent=parent3, student=student2, relationship="parent"
     )
 
-    ids = _event_audience_user_ids(event)
+    ids = get_event_audience_user_ids(event)
 
     assert parent1.id in ids
     assert specialist1.id in ids
