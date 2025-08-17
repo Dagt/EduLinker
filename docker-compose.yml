@@ -59,6 +59,8 @@ services:
       # Celery config
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      # Event reminders
+      EVENT_REMINDER_OFFSETS: "24,1"
     depends_on: [db, redis, minio, create-bucket]
     ports: ["8000:8000"]
 
@@ -69,6 +71,7 @@ services:
       DJANGO_SETTINGS_MODULE: edulinker.settings
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      EVENT_REMINDER_OFFSETS: "24,1"
     depends_on: [api, redis]
 
   celery-beat:
@@ -78,6 +81,7 @@ services:
       DJANGO_SETTINGS_MODULE: edulinker.settings
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      EVENT_REMINDER_OFFSETS: "24,1"
     depends_on: [api, redis]
 
   web:
