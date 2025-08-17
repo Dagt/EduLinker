@@ -33,3 +33,14 @@ await ImagePicker.requestMediaLibraryPermissionsAsync();
 
 La función `onPhoto` recibe la imagen codificada en Base64 lista para enviarse a la API.
 
+## Tareas y anuncios
+
+Los usuarios con rol **MAESTRO_TITULAR** o **MAESTRO_ITINERANTE** pueden crear nuevas tareas y anuncios desde la aplicación.
+
+1. Inicia la app y abre el menú principal.
+2. Selecciona *Nueva tarea* o *Nuevo anuncio*.
+3. Completa el formulario con título, descripción, grupo, fecha y adjunta archivos si es necesario.
+4. Al guardar se envía una petición `POST` al API utilizando las funciones `createHomework` o `createAnnouncement`.
+
+Los adjuntos se suben con `uploadFile`, que devuelve la URL remota lista para almacenarse en el backend.
+

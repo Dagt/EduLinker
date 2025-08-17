@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./src/screens/Login";
 import Feed from "./src/screens/Feed";
 import GroupChat from "./src/screens/GroupChat";
 import Complaints from "./src/screens/Complaints";
 import Suggestions from "./src/screens/Suggestions";
 import Homeworks from "./src/screens/Homeworks";
+import HomeworkCreate from "./src/screens/Homeworks/Create";
+import AnnouncementCreate from "./src/screens/Announcements/Create";
 import Surveys from "./src/screens/Surveys";
 import EventCalendar from "./src/screens/EventCalendar";
 import Fundraising from "./src/screens/Fundraising";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
+import { getRole } from "./src/role";
 
 if (process.env.NODE_ENV !== "test") {
   const Sentry = require("sentry-expo");
@@ -22,7 +25,11 @@ if (process.env.NODE_ENV !== "test") {
 
 export default function App(){
   const [logged,setLogged]=useState(false);
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"surveys"|"fundraising"|"events">("feed");
+  const [role,setRole]=useState("guest");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"fundraising"|"events">("feed");
+
+  useEffect(()=>{ if(logged){ (async()=> setRole(await getRole()))(); } },[logged]);
+
   return (
     <View style={{flex:1}}>
       {logged ? (
@@ -33,6 +40,12 @@ export default function App(){
             <Button title={i18n.t('menu.complaints')} onPress={()=>setView("complaints")} />
             <Button title={i18n.t('menu.suggestions')} onPress={()=>setView("suggestions")} />
             <Button title={i18n.t('menu.homeworks')} onPress={()=>setView("homeworks")} />
+            {(role==="MAESTRO_TITULAR"||role==="MAESTRO_ITINERANTE") && (
+              <>
+                <Button title={i18n.t('menu.createHomework')} onPress={()=>setView("createHomework")} />
+                <Button title={i18n.t('menu.createAnnouncement')} onPress={()=>setView("createAnnouncement")} />
+              </>
+            )}
             <Button title={i18n.t('menu.surveys')} onPress={()=>setView("surveys")} />
             <Button title={i18n.t('menu.fundraising')} onPress={()=>setView("fundraising")} />
             <Button title={i18n.t('menu.events')} onPress={()=>setView("events")} />
@@ -42,6 +55,8 @@ export default function App(){
            view==="complaints" ? <Complaints/> :
            view==="suggestions" ? <Suggestions/> :
            view==="homeworks" ? <Homeworks/> :
+           view==="createHomework" ? <HomeworkCreate/> :
+           view==="createAnnouncement" ? <AnnouncementCreate/> :
            view==="surveys" ? <Surveys/> :
            view==="fundraising" ? <Fundraising/> :
            <EventCalendar/>}

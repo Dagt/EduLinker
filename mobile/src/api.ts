@@ -145,6 +145,29 @@ export async function deleteSuggestion(id: number){
   return apiDeleteAuth(`/suggestions/${id}/`);
 }
 
+// Homeworks & Announcements
+export async function createHomework(body: {
+  title: string;
+  description: string;
+  group: number;
+  due_date: string;
+  subject: string;
+  attachments?: string[];
+}){
+  return apiPost("/homeworks/", body);
+}
+
+export async function createAnnouncement(body: {
+  title: string;
+  message: string;
+  group: number;
+  scope?: string;
+  publish_date?: string;
+  attachments?: string[];
+}){
+  return apiPost("/announcements/", body);
+}
+
 // Photos API helpers
 export async function postActivityPhoto(body: any){
   return apiPost("/activity-photos/", body);
