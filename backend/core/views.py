@@ -234,9 +234,33 @@ class ComplaintCreateView(generics.CreateAPIView):
     throttle_classes = [ComplaintCreateThrottle]
 
     def perform_create(self, serializer):
-        serializer.save(
-            created_by=self.request.user, school_id=self.request.school_id
+        user = self.request.user
+        group = serializer.validated_data["group"]
+        target_teacher = serializer.validated_data["target_teacher"]
+
+        student_ids = ParentStudent.objects.filter(parent_id=user.id).values_list(
+            "student_id", flat=True
         )
+        has_child = GroupMembership.objects.filter(
+            group=group, student_id__in=student_ids
+        ).exists()
+        if not has_child:
+            raise PermissionDenied("Parent must have a child in the group")
+
+        if not (
+            is_maestro_titular(target_teacher)
+            or is_maestro_itinerante(target_teacher)
+        ):
+            raise PermissionDenied(
+                "Target must be homeroom or itinerant teacher"
+            )
+        assigned = group.homeroom_teacher_id == target_teacher.id or SpecialistAssignment.objects.filter(
+            group=group, teacher=target_teacher
+        ).exists()
+        if not assigned:
+            raise PermissionDenied("Teacher not assigned to group")
+
+        serializer.save(created_by=user, school_id=self.request.school_id)
 
 
 class ComplaintDetailView(generics.RetrieveAPIView):
