@@ -33,6 +33,8 @@ class ComplaintsAnalyticsSerializer(serializers.Serializer):
     top_parents_by_complaints = serializers.ListField(
         child=serializers.JSONField()
     )
+    least_problematic_groups = serializers.ListField(child=serializers.JSONField())
+    events_by_group = serializers.ListField(child=serializers.JSONField())
 
 
 class FundraisingAnalyticsSerializer(serializers.Serializer):

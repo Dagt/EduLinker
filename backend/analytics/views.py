@@ -123,30 +123,57 @@ class ComplaintsAnalyticsView(APIView):
         school_id = request.school_id
         if request.user.school_id != school_id:
             raise PermissionDenied("Invalid school")
-        total_complaints = Complaint.objects.filter(school_id=school_id).count()
-        open_complaints = Complaint.objects.filter(
-            school_id=school_id, status=Complaint.Status.OPEN
+
+        group_id = request.query_params.get("group_id")
+        status = request.query_params.get("status")
+
+        complaints_qs = Complaint.objects.filter(school_id=school_id)
+        if group_id:
+            complaints_qs = complaints_qs.filter(group_id=group_id)
+        if status:
+            complaints_qs = complaints_qs.filter(status=status)
+
+        total_complaints = complaints_qs.count()
+        open_complaints = complaints_qs.filter(
+            status=Complaint.Status.OPEN
         ).count()
+
         complaints_by_group = (
-            Complaint.objects.filter(school_id=school_id)
-            .values("group")
+            complaints_qs.values("group")
             .annotate(total=Count("id"))
             .order_by("-total")
         )
+
         top_parents = (
-            Complaint.objects.filter(
-                school_id=school_id, created_by__role=User.Roles.PADRE
-            )
+            complaints_qs.filter(created_by__role=User.Roles.PADRE)
             .values("created_by")
             .annotate(total=Count("id"))
             .order_by("-total")[:5]
         )
+
+        least_problematic_groups = (
+            complaints_qs.values("group")
+            .annotate(total=Count("id"))
+            .order_by("total")[:5]
+        )
+
+        events_qs = EventGroupAudience.objects.filter(event__school_id=school_id)
+        if group_id:
+            events_qs = events_qs.filter(group_id=group_id)
+        events_by_group = (
+            events_qs.values("group_id")
+            .annotate(total=Count("id"))
+            .order_by("-total")
+        )
+
         serializer = ComplaintsAnalyticsSerializer(
             {
                 "complaints_total": total_complaints,
                 "complaints_open": open_complaints,
                 "complaints_by_group": list(complaints_by_group),
                 "top_parents_by_complaints": list(top_parents),
+                "least_problematic_groups": list(least_problematic_groups),
+                "events_by_group": list(events_by_group),
             }
         )
         return Response(serializer.data)
