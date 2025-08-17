@@ -19,6 +19,7 @@ const translations = {
       surveys: 'Surveys',
       fundraising: 'Fundraising',
       events: 'Calendar',
+      vocalAssignments: 'Vocal assignments',
     },
     login: {
       title: 'EduLinker',
@@ -66,6 +67,14 @@ const translations = {
       ledger: 'Ledger',
       expenses: 'Expenses',
     },
+    vocalAssignments: {
+      title: 'Vocal assignments',
+      assign: 'Assign',
+      revoke: 'Revoke',
+      selectParent: 'Select parent',
+      selectGroup: 'Select group',
+      none: 'No vocals',
+    },
     homeworkCreate: {
       title: 'Create homework',
       fieldTitle: 'Title',
@@ -100,6 +109,7 @@ const translations = {
       surveys: 'Encuestas',
       fundraising: 'Recaudación',
       events: 'Calendario',
+      vocalAssignments: 'Vocales',
     },
     login: {
       title: 'EduLinker',
@@ -146,6 +156,14 @@ const translations = {
     fundraising: {
       ledger: 'Ingresos',
       expenses: 'Gastos',
+    },
+    vocalAssignments: {
+      title: 'Asignaciones de vocales',
+      assign: 'Asignar',
+      revoke: 'Revocar',
+      selectParent: 'Seleccionar padre',
+      selectGroup: 'Seleccionar grupo',
+      none: 'Sin vocales',
     },
     homeworkCreate: {
       title: 'Crear tarea',

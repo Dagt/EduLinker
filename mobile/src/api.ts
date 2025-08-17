@@ -226,3 +226,11 @@ export async function createExpenseEvidence(body: {
 }){
   return apiPost("/expense-evidences/", body);
 }
+
+export async function assignVocal(body: { group: number; parent: number }){
+  return apiPost("/groups/vocal-assignments/", body);
+}
+
+export async function deactivateVocal(id: number){
+  return apiPost(`/groups/vocal-assignments/${id}/deactivate/`, {});
+}

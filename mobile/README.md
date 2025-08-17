@@ -44,3 +44,15 @@ Los usuarios con rol **MAESTRO_TITULAR** o **MAESTRO_ITINERANTE** pueden crear n
 
 Los adjuntos se suben con `uploadFile`, que devuelve la URL remota lista para almacenarse en el backend.
 
+## Asignación de vocales
+
+Los usuarios con rol **MAESTRO_TITULAR** o **DIRECTOR** pueden gestionar los vocales de un grupo desde la app móvil.
+
+1. En el menú principal, elige *Vocales*.
+2. Selecciona el grupo deseado.
+3. La pantalla mostrará los vocales activos y los padres disponibles.
+4. Toca un padre disponible y pulsa **Asignar** para nombrarlo vocal.
+5. Para revocar a un vocal activo, utiliza el botón **Revocar** junto a su nombre.
+
+Internamente se utilizan las peticiones `POST /groups/vocal-assignments/` y `POST /groups/vocal-assignments/{id}/deactivate/`.
+

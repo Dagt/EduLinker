@@ -10,7 +10,9 @@ import AnnouncementCreate from "./src/screens/Announcements/Create";
 import Surveys from "./src/screens/Surveys";
 import EventCalendar from "./src/screens/EventCalendar";
 import Fundraising from "./src/screens/Fundraising";
-import { View, Button } from "react-native";
+import VocalAssignments from "./src/screens/VocalAssignments";
+import { apiGet } from "./src/api";
+import { View, Button, Text } from "react-native";
 import i18n from "./src/i18n";
 import { getRole } from "./src/role";
 
@@ -26,9 +28,12 @@ if (process.env.NODE_ENV !== "test") {
 export default function App(){
   const [logged,setLogged]=useState(false);
   const [role,setRole]=useState("guest");
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"fundraising"|"events">("feed");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"fundraising"|"events"|"vocalAssignments">("feed");
+  const [vocalGroupId,setVocalGroupId]=useState<number|null>(null);
+  const [vocalGroups,setVocalGroups]=useState<any[]>([]);
 
   useEffect(()=>{ if(logged){ (async()=> setRole(await getRole()))(); } },[logged]);
+  useEffect(()=>{ if(view==="vocalAssignments"){ (async()=>{ try{ const g=await apiGet('/groups/'); setVocalGroups(g); }catch{ setVocalGroups([]); } })(); } },[view]);
 
   return (
     <View style={{flex:1}}>
@@ -48,6 +53,9 @@ export default function App(){
             )}
             <Button title={i18n.t('menu.surveys')} onPress={()=>setView("surveys")} />
             <Button title={i18n.t('menu.fundraising')} onPress={()=>setView("fundraising")} />
+            {(role==="MAESTRO_TITULAR"||role==="DIRECTOR") && (
+              <Button title={i18n.t('menu.vocalAssignments')} onPress={()=>{ setVocalGroupId(null); setView('vocalAssignments'); }} />
+            )}
             <Button title={i18n.t('menu.events')} onPress={()=>setView("events")} />
           </View>
           {view==="feed" ? <Feed/> :
@@ -59,6 +67,15 @@ export default function App(){
            view==="createAnnouncement" ? <AnnouncementCreate/> :
            view==="surveys" ? <Surveys/> :
            view==="fundraising" ? <Fundraising/> :
+           view==="vocalAssignments" ? (
+             vocalGroupId ? <VocalAssignments groupId={vocalGroupId}/> :
+             <View style={{padding:16}}>
+               <Text style={{fontSize:18, marginBottom:8}}>{i18n.t('vocalAssignments.selectGroup')}</Text>
+               {vocalGroups.map((g:any)=>(
+                 <Button key={g.id} title={g.name} onPress={()=>setVocalGroupId(g.id)} />
+               ))}
+             </View>
+           ) :
            <EventCalendar/>}
         </>
       ) : <Login onLoggedIn={()=>setLogged(true)}/> }
