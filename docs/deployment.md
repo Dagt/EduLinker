@@ -72,7 +72,11 @@
     kubectl create configmap edulinker-web-env --from-env-file=web/.env
     ```
 
-3. Aplica los manifiestos (`Deployment`, `Service` e `Ingress`):
+3. Aplica los manifiestos (`Deployment`, `Service` e `Ingress`) ubicados en `k8s/`:
+
+   - `k8s/api-deployment.yml` y `k8s/api-service.yml` para el backend.
+   - `k8s/web-deployment.yml` y `k8s/web-service.yml` para el frontend.
+   - `k8s/ingress.yml` que enruta subdominios por escuela.
 
     ```bash
     kubectl apply -f k8s/

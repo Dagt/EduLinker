@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edulinker-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edulinker-api
+  template:
+    metadata:
+      labels:
+        app: edulinker-api
+    spec:
+      containers:
+      - name: api
+        image: registry.example.com/edulinker-api:latest
+        envFrom:
+        - secretRef:
+            name: edulinker-api-env
+        ports:
+        - containerPort: 8000
