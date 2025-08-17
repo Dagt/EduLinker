@@ -14,7 +14,11 @@ class SchoolMiddleware:
         try:
             school = School.objects.get(subdomain=subdomain)
         except School.DoesNotExist:
-            return JsonResponse({"detail": "Invalid tenant"}, status=400)
+            school_id = request.headers.get("X-School-ID")
+            try:
+                school = School.objects.get(pk=int(school_id))
+            except (TypeError, ValueError, School.DoesNotExist):
+                return JsonResponse({"detail": "Invalid tenant"}, status=400)
 
         connection.set_tenant(school)
         request.school_id = school.id

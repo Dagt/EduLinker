@@ -26,3 +26,12 @@ def test_header_used_when_subdomain_missing():
 
     assert response.status_code == 200
     assert request.school_id == school.id
+
+
+@pytest.mark.django_db
+def test_invalid_header_returns_400():
+    rf = RequestFactory()
+    request = rf.get("/", HTTP_HOST="unknown.testserver", HTTP_X_SCHOOL_ID="bad")
+    response = SchoolMiddleware(lambda req: JsonResponse({}))(request)
+
+    assert response.status_code == 400
