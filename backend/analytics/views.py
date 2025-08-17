@@ -146,18 +146,13 @@ class ComplaintsAnalyticsView(APIView):
             .annotate(total=Count("id"))
             .order_by("-total")
         )
+        complaints_by_group = list(complaints_by_group)
 
         top_parents = (
             complaints_qs.filter(created_by__role=User.Roles.PADRE)
             .values("created_by")
             .annotate(total=Count("id"))
             .order_by("-total")[:5]
-        )
-
-        least_problematic_groups = (
-            complaints_qs.values("group")
-            .annotate(total=Count("id"))
-            .order_by("total")[:5]
         )
 
         events_qs = EventGroupAudience.objects.filter(event__school_id=school_id)
@@ -168,15 +163,30 @@ class ComplaintsAnalyticsView(APIView):
             .annotate(total=Count("id"))
             .order_by("-total")
         )
+        events_by_group = list(events_by_group)
+
+        complaints_map = {item["group"]: item["total"] for item in complaints_by_group}
+        least_problematic_groups = [
+            {
+                "group": item["group_id"],
+                "complaints": complaints_map.get(item["group_id"], 0),
+                "participation": item["total"],
+            }
+            for item in events_by_group
+        ]
+        least_problematic_groups.sort(
+            key=lambda x: (x["complaints"], -x["participation"])
+        )
+        least_problematic_groups = least_problematic_groups[:5]
 
         serializer = ComplaintsAnalyticsSerializer(
             {
                 "complaints_total": total_complaints,
                 "complaints_open": open_complaints,
-                "complaints_by_group": list(complaints_by_group),
+                "complaints_by_group": complaints_by_group,
                 "top_parents_by_complaints": list(top_parents),
-                "least_problematic_groups": list(least_problematic_groups),
-                "events_by_group": list(events_by_group),
+                "least_problematic_groups": least_problematic_groups,
+                "events_by_group": events_by_group,
             }
         )
         return Response(serializer.data)

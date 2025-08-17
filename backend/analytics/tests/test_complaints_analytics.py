@@ -123,9 +123,11 @@ def test_complaints_analytics_returns_totals():
     # group1 has two complaints, group2 has one
     assert data["complaints_by_group"][0]["total"] == 2
     assert data["top_parents_by_complaints"][0]["total"] == 3
-    # least problematic group should be group2 with one complaint
-    assert data["least_problematic_groups"][0]["group"] == group2.id
-    assert data["least_problematic_groups"][0]["total"] == 1
+    # least problematic group should be group2 with one complaint and high participation
+    group_metrics = data["least_problematic_groups"][0]
+    assert group_metrics["group"] == group2.id
+    assert group_metrics["complaints"] == 1
+    assert group_metrics["participation"] == 1
     events = {item["group_id"]: item["total"] for item in data["events_by_group"]}
     assert events[group1.id] == 1
     assert events[group2.id] == 1
@@ -218,6 +220,8 @@ def test_complaints_analytics_filters_by_query_params():
     assert data["complaints_total"] == 1
     assert data["complaints_open"] == 0
     assert data["complaints_by_group"] == [{"group": group2.id, "total": 1}]
-    assert data["least_problematic_groups"] == [{"group": group2.id, "total": 1}]
+    assert data["least_problematic_groups"] == [
+        {"group": group2.id, "complaints": 1, "participation": 1}
+    ]
     events = {item["group_id"]: item["total"] for item in data["events_by_group"]}
     assert events == {group2.id: 1}

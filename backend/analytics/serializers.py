@@ -24,16 +24,29 @@ class OverviewAnalyticsSerializer(serializers.Serializer):
     events_by_scope = serializers.ListField(child=serializers.JSONField())
 
 
+class ParentComplaintsSerializer(serializers.Serializer):
+    """Serializer for parent complaint totals."""
+
+    created_by = serializers.IntegerField()
+    total = serializers.IntegerField()
+
+
+class GroupParticipationSerializer(serializers.Serializer):
+    """Serializer for group participation and complaints."""
+
+    group = serializers.IntegerField()
+    complaints = serializers.IntegerField()
+    participation = serializers.IntegerField()
+
+
 class ComplaintsAnalyticsSerializer(serializers.Serializer):
     """Serializer for the complaints analytics endpoint."""
 
     complaints_total = serializers.IntegerField()
     complaints_open = serializers.IntegerField()
     complaints_by_group = serializers.ListField(child=serializers.JSONField())
-    top_parents_by_complaints = serializers.ListField(
-        child=serializers.JSONField()
-    )
-    least_problematic_groups = serializers.ListField(child=serializers.JSONField())
+    top_parents_by_complaints = ParentComplaintsSerializer(many=True)
+    least_problematic_groups = GroupParticipationSerializer(many=True)
     events_by_group = serializers.ListField(child=serializers.JSONField())
 
 
