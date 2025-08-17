@@ -1,3 +1,5 @@
+jest.mock('./auth', () => ({ refreshToken: jest.fn().mockResolvedValue('newtk') }));
+import { refreshToken } from './auth';
 import * as api from './api';
 
 describe('schoolIdFromHost', () => {
@@ -143,6 +145,16 @@ describe('api helpers', () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     await api.voteSurvey(3,4);
     expect(global.fetch).toHaveBeenCalledWith('http://api/surveys/3/vote', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('retries after refresh on 401', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: false, status: 401, statusText: 'unauth', json: async () => ({}) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ a: 1 }) });
+    const data = await api.apiGet('/x', 'old');
+    expect(refreshToken).toHaveBeenCalled();
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(data).toEqual({ a: 1 });
   });
 });
 

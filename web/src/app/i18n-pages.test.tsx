@@ -15,7 +15,7 @@ jest.mock('recharts', () => {
   };
 });
 jest.mock('@/lib/api');
-jest.mock('@/lib/auth', () => ({ getToken: () => 'token' }));
+jest.mock('@/lib/auth', () => ({ getToken: () => 'token', setTokens: jest.fn() }));
 jest.mock('@/lib/roles', () => ({ requireRole: () => true }));
 
 import ComplaintCreate from './complaints/create/page';

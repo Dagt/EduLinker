@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { setToken } from "@/lib/auth";
+import { setTokens } from "@/lib/auth";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
 
@@ -22,7 +22,7 @@ export default function Login(){
     });
     if(!res.ok){ setError(t("Login.invalid")); return; }
     const data = await res.json();
-    setToken(data.access);
+    setTokens(data.access, data.refresh);
     location.href = "/dashboard";
   }
 

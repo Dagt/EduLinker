@@ -2,9 +2,13 @@ import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const BASE = "http://10.0.2.2:8000/api/v1"; // Android emu
 const SCHOOL_ID_KEY = "schoolId";
+const ACCESS_KEY = "tk";
+const REFRESH_KEY = "rtk";
 
-export async function getToken(){ return await SecureStore.getItemAsync("tk"); }
-export async function setToken(t: string){ await SecureStore.setItemAsync("tk", t); }
+export async function getToken(){ return await SecureStore.getItemAsync(ACCESS_KEY); }
+export async function setToken(t: string){ await SecureStore.setItemAsync(ACCESS_KEY, t); }
+export async function getRefreshToken(){ return await SecureStore.getItemAsync(REFRESH_KEY); }
+export async function setRefreshToken(t: string){ await SecureStore.setItemAsync(REFRESH_KEY, t); }
 
 export async function getSchoolId(){
   let id = await AsyncStorage.getItem(SCHOOL_ID_KEY);
@@ -29,40 +33,50 @@ export async function headers(t?: string){
   return h;
 }
 
-export async function apiGet(path: string){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { headers: await headers(tk) });
+export async function refreshToken(){
+  const refresh = await getRefreshToken();
+  if(!refresh) throw new Error("no refresh token");
+  const r = await fetch(`${BASE}/auth/refresh/`, { method:"POST", headers: await headers(), body: JSON.stringify({ refresh }) });
   if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
+  const data = await r.json();
+  await setToken(data.access);
+  return data.access as string;
 }
 
-export async function apiPost(path: string, body: any){
+async function request(path: string, options: RequestInit = {}){
   const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"POST", headers: await headers(tk), body: JSON.stringify(body) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
-
-export async function apiPostAuth(path: string, body: any){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"POST", headers: await headers(tk), body: JSON.stringify(body) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
-
-export async function apiPutAuth(path: string, body: any){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"PUT", headers: await headers(tk), body: JSON.stringify(body) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
-
-export async function apiDeleteAuth(path: string){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method: "DELETE", headers: await headers(tk) });
+  let r = await fetch(`${BASE}${path}`, { ...options, headers: await headers(tk) });
+  if(r.status === 401){
+    try{
+      const newTk = await refreshToken();
+      r = await fetch(`${BASE}${path}`, { ...options, headers: await headers(newTk) });
+    }catch{
+      throw new Error("401 Unauthorized");
+    }
+  }
   if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
   if(r.status === 204) return;
   return r.json();
+}
+
+export async function apiGet(path: string){
+  return request(path);
+}
+
+export async function apiPost(path: string, body: any){
+  return request(path, { method:"POST", body: JSON.stringify(body) });
+}
+
+export async function apiPostAuth(path: string, body: any){
+  return request(path, { method:"POST", body: JSON.stringify(body) });
+}
+
+export async function apiPutAuth(path: string, body: any){
+  return request(path, { method:"PUT", body: JSON.stringify(body) });
+}
+
+export async function apiDeleteAuth(path: string){
+  return request(path, { method:"DELETE" });
 }
 
 export async function getNotificationPreferences(){

@@ -6,7 +6,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { headers, apiGet, apiDeleteAuth, apiPostAuth } from '../api';
+import { headers, apiGet, apiDeleteAuth, apiPostAuth, setRefreshToken, getRefreshToken } from '../api';
 
 describe('api helpers extra', () => {
   beforeEach(() => {
@@ -36,5 +36,12 @@ describe('api helpers extra', () => {
     await apiPostAuth('/z', { a: 1 });
     expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/z');
     expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('POST');
+  });
+
+  it('stores and retrieves refresh token', async () => {
+    await setRefreshToken('ref');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('rtk', 'ref');
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue('ref');
+    expect(await getRefreshToken()).toBe('ref');
   });
 });

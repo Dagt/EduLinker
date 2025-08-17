@@ -2,7 +2,7 @@
 import { registerForPushNotificationsAsync } from "../notifications";
 import { View, Text, TextInput, Button, Alert, Platform } from "react-native";
 import { useState } from "react";
-import { setToken } from "../api";
+import { setToken, setRefreshToken } from "../api";
 import { apiPostAuth } from "../api";
 import i18n from "../i18n";
 
@@ -19,6 +19,7 @@ export default function Login({ onLoggedIn }: { onLoggedIn: ()=>void }){
     if(!r.ok){ Alert.alert(i18n.t('general.error'), i18n.t('login.invalid')); return; }
     const data = await r.json();
     await setToken(data.access);
+    await setRefreshToken(data.refresh);
     const expoToken = await registerForPushNotificationsAsync();
     if (expoToken) {
       try {

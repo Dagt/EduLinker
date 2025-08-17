@@ -1,4 +1,4 @@
-import { setToken, getToken, clearToken } from './auth';
+import { setTokens, getToken, getRefreshToken, clearToken, refreshToken } from './auth';
 
 describe('auth token helpers', () => {
   beforeEach(() => {
@@ -13,15 +13,26 @@ describe('auth token helpers', () => {
     });
   });
 
-  it('stores and retrieves token', () => {
-    setToken('abc');
-    expect(getToken()).toBe('abc');
+  it('stores and retrieves tokens', () => {
+    setTokens('a','r');
+    expect(getToken()).toBe('a');
+    expect(getRefreshToken()).toBe('r');
   });
 
-  it('clears token', () => {
-    setToken('abc');
+  it('clears tokens', () => {
+    setTokens('a','r');
     clearToken();
     expect(getToken()).toBe('');
+    expect(getRefreshToken()).toBe('');
+  });
+
+  it('refreshToken updates access', async () => {
+    setTokens('old','ref');
+    const origFetch = global.fetch;
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ access: 'new' }) }) as any;
+    await refreshToken();
+    expect(getToken()).toBe('new');
+    global.fetch = origFetch;
   });
 
   it('returns empty when window undefined', () => {
@@ -30,6 +41,7 @@ describe('auth token helpers', () => {
     // @ts-ignore
     delete (global as any).window;
     expect(getToken()).toBe('');
+    expect(getRefreshToken()).toBe('');
     (global as any).window = win;
   });
 });

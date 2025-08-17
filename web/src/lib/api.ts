@@ -1,3 +1,5 @@
+import { refreshToken } from "./auth";
+
 export function schoolIdFromHost(host?: string): string {
   if (!host) {
     if (typeof window === "undefined") return "1";
@@ -32,10 +34,22 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 async function request<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
   const base = process.env.NEXT_PUBLIC_API_URL!;
-  const res = await fetch(`${base}${path}`, {
+  let tk = token;
+  let res = await fetch(`${base}${path}`, {
     ...options,
-    headers: { ...authHeaders(token), ...(options.headers || {}) },
+    headers: { ...authHeaders(tk), ...(options.headers || {}) },
   });
+  if (res.status === 401) {
+    try {
+      tk = await refreshToken();
+      res = await fetch(`${base}${path}`, {
+        ...options,
+        headers: { ...authHeaders(tk), ...(options.headers || {}) },
+      });
+    } catch {
+      return handleResponse<T>(res);
+    }
+  }
   return handleResponse<T>(res);
 }
 
