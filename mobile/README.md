@@ -33,3 +33,14 @@ await ImagePicker.requestMediaLibraryPermissionsAsync();
 
 La función `onPhoto` recibe la imagen codificada en Base64 lista para enviarse a la API.
 
+## Crear encuestas
+
+Los usuarios con permisos de **director**, **maestro titular**, **maestro itinerante** o **vocal** pueden crear encuestas desde la app móvil. Para ejecutar los tests o desarrollar esta funcionalidad:
+
+```bash
+cd mobile
+npm test
+```
+
+En la aplicación, navega a *Encuestas* y selecciona **Crear encuesta** para registrar título, descripción, opciones, alcance, grupo y fechas.
+

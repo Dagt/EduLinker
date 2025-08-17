@@ -6,6 +6,7 @@ import Complaints from "./src/screens/Complaints";
 import Suggestions from "./src/screens/Suggestions";
 import Homeworks from "./src/screens/Homeworks";
 import Surveys from "./src/screens/Surveys";
+import SurveyCreate from "./src/screens/Surveys/Create";
 import EventCalendar from "./src/screens/EventCalendar";
 import Fundraising from "./src/screens/Fundraising";
 import { View, Button } from "react-native";
@@ -22,7 +23,17 @@ if (process.env.NODE_ENV !== "test") {
 
 export default function App(){
   const [logged,setLogged]=useState(false);
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"surveys"|"fundraising"|"events">("feed");
+  const [view,setView]=useState<
+    | "feed"
+    | "chat"
+    | "complaints"
+    | "suggestions"
+    | "homeworks"
+    | "surveys"
+    | "surveys-create"
+    | "fundraising"
+    | "events"
+  >("feed");
   return (
     <View style={{flex:1}}>
       {logged ? (
@@ -42,7 +53,8 @@ export default function App(){
            view==="complaints" ? <Complaints/> :
            view==="suggestions" ? <Suggestions/> :
            view==="homeworks" ? <Homeworks/> :
-           view==="surveys" ? <Surveys/> :
+           view==="surveys" ? <Surveys onCreate={()=>setView("surveys-create")} /> :
+           view==="surveys-create" ? <SurveyCreate onBack={()=>setView("surveys")} /> :
            view==="fundraising" ? <Fundraising/> :
            <EventCalendar/>}
         </>

@@ -1,6 +1,7 @@
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import Surveys from '..';
 import { getSurveys, getSurvey, voteSurvey, getSurveyResults } from '../../../api';
+import { getRole } from '../../../role';
 
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
 jest.mock('../../../api', () => ({
@@ -9,6 +10,7 @@ jest.mock('../../../api', () => ({
   voteSurvey: jest.fn(),
   getSurveyResults: jest.fn(),
 }));
+jest.mock('../../../role', () => ({ getRole: jest.fn() }));
 
 test('navigates to survey and votes', async () => {
   const now = Date.now();
@@ -26,6 +28,7 @@ test('navigates to survey and votes', async () => {
     .mockResolvedValueOnce({ results: {} })
     .mockResolvedValueOnce({ results: {0:1} });
   (voteSurvey as jest.Mock).mockResolvedValue({});
+  (getRole as jest.Mock).mockResolvedValue('PADRE');
 
   const { getByText } = render(<Surveys />);
   await waitFor(() => getByText(/Survey 1/));

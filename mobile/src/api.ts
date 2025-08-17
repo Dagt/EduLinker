@@ -181,6 +181,19 @@ export async function getSurveyResults(id: number){
   return apiGet(`/surveys/${id}/results/`);
 }
 
+export async function createSurvey(body: {
+  scope: 'GROUP' | 'SCHOOL';
+  group?: number;
+  title: string;
+  description: string;
+  options: string[];
+  is_anonymous: boolean;
+  start_at: string;
+  end_at: string;
+}){
+  return apiPost("/surveys/", body);
+}
+
 // Fundraising helpers
 export async function getFundraisingSummary(eventId: number){
   return apiGet(`/fundraising-events/${eventId}/summary/`);
