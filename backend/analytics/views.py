@@ -2,7 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Count, Sum
+from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 from core.models import (
     Complaint,
@@ -22,6 +24,7 @@ from .serializers import (
     ComplaintsAnalyticsSerializer,
     FundraisingAnalyticsSerializer,
     EngagementAnalyticsSerializer,
+    EventsAnalyticsSerializer,
 )
 
 
@@ -262,6 +265,95 @@ class EngagementAnalyticsView(APIView):
                 "homework_participation": list(homework_data),
                 "events_participation": list(event_data),
                 "participation_rate_by_group": participation_rate,
+            }
+        )
+        return Response(serializer.data)
+
+
+class EventsAnalyticsView(APIView):
+    permission_classes = [IsDirector]
+
+    def get(self, request):
+        school_id = request.school_id
+        if request.user.school_id != school_id:
+            raise PermissionDenied("Invalid school")
+
+        from_date = request.query_params.get("from")
+        to_date = request.query_params.get("to")
+        group_id = request.query_params.get("group_id")
+        scope = request.query_params.get("scope")
+
+        events_qs = Event.objects.filter(school_id=school_id)
+        if from_date:
+            parsed_from = parse_date(from_date)
+            if parsed_from:
+                events_qs = events_qs.filter(start_at__date__gte=parsed_from)
+        if to_date:
+            parsed_to = parse_date(to_date)
+            if parsed_to:
+                events_qs = events_qs.filter(start_at__date__lte=parsed_to)
+        if group_id:
+            events_qs = events_qs.filter(group_audiences__group_id=group_id)
+        if scope:
+            events_qs = events_qs.filter(scope=scope)
+
+        events_by_day = (
+            events_qs.annotate(day=TruncDate("start_at"))
+            .values("day")
+            .annotate(total=Count("id"))
+            .order_by("day")
+        )
+        events_by_day = [
+            {"date": item["day"].isoformat(), "total": item["total"]}
+            for item in events_by_day
+        ]
+
+        events_by_week = (
+            events_qs.annotate(week=TruncWeek("start_at"))
+            .values("week")
+            .annotate(total=Count("id"))
+            .order_by("week")
+        )
+        events_by_week = [
+            {"week": item["week"].date().isoformat(), "total": item["total"]}
+            for item in events_by_week
+        ]
+
+        events_by_month = (
+            events_qs.annotate(month=TruncMonth("start_at"))
+            .values("month")
+            .annotate(total=Count("id"))
+            .order_by("month")
+        )
+        events_by_month = [
+            {"month": item["month"].date().isoformat(), "total": item["total"]}
+            for item in events_by_month
+        ]
+
+        events_by_group = (
+            events_qs.values("group_audiences__group_id")
+            .annotate(total=Count("id"))
+            .order_by("group_audiences__group_id")
+        )
+        events_by_group = [
+            {"group_id": item["group_audiences__group_id"], "total": item["total"]}
+            for item in events_by_group
+            if item["group_audiences__group_id"] is not None
+        ]
+
+        events_by_scope = (
+            events_qs.values("scope")
+            .annotate(total=Count("id"))
+            .order_by("scope")
+        )
+
+        serializer = EventsAnalyticsSerializer(
+            {
+                "events_by_day": events_by_day,
+                "events_by_week": events_by_week,
+                "events_by_month": events_by_month,
+                "events_by_group": events_by_group,
+                "events_by_scope": list(events_by_scope),
             }
         )
         return Response(serializer.data)

@@ -5,6 +5,7 @@ from .views import (
     ComplaintsAnalyticsView,
     FundraisingAnalyticsView,
     EngagementAnalyticsView,
+    EventsAnalyticsView,
 )
 
 app_name = "analytics"
@@ -29,5 +30,10 @@ urlpatterns = [
         "analytics/engagement/",
         EngagementAnalyticsView.as_view(),
         name="analytics-engagement",
+    ),
+    path(
+        "analytics/events/",
+        EventsAnalyticsView.as_view(),
+        name="analytics-events",
     ),
 ]
