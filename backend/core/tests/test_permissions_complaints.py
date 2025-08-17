@@ -1,7 +1,16 @@
 import pytest
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-from core.models import School, SchoolYear, User, Group, Complaint
+from core.models import (
+    School,
+    SchoolYear,
+    User,
+    Group,
+    Complaint,
+    Student,
+    ParentStudent,
+    GroupMembership,
+)
 
 @pytest.mark.django_db
 def test_parent_can_create_private_complaint():
@@ -10,6 +19,19 @@ def test_parent_can_create_private_complaint():
     teacher = User.objects.create_user(username="t@x.com", email="t@x.com", password="p", role="MAESTRO_TITULAR", school=school)
     group = Group.objects.create(school=school, school_year=sy, name="5A", grade_level=5, homeroom_teacher=teacher)
     parent = User.objects.create_user(username="p@x.com", email="p@x.com", password="p", role="PADRE", school=school)
+    student = Student.objects.create(
+        school=school,
+        first_name="S",
+        last_name="S",
+        grade_level=5,
+        enrollment_code="e1",
+    )
+    ParentStudent.objects.create(
+        school=school, parent=parent, student=student, relationship="FATHER"
+    )
+    GroupMembership.objects.create(
+        school=school, group=group, student=student
+    )
 
     client = APIClient()
     token = str(RefreshToken.for_user(parent).access_token)

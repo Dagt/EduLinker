@@ -3,7 +3,15 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.models import School, SchoolYear, User, Group
+from core.models import (
+    School,
+    SchoolYear,
+    User,
+    Group,
+    Student,
+    ParentStudent,
+    GroupMembership,
+)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -32,6 +40,19 @@ def test_participant_flow_access():
         password="p",
         role="PADRE",
         school=school,
+    )
+    student = Student.objects.create(
+        school=school,
+        first_name="S",
+        last_name="S",
+        grade_level=5,
+        enrollment_code="e1",
+    )
+    ParentStudent.objects.create(
+        school=school, parent=parent, student=student, relationship="FATHER"
+    )
+    GroupMembership.objects.create(
+        school=school, group=group, student=student
     )
     outsider = User.objects.create_user(
         username="o@x.com",
@@ -107,6 +128,19 @@ def test_cannot_add_participant_from_other_school():
         password="p",
         role="PADRE",
         school=school,
+    )
+    student = Student.objects.create(
+        school=school,
+        first_name="S",
+        last_name="S",
+        grade_level=5,
+        enrollment_code="e1",
+    )
+    ParentStudent.objects.create(
+        school=school, parent=parent, student=student, relationship="FATHER"
+    )
+    GroupMembership.objects.create(
+        school=school, group=group, student=student
     )
     outsider = User.objects.create_user(
         username="o1@x.com",
