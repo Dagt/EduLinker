@@ -33,3 +33,13 @@ await ImagePicker.requestMediaLibraryPermissionsAsync();
 
 La función `onPhoto` recibe la imagen codificada en Base64 lista para enviarse a la API.
 
+## Asignación de vocales
+
+Los directores y maestros titulares pueden administrar las asignaciones de vocales desde la app móvil. La pantalla **Vocales** permite:
+
+- Ver los vocales activos de un grupo.
+- Seleccionar un padre disponible del grupo para asignarlo como vocal.
+- Revocar asignaciones existentes.
+
+Antes de acceder a la pantalla se debe indicar el ID del grupo sobre el que se trabajará.
+

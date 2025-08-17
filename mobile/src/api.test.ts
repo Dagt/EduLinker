@@ -2,6 +2,7 @@ jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: j
 
 import * as SecureStore from 'expo-secure-store';
 import { headers, uploadFile, updateComplaint, updateSuggestion, deleteComplaint, deleteSuggestion, refreshToken, apiGet } from './api';
+import { assignVocal, deactivateVocal } from './api';
 
 beforeEach(() => {
   (SecureStore.getItemAsync as jest.Mock).mockReset();
@@ -94,4 +95,18 @@ test('apiGet retries after 401 using refresh', async () => {
   const data = await apiGet('/p');
   expect((fetch as jest.Mock).mock.calls[1][0]).toContain('/auth/refresh/');
   expect(data).toEqual({ v: 1 });
+});
+
+test('assignVocal posts to endpoint', async () => {
+  (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+  await assignVocal({ group: 1, parent: 2 });
+  expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/groups/vocal-assignments/');
+  expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('POST');
+});
+
+test('deactivateVocal posts to deactivate endpoint', async () => {
+  (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+  await deactivateVocal(5);
+  expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/groups/vocal-assignments/5/deactivate/');
+  expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('POST');
 });

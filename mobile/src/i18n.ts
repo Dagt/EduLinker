@@ -17,6 +17,7 @@ const translations = {
       surveys: 'Surveys',
       fundraising: 'Fundraising',
       events: 'Calendar',
+      vocals: 'Vocals',
     },
     login: {
       title: 'EduLinker',
@@ -64,6 +65,15 @@ const translations = {
       ledger: 'Ledger',
       expenses: 'Expenses',
     },
+    vocalAssignments: {
+      title: 'Vocal assignments',
+      assign: 'Assign',
+      revoke: 'Revoke',
+      selectParent: 'Select parent',
+      none: 'No vocal assignments',
+      groupId: 'Group ID',
+      select: 'Select',
+    },
   },
   es: {
     general: {
@@ -80,6 +90,7 @@ const translations = {
       surveys: 'Encuestas',
       fundraising: 'Recaudación',
       events: 'Calendario',
+      vocals: 'Vocales',
     },
     login: {
       title: 'EduLinker',
@@ -126,6 +137,15 @@ const translations = {
     fundraising: {
       ledger: 'Ingresos',
       expenses: 'Gastos',
+    },
+    vocalAssignments: {
+      title: 'Asignaciones de vocal',
+      assign: 'Asignar',
+      revoke: 'Revocar',
+      selectParent: 'Seleccionar padre',
+      none: 'Sin vocales',
+      groupId: 'ID de grupo',
+      select: 'Seleccionar',
     },
   },
 };

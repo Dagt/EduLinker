@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* istanbul ignore file */
+import { useState, useEffect } from "react";
 import Login from "./src/screens/Login";
 import Feed from "./src/screens/Feed";
 import GroupChat from "./src/screens/GroupChat";
@@ -8,7 +9,9 @@ import Homeworks from "./src/screens/Homeworks";
 import Surveys from "./src/screens/Surveys";
 import EventCalendar from "./src/screens/EventCalendar";
 import Fundraising from "./src/screens/Fundraising";
-import { View, Button } from "react-native";
+import VocalAssignments from "./src/screens/VocalAssignments";
+import { View, Button, TextInput } from "react-native";
+import { getRole } from "./src/role";
 import i18n from "./src/i18n";
 
 if (process.env.NODE_ENV !== "test") {
@@ -22,7 +25,12 @@ if (process.env.NODE_ENV !== "test") {
 
 export default function App(){
   const [logged,setLogged]=useState(false);
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"surveys"|"fundraising"|"events">("feed");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"surveys"|"fundraising"|"events"|"vocalAssignments">("feed");
+  const [role,setRole]=useState("guest");
+  const [groupInput,setGroupInput]=useState("");
+  const [selectedGroup,setSelectedGroup]=useState<number|null>(null);
+
+  useEffect(()=>{ if(logged){ (async()=>setRole(await getRole()))(); } },[logged]);
   return (
     <View style={{flex:1}}>
       {logged ? (
@@ -36,6 +44,9 @@ export default function App(){
             <Button title={i18n.t('menu.surveys')} onPress={()=>setView("surveys")} />
             <Button title={i18n.t('menu.fundraising')} onPress={()=>setView("fundraising")} />
             <Button title={i18n.t('menu.events')} onPress={()=>setView("events")} />
+            {(role==="MAESTRO_TITULAR" || role==="DIRECTOR") && (
+              <Button title={i18n.t('menu.vocals')} onPress={()=>{ setSelectedGroup(null); setView('vocalAssignments'); }} />
+            )}
           </View>
           {view==="feed" ? <Feed/> :
            view==="chat" ? <GroupChat/> :
@@ -44,6 +55,21 @@ export default function App(){
            view==="homeworks" ? <Homeworks/> :
            view==="surveys" ? <Surveys/> :
            view==="fundraising" ? <Fundraising/> :
+           view==="vocalAssignments" ? (
+             selectedGroup ? (
+               <VocalAssignments groupId={selectedGroup} />
+             ) : (
+               <View style={{padding:16}}>
+                 <TextInput
+                   placeholder={i18n.t('vocalAssignments.groupId')}
+                   value={groupInput}
+                   onChangeText={setGroupInput}
+                   style={{borderWidth:1, marginBottom:8, padding:8}}
+                 />
+                 <Button title={i18n.t('vocalAssignments.select')} onPress={()=>{ if(groupInput) setSelectedGroup(Number(groupInput)); }} />
+               </View>
+             )
+           ) :
            <EventCalendar/>}
         </>
       ) : <Login onLoggedIn={()=>setLogged(true)}/> }

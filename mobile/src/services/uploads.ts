@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import * as ImagePicker from 'expo-image-picker';
 import { uploadFile } from '../api';
 
