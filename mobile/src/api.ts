@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const BASE = "http://10.0.2.2:8000/api/v1"; // Android emu
+
+const BASE = process.env.EXPO_PUBLIC_API_URL || "http://10.0.2.2:8000/api/v1"; // Android emu fallback
 const SCHOOL_ID_KEY = "schoolId";
 
 export async function getToken(){ return await SecureStore.getItemAsync("tk"); }
@@ -9,14 +10,17 @@ export async function setToken(t: string){ await SecureStore.setItemAsync("tk", 
 export async function getSchoolId(){
   let id = await AsyncStorage.getItem(SCHOOL_ID_KEY);
   if(!id){
-    const domain = process.env.EXPO_PUBLIC_DOMAIN || "";
-    const host = domain.replace(/^https?:\/\//, "");
-    const sub = host.split(".")[0];
-    const match = sub.match(/\d+/);
-    id = match ? match[0] : "1";
-    await AsyncStorage.setItem(SCHOOL_ID_KEY, id);
+    id = process.env.EXPO_PUBLIC_SCHOOL_ID || undefined;
+    if(!id){
+      const domain = process.env.EXPO_PUBLIC_DOMAIN || "";
+      const host = domain.replace(/^https?:\/\//, "");
+      const sub = host.split(".")[0];
+      const match = sub.match(/\d+/);
+      id = match ? match[0] : "1";
+    }
+    if(id) await AsyncStorage.setItem(SCHOOL_ID_KEY, id);
   }
-  return id;
+  return id!;
 }
 
 export async function setSchoolId(id: string){
