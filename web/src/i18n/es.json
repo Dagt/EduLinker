@@ -196,6 +196,10 @@
     "attached": "Adjunto agregado",
     "downloadICS": "Descargar ICS"
   },
+  "EventDetail": {
+    "attachments": "Adjuntos",
+    "date": "Fecha"
+  },
   "NotificationSettings": {
     "header": "Notificaciones",
     "event": "Eventos",

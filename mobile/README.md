@@ -62,3 +62,10 @@ Los roles **MAESTRO_TITULAR** y **DIRECTOR** pueden gestionar los vocales activo
 3. La pantalla muestra los vocales activos y los padres disponibles del grupo.
 4. Usa los botones *Asignar* o *Revocar* para activar o desactivar a un vocal mediante las funciones `assignVocal` y `deactivateVocal`.
 
+## Detalle de eventos
+
+La pantalla **EventDetail** muestra la información del evento, una lista de adjuntos y una galería de fotos.
+
+1. Abre un evento desde el calendario.
+2. Los adjuntos se pueden abrir en el navegador tocando el nombre del archivo.
+3. Si eres autor, vocal o maestro autorizado verás el botón *Subir adjunto* que permite elegir un archivo e incorporarlo al evento.

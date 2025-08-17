@@ -85,6 +85,10 @@ const translations = {
       noneActive: 'No active vocals',
       noneAvailable: 'No available parents',
     },
+    eventDetail: {
+      attachments: 'Attachments',
+      upload: 'Upload attachment',
+    },
     homeworkCreate: {
       title: 'Create homework',
       fieldTitle: 'Title',
@@ -196,6 +200,10 @@ const translations = {
       revoke: 'Revocar',
       noneActive: 'Sin vocales activos',
       noneAvailable: 'Sin padres disponibles',
+    },
+    eventDetail: {
+      attachments: 'Adjuntos',
+      upload: 'Subir adjunto',
     },
     homeworkCreate: {
       title: 'Crear tarea',

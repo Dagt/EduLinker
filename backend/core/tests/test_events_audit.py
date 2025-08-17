@@ -121,3 +121,29 @@ def test_event_photo_upload_logged():
     log = AuditLog.objects.filter(action="event_photo_upload", entity_type="event", entity_id=event_id).first()
     assert log is not None
     assert log.metadata["photo_id"] == photo_id
+
+
+@pytest.mark.django_db
+def test_event_media_list():
+    school, director, client = setup_environment()
+    event_id = create_event(client)
+    client.post(
+        f"/api/v1/events/{event_id}/attachments/",
+        {
+            "file_url": "https://example.com/a.pdf",
+            "filename": "a.pdf",
+            "mime": "application/pdf",
+        },
+        format="json",
+    )
+    client.post(
+        f"/api/v1/events/{event_id}/photos/",
+        {"photo_url": "https://example.com/p.jpg", "caption": "c"},
+        format="json",
+    )
+    res_a = client.get(f"/api/v1/events/{event_id}/attachments/")
+    assert res_a.status_code == 200
+    assert len(res_a.json()) == 1
+    res_p = client.get(f"/api/v1/events/{event_id}/photos/")
+    assert res_p.status_code == 200
+    assert len(res_p.json()) == 1

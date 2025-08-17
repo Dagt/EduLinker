@@ -512,14 +512,23 @@ class EventCancelView(generics.UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class EventAttachmentCreateView(generics.CreateAPIView):
+class EventAttachmentListCreateView(generics.ListCreateAPIView):
     serializer_class = EventAttachmentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        event = get_object_or_404(
+    def _get_event(self):
+        return get_object_or_404(
             Event, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
+
+    def get_queryset(self):
+        event = self._get_event()
+        if not can_view_event(self.request.user, event):
+            raise PermissionDenied("Cannot view attachments for this event")
+        return event.attachments.all()
+
+    def perform_create(self, serializer):
+        event = self._get_event()
         if not can_view_event(self.request.user, event):
             raise PermissionDenied("Cannot add attachment to this event")
         attachment = serializer.save(event=event)
@@ -538,14 +547,23 @@ class EventAttachmentCreateView(generics.CreateAPIView):
         )
 
 
-class EventPhotoCreateView(generics.CreateAPIView):
+class EventPhotoListCreateView(generics.ListCreateAPIView):
     serializer_class = EventPhotoSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        event = get_object_or_404(
+    def _get_event(self):
+        return get_object_or_404(
             Event, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
+
+    def get_queryset(self):
+        event = self._get_event()
+        if not can_view_event(self.request.user, event):
+            raise PermissionDenied("Cannot view photos for this event")
+        return event.photos.all().order_by("created_at")
+
+    def perform_create(self, serializer):
+        event = self._get_event()
         if not can_view_event(self.request.user, event):
             raise PermissionDenied("Cannot add photo to this event")
         photo = serializer.save(event=event)
