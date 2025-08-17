@@ -55,3 +55,13 @@ class EngagementAnalyticsSerializer(serializers.Serializer):
         child=serializers.JSONField()
     )
 
+
+class EventsAnalyticsSerializer(serializers.Serializer):
+    """Serializer for the events analytics endpoint."""
+
+    events_by_day = serializers.ListField(child=serializers.JSONField())
+    events_by_week = serializers.ListField(child=serializers.JSONField())
+    events_by_month = serializers.ListField(child=serializers.JSONField())
+    events_by_group = serializers.ListField(child=serializers.JSONField())
+    events_by_scope = serializers.ListField(child=serializers.JSONField())
+
