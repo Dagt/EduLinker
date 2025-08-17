@@ -195,11 +195,13 @@ class VocalAssignmentCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        if not is_director(self.request.user):
-            raise PermissionDenied("Only directors can assign vocals")
-        serializer.save(
-            school_id=self.request.school_id, assigned_by=self.request.user
-        )
+        user = self.request.user
+        group = serializer.validated_data["group"]
+        if not (is_director(user) or group.homeroom_teacher_id == user.id):
+            raise PermissionDenied(
+                "Only directors or homeroom teachers can assign vocals"
+            )
+        serializer.save(school_id=self.request.school_id, assigned_by=user)
 
 
 class VocalAssignmentDeactivateView(generics.UpdateAPIView):
@@ -213,9 +215,11 @@ class VocalAssignmentDeactivateView(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()
-        if not is_director(request.user):
+        user = request.user
+        group = assignment.group
+        if not (is_director(user) or group.homeroom_teacher_id == user.id):
             raise PermissionDenied(
-                "Only directors can deactivate vocal assignments"
+                "Only directors or homeroom teachers can deactivate vocal assignments"
             )
         assignment.active = False
         assignment.end_at = timezone.now()

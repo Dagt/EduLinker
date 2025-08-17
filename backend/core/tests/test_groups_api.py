@@ -129,7 +129,7 @@ def test_maestro_titular_cannot_assign_specialist():
 
 
 @pytest.mark.django_db(transaction=True)
-def test_maestro_titular_cannot_create_vocal_assignment():
+def test_director_can_create_vocal_assignment():
     school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
     sy = SchoolYear.objects.create(
         school=school,
@@ -138,9 +138,217 @@ def test_maestro_titular_cannot_create_vocal_assignment():
         end_date="2026-07-01",
         is_current=True,
     )
-    requester = User.objects.create_user(
-        username="req@x.com",
-        email="req@x.com",
+    director = User.objects.create_user(
+        username="dir@x.com",
+        email="dir@x.com",
+        password="p",
+        role="DIRECTOR",
+        school=school,
+    )
+    parent = User.objects.create_user(
+        username="p@x.com",
+        email="p@x.com",
+        password="p",
+        role="PADRE",
+        school=school,
+    )
+    group = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+    )
+
+    client = APIClient()
+    token = str(RefreshToken.for_user(director).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+
+    res = client.post(
+        "/api/v1/groups/vocal-assignments/",
+        {"group": group.id, "parent": parent.id},
+        format="json",
+    )
+    assert res.status_code == 201
+    assert VocalAssignment.objects.filter(
+        group=group, parent=parent, assigned_by=director
+    ).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_homeroom_teacher_can_create_vocal_assignment():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    parent = User.objects.create_user(
+        username="p@x.com",
+        email="p@x.com",
+        password="p",
+        role="PADRE",
+        school=school,
+    )
+    group = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+
+    client = APIClient()
+    token = str(RefreshToken.for_user(teacher).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+
+    res = client.post(
+        "/api/v1/groups/vocal-assignments/",
+        {"group": group.id, "parent": parent.id},
+        format="json",
+    )
+    assert res.status_code == 201
+    assert VocalAssignment.objects.filter(
+        group=group, parent=parent, assigned_by=teacher
+    ).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_director_can_deactivate_vocal_assignment():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    director = User.objects.create_user(
+        username="dir@x.com",
+        email="dir@x.com",
+        password="p",
+        role="DIRECTOR",
+        school=school,
+    )
+    parent = User.objects.create_user(
+        username="p@x.com",
+        email="p@x.com",
+        password="p",
+        role="PADRE",
+        school=school,
+    )
+    group = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+    )
+    assignment = VocalAssignment.objects.create(
+        school=school,
+        group=group,
+        parent=parent,
+        assigned_by=director,
+        start_at=timezone.now(),
+    )
+
+    client = APIClient()
+    token = str(RefreshToken.for_user(director).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+
+    res = client.patch(
+        f"/api/v1/groups/vocal-assignments/{assignment.id}/deactivate/",
+        {},
+        format="json",
+    )
+    assert res.status_code == 200
+    assignment.refresh_from_db()
+    assert not assignment.active
+    assert assignment.end_at is not None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_homeroom_teacher_can_deactivate_vocal_assignment():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    parent = User.objects.create_user(
+        username="p@x.com",
+        email="p@x.com",
+        password="p",
+        role="PADRE",
+        school=school,
+    )
+    group = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="5A",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+    assignment = VocalAssignment.objects.create(
+        school=school,
+        group=group,
+        parent=parent,
+        assigned_by=teacher,
+        start_at=timezone.now(),
+    )
+
+    client = APIClient()
+    token = str(RefreshToken.for_user(teacher).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+
+    res = client.patch(
+        f"/api/v1/groups/vocal-assignments/{assignment.id}/deactivate/",
+        {},
+        format="json",
+    )
+    assert res.status_code == 200
+    assignment.refresh_from_db()
+    assert not assignment.active
+    assert assignment.end_at is not None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_non_homeroom_teacher_cannot_create_vocal_assignment():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
         password="p",
         role="MAESTRO_TITULAR",
         school=school,
@@ -160,7 +368,7 @@ def test_maestro_titular_cannot_create_vocal_assignment():
     )
 
     client = APIClient()
-    token = str(RefreshToken.for_user(requester).access_token)
+    token = str(RefreshToken.for_user(teacher).access_token)
     client.credentials(
         HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
     )
@@ -174,7 +382,7 @@ def test_maestro_titular_cannot_create_vocal_assignment():
 
 
 @pytest.mark.django_db(transaction=True)
-def test_maestro_titular_cannot_deactivate_vocal_assignment():
+def test_non_homeroom_teacher_cannot_deactivate_vocal_assignment():
     school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
     sy = SchoolYear.objects.create(
         school=school,
@@ -183,9 +391,9 @@ def test_maestro_titular_cannot_deactivate_vocal_assignment():
         end_date="2026-07-01",
         is_current=True,
     )
-    requester = User.objects.create_user(
-        username="req@x.com",
-        email="req@x.com",
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
         password="p",
         role="MAESTRO_TITULAR",
         school=school,
@@ -207,12 +415,12 @@ def test_maestro_titular_cannot_deactivate_vocal_assignment():
         school=school,
         group=group,
         parent=parent,
-        assigned_by=parent,  # dummy
+        assigned_by=parent,
         start_at=timezone.now(),
     )
 
     client = APIClient()
-    token = str(RefreshToken.for_user(requester).access_token)
+    token = str(RefreshToken.for_user(teacher).access_token)
     client.credentials(
         HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
     )
@@ -223,3 +431,5 @@ def test_maestro_titular_cannot_deactivate_vocal_assignment():
         format="json",
     )
     assert res.status_code == 403
+
+
