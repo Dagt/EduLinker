@@ -19,6 +19,7 @@ from .serializers import (
     FundraisingGroupLedgerSerializer,
     ExpenseEvidenceSerializer,
 )
+from core.throttles import EventCreateThrottle
 from core.models import SchoolYear, Group, VocalAssignment
 
 
@@ -38,6 +39,7 @@ def _user_group_ids(user, school_id):
 class FundraisingEventListCreateView(generics.ListCreateAPIView):
     serializer_class = FundraisingEventSerializer
     permission_classes = [permissions.IsAuthenticated, IsDirector]
+    throttle_classes = [EventCreateThrottle]
 
     def get_queryset(self):
         return FundraisingEvent.objects.filter(school_id=self.request.school_id)

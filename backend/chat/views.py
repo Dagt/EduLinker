@@ -5,10 +5,12 @@ from .models import GroupChat, ChatMessage
 from .serializers import ChatMessageSerializer
 from core.models import Group
 from core.permissions import can_view_chat, can_post_chat, is_director
+from core.throttles import ChatMessageThrottle
 
 class ChatMessageListCreateView(generics.ListCreateAPIView):
     serializer_class = ChatMessageSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ChatMessageThrottle]
 
     def get_queryset(self):
         group = get_object_or_404(

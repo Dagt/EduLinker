@@ -57,7 +57,7 @@ from .serializers import (
     VocalAssignmentSerializer,
     UserSerializer,
 )
-from .throttles import ComplaintCreateThrottle
+from .throttles import ComplaintCreateThrottle, EventCreateThrottle
 
 
 def _visible_group_ids(user):
@@ -321,6 +321,7 @@ class ComplaintStatusUpdateView(generics.UpdateAPIView):
 class EventListCreateView(generics.ListCreateAPIView):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [EventCreateThrottle]
 
     def get_queryset(self):
         user = self.request.user

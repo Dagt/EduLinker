@@ -169,6 +169,9 @@ REST_FRAMEWORK = {
         'anon': '100/day',
         'login': '5/min',
         'complaint': '20/day',
+        'survey': '50/day',
+        'chat': '60/min',
+        'event_create': '20/day',
     },
 }
 
