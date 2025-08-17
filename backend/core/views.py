@@ -62,17 +62,21 @@ from .throttles import ComplaintCreateThrottle, EventCreateThrottle
 
 def _visible_group_ids(user):
     if is_director(user):
-        return Group.objects.filter(school_id=user.school_id).values_list("id", flat=True)
+        return Group.objects.filter(school_id=user.school_id).values_list(
+            "id", flat=True
+        )
     if is_maestro_titular(user):
-        return Group.objects.filter(homeroom_teacher_id=user.id).values_list("id", flat=True)
+        return Group.objects.filter(homeroom_teacher_id=user.id).values_list(
+            "id", flat=True
+        )
     if is_maestro_itinerante(user):
         return SpecialistAssignment.objects.filter(teacher_id=user.id).values_list(
             "group_id", flat=True
         )
     if is_vocal(user):
-        return VocalAssignment.objects.filter(parent_id=user.id, active=True).values_list(
-            "group_id", flat=True
-        )
+        return VocalAssignment.objects.filter(
+            parent_id=user.id, active=True
+        ).values_list("group_id", flat=True)
     if is_padre(user):
         student_ids = ParentStudent.objects.filter(parent_id=user.id).values_list(
             "student_id", flat=True
@@ -90,9 +94,10 @@ def _can_manage_group(user, group):
         return True
     if is_maestro_titular(user) and group.homeroom_teacher_id == user.id:
         return True
-    if is_maestro_itinerante(user) and SpecialistAssignment.objects.filter(
-        group=group, teacher=user
-    ).exists():
+    if (
+        is_maestro_itinerante(user)
+        and SpecialistAssignment.objects.filter(group=group, teacher=user).exists()
+    ):
         return True
     return False
 
@@ -234,9 +239,7 @@ class ComplaintCreateView(generics.CreateAPIView):
     throttle_classes = [ComplaintCreateThrottle]
 
     def perform_create(self, serializer):
-        serializer.save(
-            created_by=self.request.user, school_id=self.request.school_id
-        )
+        serializer.save(created_by=self.request.user, school_id=self.request.school_id)
 
 
 class ComplaintDetailView(generics.RetrieveAPIView):
@@ -249,6 +252,7 @@ class ComplaintDetailView(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         complaint = self.get_object()
         from audit.models import AuditLog
+
         AuditLog.objects.create(
             school_id=request.school_id,
             actor=request.user,
@@ -308,6 +312,7 @@ class ComplaintStatusUpdateView(generics.UpdateAPIView):
             raise PermissionDenied("Cannot change status")
         serializer.save()
         from audit.models import AuditLog
+
         AuditLog.objects.create(
             school_id=self.request.school_id,
             actor=user,
@@ -362,17 +367,13 @@ class EventListCreateView(generics.ListCreateAPIView):
             if is_maestro_titular(user):
                 for group in groups:
                     if group.homeroom_teacher_id != user.id:
-                        raise PermissionDenied(
-                            "Cannot create event for this group"
-                        )
+                        raise PermissionDenied("Cannot create event for this group")
             if is_maestro_itinerante(user):
                 for group in groups:
                     if not SpecialistAssignment.objects.filter(
                         group=group, teacher=user
                     ).exists():
-                        raise PermissionDenied(
-                            "Cannot create event for this group"
-                        )
+                        raise PermissionDenied("Cannot create event for this group")
 
         school_year = SchoolYear.objects.filter(
             school_id=self.request.school_id, is_current=True
@@ -383,10 +384,11 @@ class EventListCreateView(generics.ListCreateAPIView):
             created_by=user,
         )
         from audit.models import AuditLog
+
         AuditLog.objects.create(
             school_id=self.request.school_id,
             actor=user,
-            action="create",
+            action="event_create",
             entity_type="event",
             entity_id=event.id,
             metadata={"scope": event.scope},
@@ -404,8 +406,19 @@ class EventCancelView(generics.UpdateAPIView):
         event = self.get_object()
         if not (is_director(request.user) or event.created_by_id == request.user.id):
             raise PermissionDenied("Cannot cancel this event")
+        prev_status = event.status
         event.status = Event.Status.CANCELLED
         event.save()
+        from audit.models import AuditLog
+
+        AuditLog.objects.create(
+            school_id=request.school_id,
+            actor=request.user,
+            action="event_cancel",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={"from": prev_status, "to": Event.Status.CANCELLED},
+        )
         serializer = self.get_serializer(event)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -420,7 +433,20 @@ class EventAttachmentCreateView(generics.CreateAPIView):
         )
         if not can_view_event(self.request.user, event):
             raise PermissionDenied("Cannot add attachment to this event")
-        serializer.save(event=event)
+        attachment = serializer.save(event=event)
+        from audit.models import AuditLog
+
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="event_attachment_upload",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={
+                "attachment_id": attachment.id,
+                "filename": attachment.filename,
+            },
+        )
 
 
 class EventPhotoCreateView(generics.CreateAPIView):
@@ -433,7 +459,20 @@ class EventPhotoCreateView(generics.CreateAPIView):
         )
         if not can_view_event(self.request.user, event):
             raise PermissionDenied("Cannot add photo to this event")
-        serializer.save(event=event)
+        photo = serializer.save(event=event)
+        from audit.models import AuditLog
+
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="event_photo_upload",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={
+                "photo_id": photo.id,
+                "caption": photo.caption,
+            },
+        )
 
 
 class ActivityPhotoListView(generics.ListAPIView):
@@ -443,12 +482,10 @@ class ActivityPhotoListView(generics.ListAPIView):
     def get_queryset(self):
         group_id = self.kwargs["pk"]
         group_ids = _visible_group_ids(self.request.user)
-        qs = ActivityPhoto.objects.filter(
-            school_id=self.request.school_id
-        ).filter(Q(group_id=group_id) | Q(homework__group_id=group_id))
-        qs = qs.filter(
-            Q(group_id__in=group_ids) | Q(homework__group_id__in=group_ids)
+        qs = ActivityPhoto.objects.filter(school_id=self.request.school_id).filter(
+            Q(group_id=group_id) | Q(homework__group_id=group_id)
         )
+        qs = qs.filter(Q(group_id__in=group_ids) | Q(homework__group_id__in=group_ids))
         return qs
 
 
@@ -466,9 +503,8 @@ class ActivityPhotoCreateView(generics.CreateAPIView):
         group_ref = group or (homework.group if homework else None)
         if group_ref and not can_post_activity_photo(self.request.user, group_ref):
             raise PermissionDenied("Cannot add photo for this group")
-        serializer.save(
-            school_id=self.request.school_id, uploaded_by=self.request.user
-        )
+        serializer.save(school_id=self.request.school_id, uploaded_by=self.request.user)
+
 
 class EventDetailView(generics.RetrieveAPIView):
     serializer_class = EventSerializer
@@ -479,6 +515,7 @@ class EventDetailView(generics.RetrieveAPIView):
         return Event.objects.filter(school_id=self.request.school_id).filter(
             user_can_view_event(user)
         )
+
 
 class EventUpdateView(generics.UpdateAPIView):
     serializer_class = EventSerializer
@@ -496,6 +533,28 @@ class EventUpdateView(generics.UpdateAPIView):
             raise PermissionDenied("Only the creator or director may edit this event")
         return super().update(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        event = serializer.instance
+        old_values = {
+            field: getattr(event, field) for field in serializer.validated_data.keys()
+        }
+        serializer.save()
+        changes = {}
+        for field, old_value in old_values.items():
+            new_value = getattr(event, field)
+            if old_value != new_value:
+                changes[field] = {"from": old_value, "to": new_value}
+        from audit.models import AuditLog
+
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="event_update",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={"changes": changes},
+        )
+
 
 class AnnouncementListCreateView(generics.ListCreateAPIView):
     serializer_class = AnnouncementSerializer
@@ -511,8 +570,7 @@ class AnnouncementListCreateView(generics.ListCreateAPIView):
             qs = qs.filter(scope=Announcement.Scope.GRUPO, group_id__in=group_ids)
         else:
             qs = qs.filter(
-                Q(scope=Announcement.Scope.GLOBAL)
-                | Q(group_id__in=group_ids)
+                Q(scope=Announcement.Scope.GLOBAL) | Q(group_id__in=group_ids)
             )
         return qs
 
@@ -532,9 +590,7 @@ class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         qs = Announcement.objects.filter(school_id=self.request.school_id)
         group_ids = _visible_group_ids(self.request.user)
-        return qs.filter(
-            Q(scope=Announcement.Scope.GLOBAL) | Q(group_id__in=group_ids)
-        )
+        return qs.filter(Q(scope=Announcement.Scope.GLOBAL) | Q(group_id__in=group_ids))
 
     def perform_update(self, serializer):
         announcement = self.get_object()
@@ -558,9 +614,7 @@ class HomeworkListCreateView(generics.ListCreateAPIView):
         group = serializer.validated_data.get("group")
         if not _can_manage_group(self.request.user, group):
             raise PermissionDenied("Cannot create homework for this group")
-        serializer.save(
-            school_id=self.request.school_id, teacher=self.request.user
-        )
+        serializer.save(school_id=self.request.school_id, teacher=self.request.user)
 
 
 class HomeworkDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -585,18 +639,20 @@ class FeedView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         group_ids = _visible_group_ids(request.user)
-        announcements = Announcement.objects.filter(
-            school_id=request.school_id
-        ).filter(
+        announcements = Announcement.objects.filter(school_id=request.school_id).filter(
             Q(scope=Announcement.Scope.GLOBAL) | Q(group_id__in=group_ids)
         )
         homeworks = Homework.objects.filter(
             school_id=request.school_id, group_id__in=group_ids
         )
-        ann_data = AnnouncementSerializer(announcements, many=True, context={"request": request}).data
+        ann_data = AnnouncementSerializer(
+            announcements, many=True, context={"request": request}
+        ).data
         for item in ann_data:
             item["type"] = "announcement"
-        hw_data = HomeworkSerializer(homeworks, many=True, context={"request": request}).data
+        hw_data = HomeworkSerializer(
+            homeworks, many=True, context={"request": request}
+        ).data
         for item in hw_data:
             item["type"] = "homework"
         items = ann_data + hw_data
