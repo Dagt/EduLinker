@@ -1,69 +1,53 @@
 import * as SecureStore from "expo-secure-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE = process.env.EXPO_PUBLIC_API_URL || "http://10.0.2.2:8000/api/v1"; // Android emu fallback
-const SCHOOL_ID_KEY = "schoolId";
+function baseUrl(){
+  const url = process.env.EXPO_PUBLIC_API_URL;
+  if(!url) throw new Error("EXPO_PUBLIC_API_URL not set");
+  return url;
+}
+
+function schoolId(){
+  const id = process.env.EXPO_PUBLIC_SCHOOL_ID;
+  if(!id) throw new Error("EXPO_PUBLIC_SCHOOL_ID not set");
+  return id;
+}
 
 export async function getToken(){ return await SecureStore.getItemAsync("tk"); }
 export async function setToken(t: string){ await SecureStore.setItemAsync("tk", t); }
 
-export async function getSchoolId(){
-  let id = await AsyncStorage.getItem(SCHOOL_ID_KEY);
-  if(!id){
-    id = process.env.EXPO_PUBLIC_SCHOOL_ID || undefined;
-    if(!id){
-      const domain = process.env.EXPO_PUBLIC_DOMAIN || "";
-      const host = domain.replace(/^https?:\/\//, "");
-      const sub = host.split(".")[0];
-      const match = sub.match(/\d+/);
-      id = match ? match[0] : "1";
-    }
-    if(id) await AsyncStorage.setItem(SCHOOL_ID_KEY, id);
-  }
-  return id!;
-}
-
-export async function setSchoolId(id: string){
-  await AsyncStorage.setItem(SCHOOL_ID_KEY, id);
-}
-
 export async function headers(t?: string){
-  const h: any = { "Content-Type":"application/json", "X-School-ID": await getSchoolId() };
+  const h: any = { "Content-Type":"application/json", "X-School-ID": schoolId() };
   if (t) h.Authorization = `Bearer ${t}`;
   return h;
 }
 
-export async function apiGet(path: string){
+async function apiFetch(path: string, init: any = {}){
   const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { headers: await headers(tk) });
+  const h = await headers(tk);
+  const opts = { ...init, headers: h };
+  return fetch(`${baseUrl()}${path}`, opts);
+}
+
+export async function apiGet(path: string){
+  const r = await apiFetch(path);
   if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
   return r.json();
 }
 
 export async function apiPost(path: string, body: any){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"POST", headers: await headers(tk), body: JSON.stringify(body) });
+  const r = await apiFetch(path, { method: "POST", body: JSON.stringify(body) });
   if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
   return r.json();
 }
 
-export async function apiPostAuth(path: string, body: any){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"POST", headers: await headers(tk), body: JSON.stringify(body) });
+export async function apiPut(path: string, body: any){
+  const r = await apiFetch(path, { method: "PUT", body: JSON.stringify(body) });
   if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
   return r.json();
 }
 
-export async function apiPutAuth(path: string, body: any){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"PUT", headers: await headers(tk), body: JSON.stringify(body) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
-
-export async function apiDeleteAuth(path: string){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method: "DELETE", headers: await headers(tk) });
+export async function apiDelete(path: string){
+  const r = await apiFetch(path, { method: "DELETE" });
   if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
   if(r.status === 204) return;
   return r.json();
@@ -74,7 +58,7 @@ export async function getNotificationPreferences(){
 }
 
 export async function updateNotificationPreferences(body: {[key: string]: boolean}){
-  return apiPutAuth("/notifications/preferences/", body);
+  return apiPut("/notifications/preferences/", body);
 }
 
 // Complaints API helpers
@@ -92,7 +76,7 @@ export async function createComplaint(body: {
 }
 
 export async function updateComplaint(id: number, body: any){
-  return apiPutAuth(`/complaints/${id}/`, body);
+  return apiPut(`/complaints/${id}/`, body);
 }
 
 export async function getComplaintMessages(id: number){
@@ -104,7 +88,7 @@ export async function sendComplaintMessage(id: number, body: any){
 }
 
 export async function deleteComplaint(id: number){
-  return apiDeleteAuth(`/complaints/${id}/`);
+  return apiDelete(`/complaints/${id}/`);
 }
 
 export async function escalateComplaint(id: number){
@@ -127,7 +111,7 @@ export async function createSuggestion(body: {
 }
 
 export async function updateSuggestion(id: number, body: any){
-  return apiPutAuth(`/suggestions/${id}/`, body);
+  return apiPut(`/suggestions/${id}/`, body);
 }
 
 export async function getSuggestionMessages(id: number){
@@ -139,7 +123,7 @@ export async function sendSuggestionMessage(id: number, body: any){
 }
 
 export async function deleteSuggestion(id: number){
-  return apiDeleteAuth(`/suggestions/${id}/`);
+  return apiDelete(`/suggestions/${id}/`);
 }
 
 // Photos API helpers

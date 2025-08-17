@@ -1,35 +1,18 @@
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn(),
-  setItem: jest.fn()
-}), { virtual: true });
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { headers, setSchoolId, uploadFile, updateComplaint, updateSuggestion, deleteComplaint, deleteSuggestion } from './api';
+import * as SecureStore from 'expo-secure-store';
+import { headers, uploadFile, updateComplaint, updateSuggestion, deleteComplaint, deleteSuggestion } from './api';
 
 beforeEach(() => {
-  (AsyncStorage.getItem as jest.Mock).mockReset();
-  (AsyncStorage.setItem as jest.Mock).mockReset();
+  (SecureStore.getItemAsync as jest.Mock).mockReset();
+  (SecureStore.setItemAsync as jest.Mock).mockReset();
+  process.env.EXPO_PUBLIC_API_URL = 'https://api';
+  process.env.EXPO_PUBLIC_SCHOOL_ID = '5';
 });
 
-test('uses stored school id from AsyncStorage', async () => {
-  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('5');
+test('headers include school id from env', async () => {
   const h = await headers();
   expect(h['X-School-ID']).toBe('5');
-  expect(AsyncStorage.setItem).not.toHaveBeenCalled();
-});
-
-test('derives school id from domain when not stored', async () => {
-  (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-  process.env.EXPO_PUBLIC_DOMAIN = '7.example.com';
-  const h = await headers();
-  expect(AsyncStorage.setItem).toHaveBeenCalledWith('schoolId', '7');
-  expect(h['X-School-ID']).toBe('7');
-});
-
-test('setSchoolId stores provided value', async () => {
-  await setSchoolId('9');
-  expect(AsyncStorage.setItem).toHaveBeenCalledWith('schoolId', '9');
 });
 
 describe('uploadFile', () => {
@@ -59,7 +42,6 @@ describe('uploadFile', () => {
 });
 
 test('updateComplaint sends PUT request', async () => {
-  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
   (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
   await updateComplaint(5, { content: 'c' });
   expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/complaints/5/');
@@ -67,7 +49,6 @@ test('updateComplaint sends PUT request', async () => {
 });
 
 test('updateSuggestion sends PUT request', async () => {
-  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
   (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
   await updateSuggestion(3, { title: 't' });
   expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/suggestions/3/');
@@ -75,7 +56,6 @@ test('updateSuggestion sends PUT request', async () => {
 });
 
 test('deleteComplaint sends DELETE request', async () => {
-  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
   (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, status: 204 });
   await deleteComplaint(2);
   expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/complaints/2/');
@@ -83,7 +63,6 @@ test('deleteComplaint sends DELETE request', async () => {
 });
 
 test('deleteSuggestion sends DELETE request', async () => {
-  (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
   (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, status: 204 });
   await deleteSuggestion(4);
   expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/suggestions/4/');

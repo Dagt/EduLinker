@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPutAuth } from "../api";
+import { apiGet, apiPost, apiPut } from "../api";
 
 export function getSuggestions(){
   return apiGet("/suggestions/");
@@ -15,7 +15,7 @@ export function createSuggestion(body: {
 }
 
 export function updateSuggestion(id: number, body: any){
-  return apiPutAuth(`/suggestions/${id}/`, body);
+  return apiPut(`/suggestions/${id}/`, body);
 }
 
 export function getSuggestionMessages(id: number){

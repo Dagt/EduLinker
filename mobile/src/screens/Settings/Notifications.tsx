@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, Switch } from "react-native";
-import { apiGet, apiPostAuth, apiPutAuth } from "../../api";
+import { apiGet, apiPost, apiPut } from "../../api";
 
 interface Pref { id?: number; enabled: boolean }
 
@@ -30,9 +30,9 @@ export default function Notifications(){
     const pref = prefs[kind];
     try {
       if(pref && pref.id){
-        await apiPutAuth(`/notifications/prefs/${pref.id}/`, { kind, enabled: value });
+        await apiPut(`/notifications/prefs/${pref.id}/`, { kind, enabled: value });
       } else {
-        const res = await apiPostAuth("/notifications/prefs/", { kind, enabled: value });
+        const res = await apiPost("/notifications/prefs/", { kind, enabled: value });
         setPrefs(prev => ({ ...prev, [kind]: { id: res.id, enabled: res.enabled } }));
       }
     } catch(e){}

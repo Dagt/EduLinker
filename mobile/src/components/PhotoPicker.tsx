@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Button, Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { apiPostAuth } from "../api";
+import { apiPost } from "../api";
 
 interface Props {
   onPhoto?: (url: string) => void;
@@ -19,7 +19,7 @@ export default function PhotoPicker({ onPhoto }: Props) {
     try {
       setImage(asset.uri);
       const filename = asset.fileName || "photo.jpg";
-      const { upload, file_url } = await apiPostAuth("/storage/presign-upload/", {
+      const { upload, file_url } = await apiPost("/storage/presign-upload/", {
         filename,
       });
       const fd = new FormData();

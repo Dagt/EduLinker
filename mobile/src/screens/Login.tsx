@@ -2,7 +2,7 @@
 import { registerForPushNotificationsAsync } from "../notifications";
 import { View, Text, TextInput, Button, Alert, Platform } from "react-native";
 import { useState } from "react";
-import { setToken, apiPost, apiPostAuth } from "../api";
+import { setToken, apiPost } from "../api";
 import i18n from "../i18n";
 
 export default function Login({ onLoggedIn }: { onLoggedIn: ()=>void }){
@@ -20,7 +20,7 @@ export default function Login({ onLoggedIn }: { onLoggedIn: ()=>void }){
     const expoToken = await registerForPushNotificationsAsync();
     if (expoToken) {
       try {
-        await apiPostAuth("/notifications/device-tokens/", { token: expoToken, platform: Platform.OS });
+        await apiPost("/notifications/device-tokens/", { token: expoToken, platform: Platform.OS });
       } catch(e){}
     }
     onLoggedIn();

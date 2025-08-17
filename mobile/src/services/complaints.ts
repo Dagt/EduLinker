@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPutAuth } from "../api";
+import { apiGet, apiPost, apiPut } from "../api";
 
 export function getComplaints(){
   return apiGet("/complaints/");
@@ -14,7 +14,7 @@ export function createComplaint(body: {
 }
 
 export function updateComplaint(id: number, body: any){
-  return apiPutAuth(`/complaints/${id}/`, body);
+  return apiPut(`/complaints/${id}/`, body);
 }
 
 export function getComplaintMessages(id: number){
