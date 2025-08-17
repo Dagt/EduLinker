@@ -51,7 +51,7 @@ export default function SuggestionsList({ onSelect, refresh }: { onSelect: (item
     setAboutStudentId("");
   };
 
-  if (loading) return <Text>Loading...</Text>;
+  if (loading) return <Text>{i18n.t('general.loading')}</Text>;
   if (role === "guest") return <Text>{i18n.t('suggestions.unauthorized')}</Text>;
   if (error) return <Text>{i18n.t('general.error')}</Text>;
 
@@ -60,9 +60,9 @@ export default function SuggestionsList({ onSelect, refresh }: { onSelect: (item
       <Text style={{ fontSize: 18, marginBottom: 8 }}>{i18n.t('suggestions.title')}</Text>
       <TextInput placeholder={i18n.t('suggestions.fieldTitle')} value={title} onChangeText={setTitle} />
       <TextInput placeholder={i18n.t('suggestions.fieldDescription')} value={description} onChangeText={setDescription} />
-      <TextInput placeholder="Group ID" value={groupId} onChangeText={setGroupId} />
-      <TextInput placeholder="Teacher ID" value={teacherId} onChangeText={setTeacherId} />
-      <TextInput placeholder="Student ID" value={aboutStudentId} onChangeText={setAboutStudentId} />
+      <TextInput placeholder={i18n.t('suggestions.groupId')} value={groupId} onChangeText={setGroupId} />
+      <TextInput placeholder={i18n.t('suggestions.teacherId')} value={teacherId} onChangeText={setTeacherId} />
+      <TextInput placeholder={i18n.t('suggestions.studentId')} value={aboutStudentId} onChangeText={setAboutStudentId} />
       <Button title={i18n.t('suggestions.send')} onPress={submit} />
       <FlatList
         data={items}

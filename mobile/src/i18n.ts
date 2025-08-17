@@ -6,6 +6,7 @@ const translations = {
     general: {
       error: 'Error',
       unauthorized: 'Unauthorized',
+      loading: 'Loading...',
     },
     menu: {
       feed: 'Feed',
@@ -51,6 +52,13 @@ const translations = {
       back: 'Back',
       save: 'Save',
       delete: 'Delete',
+      groupId: 'Group ID',
+      teacherId: 'Teacher ID',
+      studentId: 'Student ID',
+    },
+    notificationSettings: {
+      register: 'Register',
+      push: 'Push',
     },
     fundraising: {
       ledger: 'Ledger',
@@ -61,6 +69,7 @@ const translations = {
     general: {
       error: 'Error',
       unauthorized: 'No autorizado',
+      loading: 'Cargando...',
     },
     menu: {
       feed: 'Feed',
@@ -106,6 +115,13 @@ const translations = {
       back: 'Volver',
       save: 'Guardar',
       delete: 'Eliminar',
+      groupId: 'ID de grupo',
+      teacherId: 'ID de maestro',
+      studentId: 'ID de estudiante',
+    },
+    notificationSettings: {
+      register: 'Registrar',
+      push: 'Push',
     },
     fundraising: {
       ledger: 'Ingresos',
