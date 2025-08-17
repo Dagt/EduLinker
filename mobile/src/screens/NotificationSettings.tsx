@@ -18,7 +18,6 @@ export default function NotificationSettings() {
   const [role, setRole] = useState("guest");
   const [prefs, setPrefs] = useState<Record<string, boolean>>({
     push: true,
-    email: true,
   });
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +63,6 @@ export default function NotificationSettings() {
 
   const labels: Record<string, string> = {
     push: "Push",
-    email: "Email",
   };
 
   return (

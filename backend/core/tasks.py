@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from core.models import Event, Complaint, User, Homework
-from notifications.tasks import push_to_users, send_notification
+from notifications.tasks import push_to_users
 from surveys.models import Survey
 from core.utils import get_group_audience_user_ids, get_event_audience_user_ids
 
@@ -68,22 +68,6 @@ def escalate_stale_complaints():
         if director_ids:
             data = {"type": "complaint", "complaint_id": c.id}
             push_to_users.delay(
-                c.school_id,
-                director_ids,
-                "Queja escalada",
-                f"La queja #{c.id} ha sido escalada.",
-                data,
-            )
-            send_notification.delay(
-                "email",
-                c.school_id,
-                director_ids,
-                "Queja escalada",
-                f"La queja #{c.id} ha sido escalada.",
-                data,
-            )
-            send_notification.delay(
-                "sms",
                 c.school_id,
                 director_ids,
                 "Queja escalada",

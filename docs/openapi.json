@@ -4047,11 +4047,10 @@
                     "survey",
                     "complaint",
                     "complaint_message",
-                    "push",
-                    "email"
+                    "push"
                 ],
                 "type": "string",
-                "description": "* `event` - Eventos\n* `survey` - Encuestas\n* `complaint` - Quejas\n* `complaint_message` - Mensajes de queja\n* `push` - Push\n* `email` - Email"
+                "description": "* `event` - Eventos\n* `survey` - Encuestas\n* `complaint` - Quejas\n* `complaint_message` - Mensajes de queja\n* `push` - Push"
             },
             "NotificationPreference": {
                 "type": "object",

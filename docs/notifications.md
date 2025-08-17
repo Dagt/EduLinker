@@ -12,5 +12,5 @@ Gestiona tokens de dispositivo y preferencias de notificación.
 - `POST /api/v1/notifications/prefs/` – Crea una preferencia.
 - `GET /api/v1/notifications/prefs/<id>/` – Obtiene una preferencia.
 - `PUT /api/v1/notifications/prefs/<id>/` – Actualiza una preferencia.
-- `GET /api/v1/notifications/channels/` – Obtiene configuración de canales (push/email).
+- `GET /api/v1/notifications/channels/` – Obtiene configuración de canales (push).
 - `PUT /api/v1/notifications/channels/` – Actualiza configuración de canales.
