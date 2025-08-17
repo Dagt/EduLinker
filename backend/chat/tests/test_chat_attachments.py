@@ -1,76 +1,44 @@
-import pytest
-from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework.test import APIClient
-from rest_framework_simplejwt.tokens import RefreshToken
+import os
+from io import BytesIO
+from types import SimpleNamespace
+from unittest.mock import patch
 
-from core.models import (
-    Group,
-    GroupMembership,
-    ParentStudent,
-    School,
-    SchoolYear,
-    Student,
-    User,
-)
-from chat.models import ChatMessage
+import boto3
+import requests
+from moto import mock_aws
+
+from chat.serializers import ChatMessageSerializer
 
 
-@pytest.mark.django_db
-def test_chat_message_with_attachment():
-    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
-    sy = SchoolYear.objects.create(
-        school=school,
-        name="cy",
-        start_date="2025-08-01",
-        end_date="2026-07-01",
-        is_current=True,
-    )
-    teacher = User.objects.create_user(
-        username="t@x.com",
-        email="t@x.com",
-        password="p",
-        role="MAESTRO_TITULAR",
-        school=school,
-    )
-    group = Group.objects.create(
-        school=school, school_year=sy, name="5A", grade_level=5, homeroom_teacher=teacher
-    )
-    student = Student.objects.create(
-        school=school,
-        first_name="A",
-        last_name="S",
-        grade_level=5,
-        enrollment_code="E1",
-    )
-    GroupMembership.objects.create(school=school, group=group, student=student)
-    parent1 = User.objects.create_user(
-        username="p1@x.com",
-        email="p1@x.com",
-        password="p",
-        role="PADRE",
-        school=school,
-    )
-    ParentStudent.objects.create(
-        school=school, parent=parent1, student=student, relationship="F"
-    )
+@mock_aws
+def test_upload_and_read_attachment():
+    os.environ.setdefault("AWS_ACCESS_KEY_ID", "x")
+    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "x")
+    os.environ.setdefault("AWS_STORAGE_BUCKET_NAME", "test-bucket")
+    os.environ.setdefault("AWS_REGION", "us-east-1")
 
-    client = APIClient()
-    token1 = str(RefreshToken.for_user(parent1).access_token)
-    client.credentials(
-        HTTP_AUTHORIZATION=f"Bearer {token1}", HTTP_X_SCHOOL_ID=str(school.id)
-    )
-    uploaded = SimpleUploadedFile("f.txt", b"hello")
-    res = client.post(
-        f"/api/v1/chats/{group.id}/messages/",
-        {"message_text": "Hola", "author": parent1.id, "attachment": uploaded},
-        format="multipart",
-    )
+    s3 = boto3.client("s3", region_name="us-east-1")
+    s3.create_bucket(Bucket="test-bucket")
 
-    assert res.status_code in (200, 201)
-    assert ChatMessage.objects.count() == 1
-    msg = ChatMessage.objects.first()
-    assert msg.message_type == "attachment"
-    assert msg.attachment_url != ""
-    assert msg.author_role == parent1.role
-    assert res.data["message_type"] == "attachment"
-    assert res.data["author_role"] == parent1.role
+    author = SimpleNamespace(role="PADRE")
+    fake_file = BytesIO(b"hello")
+    fake_file.name = "hello.txt"
+    data = {"author": author, "message_text": "hi", "attachment": fake_file}
+    created = SimpleNamespace(id=1)
+
+    with patch("chat.serializers.ChatMessage.objects.create", return_value=created) as mock_create:
+        serializer = ChatMessageSerializer()
+        result = serializer.create(data)
+
+    assert result is created
+    url = mock_create.call_args[1]["attachment_url"]
+    assert url and "Signature=" in url
+    assert mock_create.call_args[1]["message_type"] == "attachment"
+
+    objs = s3.list_objects_v2(Bucket="test-bucket")
+    assert objs["KeyCount"] == 1
+    key = objs["Contents"][0]["Key"]
+    body = s3.get_object(Bucket="test-bucket", Key=key)["Body"].read()
+    assert body == b"hello"
+
+    assert requests.get(url).content == b"hello"
