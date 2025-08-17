@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { registerForPushNotificationsAsync } from "../notifications";
 import { getRole } from "../role";
 import { getNotificationPreferences, updateNotificationPreferences } from "../api";
+import i18n from "../i18n";
 
 export default function NotificationSettings() {
   const [token, setToken] = useState<string | null>(null);
@@ -47,7 +48,7 @@ export default function NotificationSettings() {
     }
   }, [role]);
 
-  if (role === "guest") return <Text>No autorizado</Text>;
+  if (role === "guest") return <Text>{i18n.t('general.unauthorized')}</Text>;
 
   async function register() {
     const tk = await registerForPushNotificationsAsync();
@@ -62,12 +63,12 @@ export default function NotificationSettings() {
   }
 
   const labels: Record<string, string> = {
-    push: "Push",
+    push: i18n.t('notificationSettings.push'),
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Button title="Registrar" onPress={register} />
+      <Button title={i18n.t('notificationSettings.register')} onPress={register} />
       {token && <Text style={styles.token}>{token}</Text>}
       {loading ? (
         <ActivityIndicator style={styles.loader} />
