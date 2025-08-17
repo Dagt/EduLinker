@@ -10,6 +10,7 @@ import { headers, setSchoolId, uploadFile, updateComplaint, updateSuggestion, de
 beforeEach(() => {
   (AsyncStorage.getItem as jest.Mock).mockReset();
   (AsyncStorage.setItem as jest.Mock).mockReset();
+  delete process.env.EXPO_PUBLIC_SCHOOL_ID;
 });
 
 test('uses stored school id from AsyncStorage', async () => {
@@ -19,9 +20,9 @@ test('uses stored school id from AsyncStorage', async () => {
   expect(AsyncStorage.setItem).not.toHaveBeenCalled();
 });
 
-test('derives school id from domain when not stored', async () => {
+test('uses env school id when not stored', async () => {
   (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-  process.env.EXPO_PUBLIC_DOMAIN = '7.example.com';
+  process.env.EXPO_PUBLIC_SCHOOL_ID = '7';
   const h = await headers();
   expect(AsyncStorage.setItem).toHaveBeenCalledWith('schoolId', '7');
   expect(h['X-School-ID']).toBe('7');
