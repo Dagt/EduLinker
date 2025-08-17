@@ -242,6 +242,19 @@ class ComplaintDetailView(generics.RetrieveAPIView):
     def get_queryset(self):
         return Complaint.objects.filter(school_id=self.request.school_id)
 
+    def retrieve(self, request, *args, **kwargs):
+        complaint = self.get_object()
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=request.school_id,
+            actor=request.user,
+            action="read",
+            entity_type="complaint",
+            entity_id=complaint.id,
+        )
+        serializer = self.get_serializer(complaint)
+        return Response(serializer.data)
+
 
 class ComplaintMessageCreateView(generics.CreateAPIView):
     serializer_class = ComplaintMessageSerializer
