@@ -269,7 +269,21 @@ class ComplaintMessageCreateView(generics.CreateAPIView):
             Complaint, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
         self.check_object_permissions(self.request, complaint)
-        serializer.save(complaint=complaint, author=self.request.user)
+        message = serializer.save(complaint=complaint, author=self.request.user)
+        from audit.models import AuditLog
+
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="message_create",
+            entity_type="complaint",
+            entity_id=complaint.id,
+            metadata={
+                "complaint_id": complaint.id,
+                "author_id": self.request.user.id,
+                "message_id": message.id,
+            },
+        )
 
 
 class ComplaintParticipantCreateView(generics.CreateAPIView):
@@ -281,7 +295,22 @@ class ComplaintParticipantCreateView(generics.CreateAPIView):
             Complaint, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
         self.check_object_permissions(self.request, complaint)
-        serializer.save(complaint=complaint, added_by=self.request.user)
+        participant = serializer.save(
+            complaint=complaint, added_by=self.request.user
+        )
+        from audit.models import AuditLog
+
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="participant_add",
+            entity_type="complaint",
+            entity_id=complaint.id,
+            metadata={
+                "complaint_id": complaint.id,
+                "user_added_id": participant.user_id,
+            },
+        )
 
 
 class ComplaintStatusUpdateView(generics.UpdateAPIView):
