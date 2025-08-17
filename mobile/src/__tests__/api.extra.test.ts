@@ -1,18 +1,14 @@
 jest.mock('expo-secure-store', () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn() }));
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn(),
-  setItem: jest.fn()
-}), { virtual: true });
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { headers, apiGet, apiDeleteAuth, apiPostAuth } from '../api';
 
 describe('api helpers extra', () => {
   beforeEach(() => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue('1');
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue('tk');
     (global as any).fetch = jest.fn();
+    process.env.EXPO_PUBLIC_API_URL = 'https://api';
+    process.env.EXPO_PUBLIC_SCHOOL_ID = '1';
   });
 
   it('adds Authorization header when token provided', async () => {

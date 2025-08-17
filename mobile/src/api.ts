@@ -1,9 +1,18 @@
 import * as SecureStore from "expo-secure-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE = process.env.EXPO_PUBLIC_API_URL || "http://10.0.2.2:8000/api/v1"; // Android emu fallback
-const SCHOOL_ID_KEY = "schoolId";
 const REFRESH_KEY = "rf";
+
+export function getApiUrl(){
+  const url = process.env.EXPO_PUBLIC_API_URL;
+  if(!url) throw new Error("EXPO_PUBLIC_API_URL not set");
+  return url;
+}
+
+export function getSchoolId(){
+  const id = process.env.EXPO_PUBLIC_SCHOOL_ID;
+  if(!id) throw new Error("EXPO_PUBLIC_SCHOOL_ID not set");
+  return id;
+}
 
 export async function getToken(){ return await SecureStore.getItemAsync("tk"); }
 export async function setToken(t: string){ await SecureStore.setItemAsync("tk", t); }
@@ -13,7 +22,7 @@ export async function setRefreshToken(t: string){ await SecureStore.setItemAsync
 export async function refreshToken(){
   const refresh = await getRefreshToken();
   if(!refresh) return false;
-  const r = await fetch(`${BASE}/auth/refresh/`, {
+  const r = await fetch(`${getApiUrl()}/auth/refresh/`, {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({ refresh })
@@ -25,35 +34,15 @@ export async function refreshToken(){
   return true;
 }
 
-export async function getSchoolId(){
-  let id = await AsyncStorage.getItem(SCHOOL_ID_KEY);
-  if(!id){
-    id = process.env.EXPO_PUBLIC_SCHOOL_ID || undefined;
-    if(!id){
-      const domain = process.env.EXPO_PUBLIC_DOMAIN || "";
-      const host = domain.replace(/^https?:\/\//, "");
-      const sub = host.split(".")[0];
-      const match = sub.match(/\d+/);
-      id = match ? match[0] : "1";
-    }
-    if(id) await AsyncStorage.setItem(SCHOOL_ID_KEY, id);
-  }
-  return id!;
-}
-
-export async function setSchoolId(id: string){
-  await AsyncStorage.setItem(SCHOOL_ID_KEY, id);
-}
-
-export async function headers(t?: string){
-  const h: any = { "Content-Type":"application/json", "X-School-ID": await getSchoolId() };
+export function headers(t?: string){
+  const h: any = { "Content-Type":"application/json", "X-School-ID": getSchoolId() };
   if (t) h.Authorization = `Bearer ${t}`;
   return h;
 }
 
 async function request(path: string, options: RequestInit = {}, retry = true){
   const tk = await getToken();
-  const res = await fetch(`${BASE}${path}`, { ...options, headers: await headers(tk) });
+  const res = await fetch(`${getApiUrl()}${path}`, { ...options, headers: headers(tk) });
   if(res.status === 401 && retry){
     const ok = await refreshToken();
     if(ok) return request(path, options, false);
