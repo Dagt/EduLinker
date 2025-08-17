@@ -25,6 +25,8 @@ from .models import (
     ParentStudent,
     VocalAssignment,
     ActivityPhoto,
+    Student,
+    User,
 )
 from .permissions import (
     CanAccessComplaint,
@@ -56,6 +58,7 @@ from .serializers import (
     SpecialistAssignmentSerializer,
     VocalAssignmentSerializer,
     UserSerializer,
+    StudentSerializer,
 )
 from .throttles import ComplaintCreateThrottle, EventCreateThrottle
 
@@ -226,6 +229,42 @@ class VocalAssignmentDeactivateView(generics.UpdateAPIView):
         assignment.save()
         serializer = self.get_serializer(assignment)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GroupMembersView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        group = get_object_or_404(
+            Group, pk=self.kwargs["pk"], school_id=request.school_id
+        )
+        user = request.user
+        allowed = False
+        if is_director(user):
+            allowed = True
+        elif group.homeroom_teacher_id == user.id:
+            allowed = True
+        elif SpecialistAssignment.objects.filter(group=group, teacher=user).exists():
+            allowed = True
+        elif VocalAssignment.objects.filter(
+            group=group, parent=user, active=True
+        ).exists():
+            allowed = True
+        if not allowed:
+            raise PermissionDenied("Not allowed to view group members")
+
+        students = Student.objects.filter(memberships__group=group)
+        parents = (
+            User.objects.filter(
+                children_relations__student__memberships__group=group
+            ).distinct()
+        )
+        return Response(
+            {
+                "students": StudentSerializer(students, many=True).data,
+                "parents": UserSerializer(parents, many=True).data,
+            }
+        )
 
 
 class ComplaintCreateView(generics.CreateAPIView):
