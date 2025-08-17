@@ -121,4 +121,19 @@ class SurveyResultsView(generics.GenericAPIView):
             .order_by("option_index")
         )
         results = {str(item["option_index"]): item["count"] for item in agg}
-        return Response({"results": results})
+        data = {"results": results}
+        if not survey.is_anonymous:
+            votes = (
+                SurveyVote.objects.filter(survey=survey)
+                .select_related("voter")
+                .order_by("id")
+            )
+            data["votes"] = [
+                {
+                    "id": v.voter_id,
+                    "name": v.voter.get_full_name(),
+                    "option_index": v.option_index,
+                }
+                for v in votes
+            ]
+        return Response(data)
