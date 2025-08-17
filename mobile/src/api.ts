@@ -3,9 +3,27 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE = process.env.EXPO_PUBLIC_API_URL || "http://10.0.2.2:8000/api/v1"; // Android emu fallback
 const SCHOOL_ID_KEY = "schoolId";
+const REFRESH_KEY = "rf";
 
 export async function getToken(){ return await SecureStore.getItemAsync("tk"); }
 export async function setToken(t: string){ await SecureStore.setItemAsync("tk", t); }
+export async function getRefreshToken(){ return await SecureStore.getItemAsync(REFRESH_KEY); }
+export async function setRefreshToken(t: string){ await SecureStore.setItemAsync(REFRESH_KEY, t); }
+
+export async function refreshToken(){
+  const refresh = await getRefreshToken();
+  if(!refresh) return false;
+  const r = await fetch(`${BASE}/auth/refresh/`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ refresh })
+  });
+  if(!r.ok) return false;
+  const data = await r.json();
+  await setToken(data.access);
+  if(data.refresh) await setRefreshToken(data.refresh);
+  return true;
+}
 
 export async function getSchoolId(){
   let id = await AsyncStorage.getItem(SCHOOL_ID_KEY);
@@ -33,40 +51,36 @@ export async function headers(t?: string){
   return h;
 }
 
-export async function apiGet(path: string){
+async function request(path: string, options: RequestInit = {}, retry = true){
   const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { headers: await headers(tk) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
+  const res = await fetch(`${BASE}${path}`, { ...options, headers: await headers(tk) });
+  if(res.status === 401 && retry){
+    const ok = await refreshToken();
+    if(ok) return request(path, options, false);
+  }
+  if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if(res.status === 204) return;
+  return res.json();
+}
+
+export async function apiGet(path: string){
+  return request(path);
 }
 
 export async function apiPost(path: string, body: any){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"POST", headers: await headers(tk), body: JSON.stringify(body) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
+  return request(path, { method:"POST", body: JSON.stringify(body) });
 }
 
 export async function apiPostAuth(path: string, body: any){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"POST", headers: await headers(tk), body: JSON.stringify(body) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
+  return request(path, { method:"POST", body: JSON.stringify(body) });
 }
 
 export async function apiPutAuth(path: string, body: any){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method:"PUT", headers: await headers(tk), body: JSON.stringify(body) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
+  return request(path, { method:"PUT", body: JSON.stringify(body) });
 }
 
 export async function apiDeleteAuth(path: string){
-  const tk = await getToken();
-  const r = await fetch(`${BASE}${path}`, { method: "DELETE", headers: await headers(tk) });
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  if(r.status === 204) return;
-  return r.json();
+  return request(path, { method: "DELETE" });
 }
 
 export async function getNotificationPreferences(){

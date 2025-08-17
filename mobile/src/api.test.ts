@@ -5,11 +5,14 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }), { virtual: true });
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { headers, setSchoolId, uploadFile, updateComplaint, updateSuggestion, deleteComplaint, deleteSuggestion } from './api';
+import * as SecureStore from 'expo-secure-store';
+import { headers, setSchoolId, uploadFile, updateComplaint, updateSuggestion, deleteComplaint, deleteSuggestion, refreshToken, apiGet } from './api';
 
 beforeEach(() => {
   (AsyncStorage.getItem as jest.Mock).mockReset();
   (AsyncStorage.setItem as jest.Mock).mockReset();
+  (SecureStore.getItemAsync as jest.Mock).mockReset();
+  (SecureStore.setItemAsync as jest.Mock).mockReset();
 });
 
 test('uses stored school id from AsyncStorage', async () => {
@@ -88,4 +91,30 @@ test('deleteSuggestion sends DELETE request', async () => {
   await deleteSuggestion(4);
   expect((fetch as jest.Mock).mock.calls[0][0]).toContain('/suggestions/4/');
   expect((fetch as jest.Mock).mock.calls[0][1].method).toBe('DELETE');
+});
+
+test('refreshToken updates stored access', async () => {
+  (SecureStore.getItemAsync as jest.Mock).mockImplementation((k: string) => k === 'rf' ? 'r1' : null);
+  (global as any).fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ access: 'a2', refresh: 'r2' }) });
+  const ok = await refreshToken();
+  expect(ok).toBe(true);
+  expect(SecureStore.setItemAsync).toHaveBeenCalledWith('tk', 'a2');
+  expect(SecureStore.setItemAsync).toHaveBeenCalledWith('rf', 'r2');
+});
+
+test('refreshToken returns false without stored refresh', async () => {
+  (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+  const ok = await refreshToken();
+  expect(ok).toBe(false);
+});
+
+test('apiGet retries after 401 using refresh', async () => {
+  (SecureStore.getItemAsync as jest.Mock).mockImplementation((k: string) => k === 'rf' ? 'r1' : null);
+  (global as any).fetch = jest.fn()
+    .mockResolvedValueOnce({ status: 401, ok: false })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ access: 'a2', refresh: 'r2' }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ v: 1 }) });
+  const data = await apiGet('/p');
+  expect((fetch as jest.Mock).mock.calls[1][0]).toContain('/auth/refresh/');
+  expect(data).toEqual({ v: 1 });
 });

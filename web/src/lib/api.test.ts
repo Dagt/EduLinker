@@ -22,6 +22,7 @@ describe('api helpers', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_API_URL = 'http://api';
     global.fetch = jest.fn();
+    window.localStorage.clear();
   });
   afterEach(() => {
     (global.fetch as jest.Mock).mockReset();
@@ -84,6 +85,17 @@ describe('api helpers', () => {
   it('apiGet falls back to status text when no detail', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500, statusText: 'err', json: async () => { throw new Error('x'); } });
     await expect(api.apiGet('/x')).rejects.toThrow('500 err');
+  });
+
+  it('retries once on 401 with refresh', async () => {
+    window.localStorage.setItem('edulinker_refresh','r1');
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ status:401, ok:false, json: async()=>({}) })
+      .mockResolvedValueOnce({ ok:true, json: async()=>({ access:'a2', refresh:'r2' }) })
+      .mockResolvedValueOnce({ ok:true, json: async()=>({ d:4 }) });
+    const data = await api.apiGet('/p');
+    expect((global.fetch as jest.Mock).mock.calls[1][0]).toBe('http://api/auth/refresh/');
+    expect(data).toEqual({ d:4 });
   });
   it('updateSuggestionStatus posts', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
