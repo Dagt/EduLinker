@@ -8,6 +8,7 @@ import Homeworks from "./src/screens/Homeworks";
 import HomeworkCreate from "./src/screens/Homeworks/Create";
 import AnnouncementCreate from "./src/screens/Announcements/Create";
 import Surveys from "./src/screens/Surveys";
+import SurveyCreate from "./src/screens/Surveys/Create";
 import EventCalendar from "./src/screens/EventCalendar";
 import Fundraising from "./src/screens/Fundraising";
 import { View, Button } from "react-native";
@@ -26,7 +27,7 @@ if (process.env.NODE_ENV !== "test") {
 export default function App(){
   const [logged,setLogged]=useState(false);
   const [role,setRole]=useState("guest");
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"fundraising"|"events">("feed");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events">("feed");
 
   useEffect(()=>{ if(logged){ (async()=> setRole(await getRole()))(); } },[logged]);
 
@@ -57,7 +58,8 @@ export default function App(){
            view==="homeworks" ? <Homeworks/> :
            view==="createHomework" ? <HomeworkCreate/> :
            view==="createAnnouncement" ? <AnnouncementCreate/> :
-           view==="surveys" ? <Surveys/> :
+           view==="surveys" ? <Surveys onCreate={()=>setView("createSurvey")} /> :
+           view==="createSurvey" ? <SurveyCreate/> :
            view==="fundraising" ? <Fundraising/> :
            <EventCalendar/>}
         </>

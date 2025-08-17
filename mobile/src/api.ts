@@ -196,6 +196,19 @@ export async function getSurvey(id: number){
   return apiGet(`/surveys/${id}/`);
 }
 
+export async function createSurvey(body: {
+  title: string;
+  description: string;
+  options: string[];
+  scope: 'GRUPO' | 'ESCUELA';
+  group?: number;
+  anonymous: boolean;
+  start_at: string;
+  end_at: string;
+}){
+  return apiPost("/surveys/", body);
+}
+
 export async function voteSurvey(id: number, option_index: number){
   return apiPost(`/surveys/${id}/vote/`, { option_index });
 }
