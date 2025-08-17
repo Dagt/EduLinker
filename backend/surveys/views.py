@@ -5,6 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from .models import Survey, SurveyVote
 from .serializers import SurveySerializer, SurveyVoteSerializer
+from core.throttles import SurveyThrottle
 from core.permissions import (
     is_director,
     is_maestro_titular,
@@ -17,6 +18,7 @@ from core.models import GroupMembership, ParentStudent, SpecialistAssignment, Vo
 class SurveyListCreateView(generics.ListCreateAPIView):
     serializer_class = SurveySerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [SurveyThrottle]
 
     def get_queryset(self):
         qs = Survey.objects.filter(school_id=self.request.school_id)
@@ -58,6 +60,7 @@ class SurveyDetailView(generics.RetrieveAPIView):
 class SurveyVoteView(generics.CreateAPIView):
     serializer_class = SurveyVoteSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [SurveyThrottle]
 
     def perform_create(self, serializer):
         survey = get_object_or_404(
