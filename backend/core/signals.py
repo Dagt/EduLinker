@@ -1,6 +1,13 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from core.models import Complaint, ComplaintMessage, User
+from core.models import (
+    Complaint,
+    ComplaintMessage,
+    Homework,
+    GroupMembership,
+    ParentStudent,
+    User,
+)
 from django.conf import settings
 from notifications.tasks import push_to_users
 
@@ -47,3 +54,34 @@ def notify_new_complaint_message(sender, instance: ComplaintMessage, created, **
             push_to_users(**params)
         else:
             push_to_users.delay(**params)
+
+
+@receiver(post_save, sender=Homework)
+def notify_new_homework(sender, instance: Homework, created, **kwargs):
+    if not created:
+        return
+    school_id = instance.school_id
+    student_ids = GroupMembership.objects.filter(
+        group_id=instance.group_id, school_id=school_id
+    ).values_list("student_id", flat=True)
+    parent_ids = ParentStudent.objects.filter(
+        student_id__in=student_ids, school_id=school_id
+    ).values_list("parent_id", flat=True)
+    targets = set(parent_ids)
+    if instance.teacher_id:
+        targets.add(instance.teacher_id)
+    user_ids = [uid for uid in targets if uid]
+    if not user_ids:
+        return
+    params = dict(
+        school_id=school_id,
+        user_ids=user_ids,
+        title=f"Nueva tarea: {instance.title}",
+        body=f"Entrega el {instance.due_date:%Y-%m-%d}",
+        data={"homework_id": instance.id},
+        kind="homework",
+    )
+    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+        push_to_users(**params)
+    else:
+        push_to_users.delay(**params)
