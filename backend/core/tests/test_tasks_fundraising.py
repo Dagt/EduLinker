@@ -1,0 +1,97 @@
+import pytest
+from django.utils import timezone
+from datetime import timedelta
+
+from core.models import School, SchoolYear, Group, User
+from fundraising.models import FundraisingEvent, FundraisingGroupLedger
+from core.tasks import send_fundraising_weekly_summary, push_to_users
+
+
+@pytest.mark.django_db
+def test_send_fundraising_weekly_summary(monkeypatch):
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    director = User.objects.create_user(
+        username="d@x.com",
+        email="d@x.com",
+        password="p",
+        role="DIRECTOR",
+        school=school,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    g1 = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="G1",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+    g2 = Group.objects.create(
+        school=school,
+        school_year=sy,
+        name="G2",
+        grade_level=5,
+        homeroom_teacher=teacher,
+    )
+    event = FundraisingEvent.objects.create(
+        school=school,
+        school_year=sy,
+        name="Fair",
+        date="2025-10-10",
+    )
+
+    FundraisingGroupLedger.objects.create(
+        event=event,
+        group=g1,
+        amount_collected="100.00",
+        created_by=teacher,
+    )
+    FundraisingGroupLedger.objects.create(
+        event=event,
+        group=g2,
+        amount_collected="200.00",
+        created_by=teacher,
+    )
+    old = FundraisingGroupLedger.objects.create(
+        event=event,
+        group=g1,
+        amount_collected="50.00",
+        created_by=teacher,
+    )
+    old.created_at = timezone.now() - timedelta(days=8)
+    old.save(update_fields=["created_at"])
+
+    calls = []
+
+    def fake_delay(*args, **kwargs):
+        calls.append((args, kwargs))
+
+    monkeypatch.setattr(push_to_users, "delay", fake_delay)
+
+    summary = send_fundraising_weekly_summary()
+
+    assert len(summary) == 2
+    totals = {(s["group__name"], s["event__name"]): s["total"] for s in summary}
+    assert totals[("G1", "Fair")] == 100
+    assert totals[("G2", "Fair")] == 200
+
+    assert len(calls) == 1
+    args, kwargs = calls[0]
+    assert args[0] == school.id
+    assert director.id in args[1]
+    body = args[3]
+    assert "G1" in body and "100" in body
+    assert "G2" in body and "200" in body
+
