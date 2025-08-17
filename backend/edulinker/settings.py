@@ -27,19 +27,23 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-INSTALLED_APPS = [
+SHARED_APPS = [
+    'django_tenants',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework_simplejwt',
     'corsheaders',
-    'drf_spectacular',
     'edulinker',
     'core',
+]
+
+TENANT_APPS = [
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'drf_spectacular',
     'surveys',
     'fundraising',
     'analytics',
@@ -48,6 +52,11 @@ INSTALLED_APPS = [
     'notifications',
     'audit',
 ]
+
+INSTALLED_APPS = list(dict.fromkeys(SHARED_APPS + TENANT_APPS))
+
+TENANT_MODEL = "core.School"
+DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -126,7 +135,7 @@ if os.getenv('USE_SQLITE') == '1':
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
+            'ENGINE': 'django_tenants.postgresql_backend',
             'NAME': os.getenv('POSTGRES_DB', 'edulinker'),
             'USER': os.getenv('POSTGRES_USER', 'edulinker'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'edulinker'),

@@ -2,16 +2,24 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+from django_tenants.models import TenantMixin
 
 from .roles import Roles as UserRoles
 
 
-class School(models.Model):
+class School(TenantMixin):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     logo_url = models.URLField(blank=True)
     subdomain = models.CharField(max_length=50, unique=True)
     active = models.BooleanField(default=True)
+
+    auto_create_schema = True
+
+    def save(self, *args, **kwargs):
+        if not self.schema_name:
+            self.schema_name = self.subdomain
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

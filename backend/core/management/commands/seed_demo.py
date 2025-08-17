@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
-from django.db import transaction
+from django.db import transaction, connection
 
 from core.models import (
     School, SchoolYear, User, Student, Group, GroupMembership,
@@ -38,6 +38,7 @@ class Command(BaseCommand):
         school, _ = School.objects.get_or_create(name="Colegio Demo", slug="colegio-demo", defaults={
             "subdomain": "demo", "active": True
         })
+        connection.set_tenant(school)
         today = date.today()
         sy_start = date(today.year, 8, 1)
         sy_end = date(today.year+1, 7, 15)
@@ -275,6 +276,7 @@ class Command(BaseCommand):
             school=school, user=group_parents[groups[0]][0],
             kind=NotificationPreference.Kind.COMPLAINT, defaults={"enabled": False}
         )
+        connection.set_schema_to_public()
 
         self.stdout.write(self.style.SUCCESS("Seed demo creada. Credenciales:"))
         self.stdout.write("Director: director@demo.com / demo123")
