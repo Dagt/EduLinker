@@ -21,12 +21,26 @@ export default function AuditPage() {
   const pageSize = 10;
   const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
+  const [actor, setActor] = useState("");
+  const [actionFilter, setActionFilter] = useState("");
+  const [entityType, setEntityType] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   useEffect(() => {
     async function load() {
       try {
         const tk = getToken();
-        const data = await apiGet<any>(`/audit-logs/?page=${page}&page_size=${pageSize}`, tk);
+        const params = new URLSearchParams({
+          page: String(page),
+          page_size: String(pageSize),
+        });
+        if (actor) params.append("actor", actor);
+        if (actionFilter) params.append("action", actionFilter);
+        if (entityType) params.append("entity_type", entityType);
+        if (dateFrom) params.append("date_from", dateFrom);
+        if (dateTo) params.append("date_to", dateTo);
+        const data = await apiGet<any>(`/audit-logs/?${params.toString()}`, tk);
         const results = data.results || data;
         setLogs(results);
         setTotal(data.count || results.length);
@@ -35,7 +49,7 @@ export default function AuditPage() {
       }
     }
     load();
-  }, [page, t]);
+  }, [page, actor, actionFilter, entityType, dateFrom, dateTo, t]);
 
   if (!requireRole(["director"])) return <p>{t("AuditLogs.unauthorized")}</p>;
 
@@ -47,6 +61,53 @@ export default function AuditPage() {
       <main style={{ padding: 16 }}>
         <h2>{t("AuditLogs.header")}</h2>
         {error && <p>{error}</p>}
+        <div style={{ marginBottom: 16 }}>
+          <input
+            placeholder={t("AuditLogs.actor")}
+            value={actor}
+            onChange={(e) => {
+              setActor(e.target.value);
+              setPage(1);
+            }}
+            style={{ marginRight: 8 }}
+          />
+          <input
+            placeholder={t("AuditLogs.action")}
+            value={actionFilter}
+            onChange={(e) => {
+              setActionFilter(e.target.value);
+              setPage(1);
+            }}
+            style={{ marginRight: 8 }}
+          />
+          <input
+            placeholder={t("AuditLogs.entityType")}
+            value={entityType}
+            onChange={(e) => {
+              setEntityType(e.target.value);
+              setPage(1);
+            }}
+            style={{ marginRight: 8 }}
+          />
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => {
+              setDateFrom(e.target.value);
+              setPage(1);
+            }}
+            style={{ marginRight: 8 }}
+          />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => {
+              setDateTo(e.target.value);
+              setPage(1);
+            }}
+            style={{ marginRight: 8 }}
+          />
+        </div>
         <table>
           <thead>
             <tr>

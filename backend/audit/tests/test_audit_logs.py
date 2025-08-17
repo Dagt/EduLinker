@@ -3,6 +3,8 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.models import School, SchoolYear, Group, User
 from audit.models import AuditLog
+from django.utils import timezone
+from datetime import timedelta
 
 @pytest.mark.django_db
 def test_complaint_status_change_logged_and_endpoint():
@@ -127,3 +129,61 @@ def test_chat_message_logged():
     assert res.status_code in (200,201)
     msg_id = res.json()["id"]
     assert AuditLog.objects.filter(action="create", entity_type="chat_message", entity_id=msg_id).exists()
+
+
+@pytest.mark.django_db
+def test_audit_log_filters():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    director = User.objects.create_user(
+        username="d@x.com", email="d@x.com", password="p", role="DIRECTOR", school=school
+    )
+    other = User.objects.create_user(
+        username="o@x.com", email="o@x.com", password="p", role="DIRECTOR", school=school
+    )
+    now = timezone.now()
+    AuditLog.objects.create(
+        school=school,
+        actor=director,
+        action="create",
+        entity_type="event",
+        entity_id=1,
+        created_at=now - timedelta(days=2),
+    )
+    AuditLog.objects.create(
+        school=school,
+        actor=other,
+        action="delete",
+        entity_type="event",
+        entity_id=2,
+        created_at=now - timedelta(days=1),
+    )
+    AuditLog.objects.create(
+        school=school,
+        actor=director,
+        action="update",
+        entity_type="group",
+        entity_id=3,
+        created_at=now,
+    )
+
+    client = APIClient()
+    token = str(RefreshToken.for_user(director).access_token)
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id))
+
+    res = client.get(f"/api/v1/audit-logs/?actor={other.id}")
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+
+    res = client.get("/api/v1/audit-logs/?action=update")
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+
+    res = client.get("/api/v1/audit-logs/?entity_type=event")
+    assert res.status_code == 200
+    assert len(res.json()) == 2
+
+    date_from = (now - timedelta(days=1.5)).date().isoformat()
+    date_to = (now - timedelta(days=0.5)).date().isoformat()
+    res = client.get(f"/api/v1/audit-logs/?date_from={date_from}&date_to={date_to}")
+    assert res.status_code == 200
+    assert len(res.json()) == 1
