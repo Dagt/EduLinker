@@ -27,6 +27,10 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+# External WhatsApp provider
+WHATSAPP_API_URL = os.getenv("WHATSAPP_API_URL")
+WHATSAPP_API_TOKEN = os.getenv("WHATSAPP_API_TOKEN")
+
 SHARED_APPS = [
     'django_tenants',
     'django.contrib.admin',
