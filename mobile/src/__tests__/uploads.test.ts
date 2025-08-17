@@ -1,4 +1,5 @@
 jest.mock('expo-image-picker', () => ({
+  __esModule: true,
   launchImageLibraryAsync: jest.fn(),
   MediaTypeOptions: { Images: 'Images' },
 }));
