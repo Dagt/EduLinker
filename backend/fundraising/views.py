@@ -244,7 +244,22 @@ class ExpenseEvidenceListCreateView(generics.ListCreateAPIView):
             raise PermissionDenied("Group mismatch for school")
         if not can_upload_expense(user, group):
             raise PermissionDenied("Not allowed to upload expenses for this group")
-        serializer.save(uploader=user)
+        expense = serializer.save(uploader=user)
+        from audit.models import AuditLog
+
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="expense_create",
+            entity_type="expense_evidence",
+            entity_id=expense.id,
+            metadata={
+                "ledger_id": ledger.id if ledger else None,
+                "group_id": group.id if group else None,
+                "amount": str(expense.amount),
+                "concept": expense.concept,
+            },
+        )
 
 
 class ExpenseEvidenceDetailView(generics.RetrieveUpdateDestroyAPIView):
