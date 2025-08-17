@@ -2,8 +2,7 @@
 import { registerForPushNotificationsAsync } from "../notifications";
 import { View, Text, TextInput, Button, Alert, Platform } from "react-native";
 import { useState } from "react";
-import { setToken } from "../api";
-import { apiPostAuth } from "../api";
+import { setToken, apiPost, apiPostAuth } from "../api";
 import i18n from "../i18n";
 
 export default function Login({ onLoggedIn }: { onLoggedIn: ()=>void }){
@@ -11,14 +10,13 @@ export default function Login({ onLoggedIn }: { onLoggedIn: ()=>void }){
   async function login(){
     if(!email){ Alert.alert(i18n.t('general.error'), i18n.t('login.missingEmail')); return; }
     if(!password){ Alert.alert(i18n.t('general.error'), i18n.t('login.missingPassword')); return; }
-    const r = await fetch("http://10.0.2.2:8000/api/v1/auth/login/", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json", "X-School-ID":"1" },
-      body: JSON.stringify({ username: email, password })
-    });
-    if(!r.ok){ Alert.alert(i18n.t('general.error'), i18n.t('login.invalid')); return; }
-    const data = await r.json();
-    await setToken(data.access);
+    try{
+      const data = await apiPost("/auth/login/", { username: email, password });
+      await setToken(data.access);
+    } catch(e){
+      Alert.alert(i18n.t('general.error'), i18n.t('login.invalid'));
+      return;
+    }
     const expoToken = await registerForPushNotificationsAsync();
     if (expoToken) {
       try {
@@ -27,7 +25,7 @@ export default function Login({ onLoggedIn }: { onLoggedIn: ()=>void }){
     }
     onLoggedIn();
   }
-  return (
+    return (
     <View style={{padding:16}}>
       <Text style={{fontSize:20, marginBottom:8}}>{i18n.t('login.title')}</Text>
       <TextInput placeholder={i18n.t('login.email')} onChangeText={setEmail} style={{borderWidth:1, marginBottom:8, padding:8}}/>
