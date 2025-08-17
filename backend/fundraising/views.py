@@ -1,8 +1,14 @@
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.db.models import Sum, Q
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from decimal import Decimal
+from io import StringIO
+import csv
+from fpdf import FPDF
 from core.permissions import (
     IsDirector,
     IsDirectorOrReadOnly,
@@ -92,6 +98,76 @@ class FundraisingEventSummaryView(generics.RetrieveAPIView):
             "expenses": ExpenseEvidenceSerializer(expenses, many=True).data,
         }
         return Response(data)
+
+
+class FundraisingEventExportView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        event = get_object_or_404(
+            FundraisingEvent, pk=pk, school_id=request.school_id
+        )
+        ledgers = (
+            FundraisingGroupLedger.objects.filter(event=event)
+            .values("group_id", "group__name")
+            .annotate(total=Sum("amount_collected"))
+        )
+        expenses = ExpenseEvidence.objects.filter(ledger__event=event)
+        total_collected = sum((l["total"] for l in ledgers), Decimal("0"))
+        total_expenses = sum((e.amount for e in expenses), Decimal("0"))
+        balance = total_collected - total_expenses
+
+        fmt = request.query_params.get("format", "csv").lower()
+        if fmt == "pdf":
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", "B", 16)
+            pdf.cell(0, 10, f"{event.name}", ln=True)
+            pdf.set_font("Arial", "", 12)
+            pdf.cell(0, 10, f"Date: {event.date}", ln=True)
+            pdf.ln(5)
+            pdf.set_font("Arial", "B", 14)
+            pdf.cell(0, 10, "Collections", ln=True)
+            pdf.set_font("Arial", "", 12)
+            for l in ledgers:
+                pdf.cell(0, 8, f"{l['group__name']}: {l['total']}", ln=True)
+            pdf.ln(5)
+            pdf.set_font("Arial", "B", 14)
+            pdf.cell(0, 10, "Expenses", ln=True)
+            pdf.set_font("Arial", "", 12)
+            for e in expenses:
+                pdf.cell(0, 8, f"{e.concept}: {e.amount}", ln=True)
+            pdf.ln(5)
+            pdf.set_font("Arial", "B", 12)
+            pdf.cell(0, 8, f"Total collected: {total_collected}", ln=True)
+            pdf.cell(0, 8, f"Total expenses: {total_expenses}", ln=True)
+            pdf.cell(0, 8, f"Balance: {balance}", ln=True)
+            pdf_bytes = pdf.output(dest="S").encode("latin-1")
+            response = HttpResponse(pdf_bytes, content_type="application/pdf")
+            response[
+                "Content-Disposition"
+            ] = f'attachment; filename="fundraising_event_{event.id}.pdf"'
+            return response
+
+        buffer = StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(["Group", "Amount Collected"])
+        for l in ledgers:
+            writer.writerow([l["group__name"], l["total"]])
+        writer.writerow([])
+        writer.writerow(["Expenses"])
+        writer.writerow(["Concept", "Amount"])
+        for e in expenses:
+            writer.writerow([e.concept, e.amount])
+        writer.writerow([])
+        writer.writerow(["Total collected", str(total_collected)])
+        writer.writerow(["Total expenses", str(total_expenses)])
+        writer.writerow(["Balance", str(balance)])
+        response = HttpResponse(buffer.getvalue(), content_type="text/csv")
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="fundraising_event_{event.id}.csv"'
+        return response
 
 class FundraisingLedgerListCreateView(generics.ListCreateAPIView):
     serializer_class = FundraisingGroupLedgerSerializer

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Nav from "@/components/Nav";
 import { getToken } from "@/lib/auth";
-import { getFundraisingEventSummary } from "@/lib/api";
+import { getFundraisingEventSummary, exportFundraisingEvent } from "@/lib/api";
 import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
@@ -33,6 +33,23 @@ export default function FundraisingSummary() {
     } catch (err) {
       console.error(err);
       setSummary(null);
+    }
+  }
+
+  async function download(format: "csv" | "pdf") {
+    try {
+      const tk = getToken();
+      const blob = await exportFundraisingEvent(Number(eventId), format, tk);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `fundraising_${eventId}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -95,6 +112,12 @@ export default function FundraisingSummary() {
                 ))}
               </tbody>
             </table>
+            <button onClick={() => download("csv")} style={{ marginRight: 8 }}>
+              {t("FundraisingSummary.downloadCsv")}
+            </button>
+            <button onClick={() => download("pdf")}> 
+              {t("FundraisingSummary.downloadPdf")}
+            </button>
           </>
         )}
       </main>

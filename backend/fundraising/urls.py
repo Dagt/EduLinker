@@ -8,6 +8,7 @@ from .views import (
     ExpenseEvidenceListCreateView,
     ExpenseEvidenceDetailView,
     FundraisingEventSummaryView,
+    FundraisingEventExportView,
 )
 
 urlpatterns = [
@@ -15,6 +16,7 @@ urlpatterns = [
     path("fundraising-events/<int:pk>/", FundraisingEventDetailView.as_view(), name="fundraising-event-detail"),
     path("fundraising-events/<int:pk>/update/", FundraisingEventUpdateView.as_view(), name="fundraising-event-update"),
     path("fundraising-events/<int:pk>/summary/", FundraisingEventSummaryView.as_view(), name="fundraising-event-summary"),
+    path("fundraising-events/<int:pk>/export/", FundraisingEventExportView.as_view(), name="fundraising-event-export"),
     path("fundraising-ledger/", FundraisingLedgerListCreateView.as_view(), name="fundraising-ledger-list-create"),
     path("fundraising-ledger/<int:pk>/", FundraisingLedgerDetailView.as_view(), name="fundraising-ledger-detail"),
     path("expense-evidences/", ExpenseEvidenceListCreateView.as_view(), name="expense-evidence-list-create"),

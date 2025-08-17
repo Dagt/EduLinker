@@ -94,6 +94,22 @@ export async function getFundraisingEventSummary(eventId: number, token?: string
   return apiGet(`/fundraising-events/${eventId}/summary/`, token);
 }
 
+export async function exportFundraisingEvent(
+  eventId: number,
+  format: "csv" | "pdf",
+  token?: string,
+) {
+  const base = process.env.NEXT_PUBLIC_API_URL!;
+  const res = await fetch(
+    `${base}/fundraising-events/${eventId}/export/?format=${format}`,
+    {
+      headers: authHeaders(token),
+    },
+  );
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.blob();
+}
+
 // Analytics dashboard
 export async function getAnalytics(token?: string) {
   return apiGet(`/analytics/overview/`, token);
