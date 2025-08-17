@@ -114,7 +114,7 @@ def test_event_creation_logged():
     }, format="json")
     assert res.status_code in (200,201)
     event_id = res.json()["id"]
-    assert AuditLog.objects.filter(action="create", entity_type="event", entity_id=event_id).exists()
+    assert AuditLog.objects.filter(action="event_create", entity_type="event", entity_id=event_id).exists()
 
 @pytest.mark.django_db
 def test_chat_message_logged():
