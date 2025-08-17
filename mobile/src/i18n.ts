@@ -38,6 +38,7 @@ const translations = {
       requiredMessage: 'Please enter a message',
       save: 'Save',
       delete: 'Delete',
+      escalate: 'Escalate',
     },
     suggestions: {
       title: 'Suggestions',
@@ -92,6 +93,7 @@ const translations = {
       requiredMessage: 'Ingresa un mensaje',
       save: 'Guardar',
       delete: 'Eliminar',
+      escalate: 'Escalar',
     },
     suggestions: {
       title: 'Sugerencias',

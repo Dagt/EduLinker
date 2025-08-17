@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TextInput, Button, Alert } from "react-native";
-import { getComplaintMessages, sendComplaintMessage, updateComplaint, deleteComplaint } from "../../api";
+import { getComplaintMessages, sendComplaintMessage, updateComplaint, deleteComplaint, escalateComplaint } from "../../api";
 import i18n from "../../i18n";
 
 export default function ComplaintDetail({ complaint, onBack }: { complaint: any; onBack: () => void }) {
@@ -53,6 +53,7 @@ export default function ComplaintDetail({ complaint, onBack }: { complaint: any;
       />
       <Button title={i18n.t('complaints.send')} onPress={sendMsg} />
       <Button title={i18n.t('complaints.back')} onPress={onBack} />
+      <Button title={i18n.t('complaints.escalate')} onPress={async () => { await escalateComplaint(data.id); }} />
       <Button title={i18n.t('complaints.delete')} onPress={async () => { await deleteComplaint(data.id); onBack(); }} />
     </View>
   );
