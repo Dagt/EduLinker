@@ -67,3 +67,14 @@ All requests must include the `X-School-ID` header.
 - General: 1000 requests per day per user, 100 per day per IP.
 - Login: 5 attempts per minute per IP.
 - Complaint creation: 20 requests per day per user.
+
+### Event media endpoints
+
+Events support attachments and photos. Endpoints:
+
+- `GET /api/v1/events/{id}/attachments/` list attachments.
+- `POST /api/v1/events/{id}/attachments/` upload a new attachment.
+- `GET /api/v1/events/{id}/photos/` list photos.
+- `POST /api/v1/events/{id}/photos/` upload a new photo.
+
+Users must have permission to view the event in order to access these resources.
