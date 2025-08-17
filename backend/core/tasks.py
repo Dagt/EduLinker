@@ -11,15 +11,26 @@ from core.utils import get_group_audience_user_ids, get_event_audience_user_ids
 @shared_task
 def send_event_reminders():
     now = timezone.now()
-    soon = now + timedelta(hours=getattr(settings, "EVENT_REMINDER_HOURS_AHEAD", 24))
-    events = Event.objects.filter(status="ACTIVE", start_at__range=(now, soon))
+    offsets = getattr(settings, "EVENT_REMINDER_OFFSETS", [24])
+    total_events = 0
     total_push = 0
-    for ev in events:
-        user_ids = get_event_audience_user_ids(ev)
-        if user_ids:
-            push_to_users.delay(ev.school_id, user_ids, f"Recordatorio: {ev.title}", f"Inicia {ev.start_at:%Y-%m-%d %H:%M}", {"type": "event", "event_id": ev.id})
-            total_push += len(user_ids)
-    return {"events": events.count(), "recipients": total_push}
+    for offset in offsets:
+        start = now + timedelta(hours=offset)
+        end = start + timedelta(hours=1)
+        events = Event.objects.filter(status="ACTIVE", start_at__range=(start, end))
+        total_events += events.count()
+        for ev in events:
+            user_ids = get_event_audience_user_ids(ev)
+            if user_ids:
+                push_to_users.delay(
+                    ev.school_id,
+                    user_ids,
+                    f"Recordatorio: {ev.title}",
+                    f"Inicia {ev.start_at:%Y-%m-%d %H:%M}",
+                    {"type": "event", "event_id": ev.id},
+                )
+                total_push += len(user_ids)
+    return {"events": total_events, "recipients": total_push}
 
 @shared_task
 def send_homework_reminders():
