@@ -14,6 +14,7 @@ export const protectedRoutes: Record<string, string[]> = {
   "/groups/assign-homeroom": ["admin"],
   "/groups/assign-specialist": ["admin"],
   "/groups/assign-vocal": ["admin"],
+  "/audit": ["director"],
 };
 
 export function canAccessRoute(path: string, role?: string): boolean {
