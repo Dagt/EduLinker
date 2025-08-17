@@ -1,5 +1,9 @@
 from django.apps import AppConfig
 
+
 class FundraisingConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'fundraising'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "fundraising"
+
+    def ready(self) -> None:  # pragma: no cover - import signals
+        from . import signals  # noqa: F401
