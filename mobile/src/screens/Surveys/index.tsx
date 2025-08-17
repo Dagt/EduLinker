@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Button } from "react-native";
 import { getSurveys } from "../../api";
+import { getRole } from "../../role";
+import i18n from "../../i18n";
 import SurveyVote from "./Vote";
 import SurveyResults from "./Results";
 
-export default function Surveys(){
+export default function Surveys({ onCreate }: { onCreate?: () => void }){
   const [items, setItems] = useState<any[]>([]);
   const [selected, setSelected] = useState<{id:number,type:'vote'|'results'}|null>(null);
+  const [role,setRole]=useState("guest");
 
   useEffect(()=>{
     (async()=>{
@@ -16,6 +19,9 @@ export default function Surveys(){
       }catch{
         setItems([]);
       }
+    })();
+    (async()=>{
+      setRole(await getRole());
     })();
   },[]);
 
@@ -34,7 +40,10 @@ export default function Surveys(){
   }
   return (
     <View style={{padding:16}}>
-      <Text style={{fontSize:18, marginBottom:8}}>Encuestas</Text>
+      <Text style={{fontSize:18, marginBottom:8}}>{i18n.t('surveys.title')}</Text>
+      {(onCreate && ["MAESTRO_TITULAR","MAESTRO_ITINERANTE","VOCAL","DIRECTOR"].includes(role)) && (
+        <Button title={i18n.t('surveys.create')} onPress={onCreate} />
+      )}
       <FlatList data={items} keyExtractor={(x)=>String(x.id)}
         ListEmptyComponent={<Text>No hay encuestas</Text>}
         renderItem={({item})=> {

@@ -20,6 +20,10 @@ const translations = {
       fundraising: 'Fundraising',
       events: 'Calendar',
     },
+    surveys: {
+      title: 'Surveys',
+      create: 'Create survey',
+    },
     login: {
       title: 'EduLinker',
       email: 'Email',
@@ -82,6 +86,18 @@ const translations = {
       attach: 'Attach',
       submit: 'Save',
     },
+    surveyCreate: {
+      title: 'Create survey',
+      fieldTitle: 'Title',
+      fieldDescription: 'Description',
+      fieldOptions: 'Options',
+      fieldStart: 'Start date',
+      fieldEnd: 'End date',
+      scopeGroup: 'Group',
+      scopeSchool: 'School',
+      anonymous: 'Anonymous',
+      submit: 'Save',
+    },
   },
   es: {
     general: {
@@ -100,6 +116,10 @@ const translations = {
       surveys: 'Encuestas',
       fundraising: 'Recaudación',
       events: 'Calendario',
+    },
+    surveys: {
+      title: 'Encuestas',
+      create: 'Crear encuesta',
     },
     login: {
       title: 'EduLinker',
@@ -161,6 +181,18 @@ const translations = {
       fieldMessage: 'Mensaje',
       fieldDate: 'Fecha',
       attach: 'Adjuntar',
+      submit: 'Guardar',
+    },
+    surveyCreate: {
+      title: 'Crear encuesta',
+      fieldTitle: 'Título',
+      fieldDescription: 'Descripción',
+      fieldOptions: 'Opciones',
+      fieldStart: 'Inicio',
+      fieldEnd: 'Fin',
+      scopeGroup: 'Grupo',
+      scopeSchool: 'Escuela',
+      anonymous: 'Anónima',
       submit: 'Guardar',
     },
   },

@@ -44,3 +44,12 @@ Los usuarios con rol **MAESTRO_TITULAR** o **MAESTRO_ITINERANTE** pueden crear n
 
 Los adjuntos se suben con `uploadFile`, que devuelve la URL remota lista para almacenarse en el backend.
 
+## Encuestas
+
+Los roles **MAESTRO_TITULAR**, **MAESTRO_ITINERANTE**, **VOCAL** activo y **DIRECTOR** pueden crear encuestas desde la pantalla de encuestas.
+
+1. Abre el menú principal y selecciona *Encuestas*.
+2. Presiona *Crear encuesta*.
+3. Completa título, descripción, opciones, alcance (escuela o grupo), anonimato y fechas.
+4. Al guardar se envía una petición `POST` al API mediante la función `createSurvey`.
+
