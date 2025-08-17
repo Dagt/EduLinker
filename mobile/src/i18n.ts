@@ -14,6 +14,8 @@ const translations = {
       complaints: 'Complaints',
       suggestions: 'Suggestions',
       homeworks: 'Homeworks',
+      createHomework: 'New Homework',
+      createAnnouncement: 'New Announcement',
       surveys: 'Surveys',
       fundraising: 'Fundraising',
       events: 'Calendar',
@@ -64,6 +66,22 @@ const translations = {
       ledger: 'Ledger',
       expenses: 'Expenses',
     },
+    homeworkCreate: {
+      title: 'Create homework',
+      fieldTitle: 'Title',
+      fieldDescription: 'Description',
+      fieldDueDate: 'Due date',
+      attach: 'Attach',
+      submit: 'Save',
+    },
+    announcementCreate: {
+      title: 'Create announcement',
+      fieldTitle: 'Title',
+      fieldMessage: 'Message',
+      fieldDate: 'Date',
+      attach: 'Attach',
+      submit: 'Save',
+    },
   },
   es: {
     general: {
@@ -77,6 +95,8 @@ const translations = {
       complaints: 'Quejas',
       suggestions: 'Sugerencias',
       homeworks: 'Tareas',
+      createHomework: 'Nueva tarea',
+      createAnnouncement: 'Nuevo anuncio',
       surveys: 'Encuestas',
       fundraising: 'Recaudación',
       events: 'Calendario',
@@ -126,6 +146,22 @@ const translations = {
     fundraising: {
       ledger: 'Ingresos',
       expenses: 'Gastos',
+    },
+    homeworkCreate: {
+      title: 'Crear tarea',
+      fieldTitle: 'Título',
+      fieldDescription: 'Descripción',
+      fieldDueDate: 'Fecha límite',
+      attach: 'Adjuntar',
+      submit: 'Guardar',
+    },
+    announcementCreate: {
+      title: 'Crear anuncio',
+      fieldTitle: 'Título',
+      fieldMessage: 'Mensaje',
+      fieldDate: 'Fecha',
+      attach: 'Adjuntar',
+      submit: 'Guardar',
     },
   },
 };
