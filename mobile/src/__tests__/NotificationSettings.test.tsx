@@ -30,19 +30,16 @@ describe("NotificationSettings", () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
     (api.getNotificationPreferences as jest.Mock).mockResolvedValue({
       push: true,
-      email: false,
     });
 
     const { getByTestId } = render(<NotificationSettings />);
 
     await waitFor(() => expect(api.getNotificationPreferences).toHaveBeenCalled());
     const pushSwitch = getByTestId("push-switch");
-    const emailSwitch = getByTestId("email-switch");
     expect(pushSwitch.props.value).toBe(true);
-    expect(emailSwitch.props.value).toBe(false);
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
       "notificationPrefs",
-      JSON.stringify({ push: true, email: false })
+      JSON.stringify({ push: true })
     );
   });
 
@@ -50,7 +47,6 @@ describe("NotificationSettings", () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
     (api.getNotificationPreferences as jest.Mock).mockResolvedValue({
       push: true,
-      email: true,
       event: true,
     });
 
@@ -62,12 +58,11 @@ describe("NotificationSettings", () => {
     await waitFor(() => {
       expect(api.updateNotificationPreferences).toHaveBeenCalledWith({
         push: false,
-        email: true,
         event: true,
       });
       expect(AsyncStorage.setItem).toHaveBeenCalledWith(
         "notificationPrefs",
-        JSON.stringify({ push: false, email: true, event: true })
+        JSON.stringify({ push: false, event: true })
       );
     });
   });

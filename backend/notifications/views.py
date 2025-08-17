@@ -68,17 +68,16 @@ class NotificationChannelPrefsView(APIView):
             for p in NotificationPreference.objects.filter(
                 school_id=request.school_id,
                 user=request.user,
-                kind__in=["push", "email"],
+                kind__in=["push"],
             )
         }
-        return Response({"push": prefs.get("push", True), "email": prefs.get("email", True)})
+        return Response({"push": prefs.get("push", True)})
 
     def put(self, request):
-        for key in ["push", "email"]:
-            if key in request.data:
-                pref, _ = NotificationPreference.objects.get_or_create(
-                    school_id=request.school_id, user=request.user, kind=key
-                )
-                pref.enabled = bool(request.data[key])
-                pref.save(update_fields=["enabled"])
+        if "push" in request.data:
+            pref, _ = NotificationPreference.objects.get_or_create(
+                school_id=request.school_id, user=request.user, kind="push"
+            )
+            pref.enabled = bool(request.data["push"])
+            pref.save(update_fields=["enabled"])
         return self.get(request)

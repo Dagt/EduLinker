@@ -35,17 +35,12 @@ def test_escalate_stale_complaints_triggers_notifications(monkeypatch, settings)
         username="p1", school=school, role="PADRE", email="p1@example.com"
     )
     push_calls: list = []
-    send_calls: list = []
 
     def fake_push(*args, **kwargs):
         push_calls.append(args)
 
-    def fake_send(provider, school_id, user_ids, title, body, data):
-        send_calls.append((provider, school_id, list(user_ids), title, body, data))
-
     monkeypatch.setattr("core.tasks.push_to_users.delay", fake_push)
     monkeypatch.setattr("notifications.tasks.push_to_users.delay", fake_push)
-    monkeypatch.setattr("core.tasks.send_notification.delay", fake_send)
 
     complaint = Complaint.objects.create(
         school=school,
@@ -60,7 +55,6 @@ def test_escalate_stale_complaints_triggers_notifications(monkeypatch, settings)
 
     # Clear calls from creation signal
     push_calls.clear()
-    send_calls.clear()
 
     escalate_stale_complaints.run()
     complaint.refresh_from_db()
@@ -68,5 +62,3 @@ def test_escalate_stale_complaints_triggers_notifications(monkeypatch, settings)
     assert complaint.status == Complaint.Status.ESCALATED
     assert push_calls and push_calls[0][0] == school.id
     assert list(push_calls[0][1]) == [director.id]
-    providers = {call[0] for call in send_calls}
-    assert {"email", "sms"} <= providers

@@ -1,13 +1,9 @@
 
 from celery import shared_task
 
-from core.models import User
-
 from .models import DeviceToken, ExpoTicket, FailedExpoTicket, NotificationPreference
 from .providers import expo
 from .providers.expo import ExpoProvider
-from .providers.email import EmailProvider
-from .providers.whatsapp import WhatsAppProvider
 
 
 def _active_tokens_for_users(user_ids, school_id):
@@ -16,24 +12,6 @@ def _active_tokens_for_users(user_ids, school_id):
             active=True, school_id=school_id, user_id__in=user_ids
         ).values_list("token", flat=True)
     )
-
-
-def _emails_for_users(user_ids, school_id):
-    return list(
-        User.objects.filter(id__in=user_ids, school_id=school_id).values_list(
-            "email", flat=True
-        )
-    )
-
-
-def _phones_for_users(user_ids, school_id):
-    return [
-        p
-        for p in User.objects.filter(id__in=user_ids, school_id=school_id).values_list(
-            "phone", flat=True
-        )
-        if p
-    ]
 
 
 def _filter_user_ids_by_pref(school_id, user_ids, kind):
@@ -86,18 +64,6 @@ def send_notification(
             "tickets": len(token_ticket_pairs),
             "invalid": len(invalid_tokens),
         }
-
-    elif provider == "email":
-        emails = _emails_for_users(user_ids, school_id)
-        provider_obj = EmailProvider()
-        provider_obj.send(emails, title, body, data or {})
-        return {"sent": len(emails)}
-
-    elif provider in ("sms", "whatsapp"):
-        numbers = _phones_for_users(user_ids, school_id)
-        provider_obj = WhatsAppProvider()
-        provider_obj.send(numbers, title, body, data or {})
-        return {"sent": len(numbers)}
 
     else:
         raise ValueError("Unknown provider")

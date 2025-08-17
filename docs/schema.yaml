@@ -2066,12 +2066,14 @@ components:
       - survey
       - complaint
       - complaint_message
+      - push
       type: string
       description: |-
         * `event` - Eventos
         * `survey` - Encuestas
         * `complaint` - Quejas
         * `complaint_message` - Mensajes de queja
+        * `push` - Push
     NotificationPreference:
       type: object
       properties:

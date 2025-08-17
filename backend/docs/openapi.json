@@ -2463,7 +2463,6 @@ components:
       - complaint
       - complaint_message
       - push
-      - email
       type: string
       description: |-
         * `event` - Eventos
@@ -2471,7 +2470,6 @@ components:
         * `complaint` - Quejas
         * `complaint_message` - Mensajes de queja
         * `push` - Push
-        * `email` - Email
     NotificationPreference:
       type: object
       properties:
