@@ -1,6 +1,3 @@
-import * as ImagePicker from 'expo-image-picker';
-import { uploadFile } from '../api';
-
 jest.mock('expo-image-picker', () => ({
   launchImageLibraryAsync: jest.fn(),
   MediaTypeOptions: { Images: 'Images' },
@@ -8,6 +5,8 @@ jest.mock('expo-image-picker', () => ({
 
 jest.mock('../api', () => ({ uploadFile: jest.fn() }));
 
+const ImagePicker = require('expo-image-picker');
+const { uploadFile } = require('../api');
 const { pickAndUpload } = require('../services/uploads');
 
 describe('pickAndUpload', () => {

@@ -38,7 +38,7 @@ export default function App(){
             <Button title={i18n.t('menu.events')} onPress={()=>setView("events")} />
           </View>
           {view==="feed" ? <Feed/> :
-           view==="chat" ? <GroupChat groupId={1}/> :
+           view==="chat" ? <GroupChat/> :
            view==="complaints" ? <Complaints/> :
            view==="suggestions" ? <Suggestions/> :
            view==="homeworks" ? <Homeworks/> :
