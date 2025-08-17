@@ -478,7 +478,7 @@ class EventListCreateView(generics.ListCreateAPIView):
         AuditLog.objects.create(
             school_id=self.request.school_id,
             actor=user,
-            action="create",
+            action="event_create",
             entity_type="event",
             entity_id=event.id,
             metadata={"scope": event.scope},
@@ -496,8 +496,18 @@ class EventCancelView(generics.UpdateAPIView):
         event = self.get_object()
         if not (is_director(request.user) or event.created_by_id == request.user.id):
             raise PermissionDenied("Cannot cancel this event")
+        prev_status = event.status
         event.status = Event.Status.CANCELLED
         event.save()
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=request.user,
+            action="event_cancel",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={"from": prev_status, "to": event.status},
+        )
         serializer = self.get_serializer(event)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -512,7 +522,20 @@ class EventAttachmentCreateView(generics.CreateAPIView):
         )
         if not can_view_event(self.request.user, event):
             raise PermissionDenied("Cannot add attachment to this event")
-        serializer.save(event=event)
+        attachment = serializer.save(event=event)
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="event_attachment_upload",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={
+                "attachment_id": attachment.id,
+                "filename": attachment.filename,
+                "mime": attachment.mime,
+            },
+        )
 
 
 class EventPhotoCreateView(generics.CreateAPIView):
@@ -525,7 +548,16 @@ class EventPhotoCreateView(generics.CreateAPIView):
         )
         if not can_view_event(self.request.user, event):
             raise PermissionDenied("Cannot add photo to this event")
-        serializer.save(event=event)
+        photo = serializer.save(event=event)
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="event_photo_upload",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={"photo_id": photo.id, "caption": photo.caption},
+        )
 
 
 class ActivityPhotoListView(generics.ListAPIView):
@@ -587,6 +619,24 @@ class EventUpdateView(generics.UpdateAPIView):
         if not (is_director(request.user) or event.created_by_id == request.user.id):
             raise PermissionDenied("Only the creator or director may edit this event")
         return super().update(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        event = serializer.instance
+        changes = {}
+        for field, value in serializer.validated_data.items():
+            old_value = getattr(event, field)
+            if old_value != value:
+                changes[field] = {"from": str(old_value), "to": str(value)}
+        serializer.save()
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="event_update",
+            entity_type="event",
+            entity_id=event.id,
+            metadata={"changes": changes},
+        )
 
 
 class AnnouncementListCreateView(generics.ListCreateAPIView):
