@@ -193,7 +193,8 @@
     "header": "Calendario",
     "uploaded": "Subido: {{url}}",
     "attachLast": "Adjuntar último archivo",
-    "attached": "Adjunto agregado"
+    "attached": "Adjunto agregado",
+    "downloadICS": "Descargar ICS"
   },
   "NotificationSettings": {
     "header": "Notificaciones",
