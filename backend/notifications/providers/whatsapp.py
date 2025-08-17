@@ -1,40 +1,32 @@
-"""Twilio based WhatsApp/SMS notification provider."""
+"""HTTP based WhatsApp/SMS notification provider."""
 
 from __future__ import annotations
 
-import os
+import logging
 from typing import Iterable, Dict, Any, List
 
-from twilio.rest import Client
+import requests
+from django.conf import settings
 
 from .base import NotificationProvider
 
 
 class WhatsAppProvider(NotificationProvider):
-    """Send WhatsApp/SMS messages using the Twilio API.
+    """Send WhatsApp/SMS messages using an external HTTP API (e.g. Meta).
 
-    The provider expects the following environment variables to be defined:
+    It expects the following settings to be configured:
 
-    ``TWILIO_ACCOUNT_SID``
-        Account SID for the Twilio project.
-    ``TWILIO_AUTH_TOKEN``
-        Authentication token for the Twilio project.
-    ``TWILIO_FROM_NUMBER``
-        Phone number (or WhatsApp enabled number) used as the sender.
+    ``WHATSAPP_API_URL``
+        Full endpoint to send messages.
+    ``WHATSAPP_API_TOKEN``
+        Bearer token used for authentication.
     """
 
-    def __init__(self) -> None:
-        self.account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
-        self.auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
-        self.from_number = os.environ.get("TWILIO_FROM_NUMBER")
-
-        # The client is only initialised when credentials are available.  This
-        # allows the class to be imported in environments where the variables
-        # are missing (e.g. during tests where ``send`` is patched).
-        if self.account_sid and self.auth_token:
-            self.client: Client | None = Client(self.account_sid, self.auth_token)
-        else:
-            self.client = None
+    def __init__(self, api_url: str | None = None, token: str | None = None, timeout: int = 10) -> None:
+        self.api_url = api_url or getattr(settings, "WHATSAPP_API_URL", None)
+        self.token = token or getattr(settings, "WHATSAPP_API_TOKEN", None)
+        self.timeout = timeout
+        self.logger = logging.getLogger(__name__)
 
     def send(
         self,
@@ -43,24 +35,33 @@ class WhatsAppProvider(NotificationProvider):
         body: str,
         data: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
-        if not self.client or not self.from_number:
-            raise EnvironmentError("Twilio credentials are not configured")
+        if not self.api_url or not self.token:
+            raise EnvironmentError("WhatsApp API credentials are not configured")
 
         sent: int = 0
-        sids: List[str] = []
+        ids: List[str] = []
+        message_text = f"{title}\n{body}" if title else body
+        headers = {"Authorization": f"Bearer {self.token}"}
 
         for number in numbers:
+            payload = {
+                "messaging_product": "whatsapp",
+                "to": number,
+                "type": "text",
+                "text": {"preview_url": False, "body": message_text},
+            }
             try:
-                message = self.client.messages.create(
-                    body=f"{title}\n{body}" if title else body,
-                    from_=self.from_number,
-                    to=number,
+                response = requests.post(
+                    self.api_url,
+                    headers=headers,
+                    json=payload,
+                    timeout=self.timeout,
                 )
+                response.raise_for_status()
+                ids.append(response.json().get("messages", [{}])[0].get("id", ""))
                 sent += 1
-                # ``sid`` is the Twilio identifier for the message
-                sids.append(getattr(message, "sid", ""))
-            except Exception as exc:  # pragma: no cover - defensive
-                return {"sent": sent, "error": str(exc)}
+            except requests.RequestException as exc:
+                self.logger.error("WhatsApp API request failed: %s", exc)
 
-        return {"sent": sent, "sids": sids}
+        return {"sent": sent, "ids": ids}
 

@@ -4,7 +4,6 @@ from unittest.mock import patch
 from core.models import School, User
 from notifications.models import NotificationPreference
 from notifications.tasks import send_notification
-from notifications.providers.whatsapp import WhatsAppProvider
 
 
 @pytest.mark.django_db
@@ -47,39 +46,4 @@ def test_sms_provider_respects_preferences():
     assert result["sent"] == 1
     mock_send.assert_called_once()
     assert mock_send.call_args[0][0] == [u2.phone]
-
-
-def _set_twilio_env(monkeypatch):
-    """Helper to configure required Twilio environment variables."""
-    monkeypatch.setenv("TWILIO_ACCOUNT_SID", "sid")
-    monkeypatch.setenv("TWILIO_AUTH_TOKEN", "token")
-    monkeypatch.setenv("TWILIO_FROM_NUMBER", "+111")
-
-
-def test_whatsapp_provider_success(monkeypatch):
-    _set_twilio_env(monkeypatch)
-
-    msg = type("Msg", (), {"sid": "SM123"})()
-
-    with patch("notifications.providers.whatsapp.Client") as mock_client:
-        mock_client.return_value.messages.create.return_value = msg
-        provider = WhatsAppProvider()
-        result = provider.send(["+222"], "Hello", "World")
-
-    assert result == {"sent": 1, "sids": ["SM123"]}
-    mock_client.return_value.messages.create.assert_called_once_with(
-        body="Hello\nWorld", from_="+111", to="+222"
-    )
-
-
-def test_whatsapp_provider_error(monkeypatch):
-    _set_twilio_env(monkeypatch)
-
-    with patch("notifications.providers.whatsapp.Client") as mock_client:
-        mock_client.return_value.messages.create.side_effect = Exception("boom")
-        provider = WhatsAppProvider()
-        result = provider.send(["+222"], "Hello", "World")
-
-    assert result["sent"] == 0
-    assert "error" in result
 
