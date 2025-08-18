@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 
@@ -6,6 +6,7 @@ from core.models import (
     Announcement,
     Complaint,
     ComplaintMessage,
+    ComplaintParticipant,
     Group,
     GroupMembership,
     Homework,
@@ -58,6 +59,81 @@ def notify_new_complaint_message(sender, instance: ComplaintMessage, created, **
             push_to_users(**params)
         else:
             push_to_users.delay(**params)
+
+
+@receiver(pre_save, sender=Complaint)
+def track_complaint_prev_status(sender, instance: Complaint, **kwargs):
+    if instance.pk:
+        try:
+            instance._prev_status = sender.objects.only("status").get(pk=instance.pk).status
+        except sender.DoesNotExist:
+            instance._prev_status = None
+
+
+@receiver(post_save, sender=Complaint)
+def notify_complaint_status_change(sender, instance: Complaint, created, **kwargs):
+    if created:
+        return
+    prev_status = getattr(instance, "_prev_status", None)
+    if prev_status is None or prev_status == instance.status:
+        return
+    actor_id = getattr(instance, "_actor_id", None)
+    school_id = instance.school_id
+    targets = {instance.created_by_id, instance.target_teacher_id}
+    targets.update(_director_ids(school_id))
+    targets.update(instance.participants.values_list("user_id", flat=True))
+    if actor_id in targets:
+        targets.remove(actor_id)
+    if not targets:
+        return
+    params = dict(
+        school_id=school_id,
+        user_ids=list(targets),
+        title="Estado de queja actualizado",
+        body=f"Queja #{instance.id} ahora está {instance.status}",
+        data={
+            "type": "complaint_status",
+            "complaint_id": instance.id,
+            "status": instance.status,
+        },
+        kind="complaint",
+    )
+    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+        push_to_users(**params)
+    else:
+        push_to_users.delay(**params)
+
+
+@receiver(post_save, sender=ComplaintParticipant)
+def notify_new_complaint_participant(sender, instance: ComplaintParticipant, created, **kwargs):
+    if not created:
+        return
+    c = instance.complaint
+    school_id = c.school_id
+    targets = {c.created_by_id, c.target_teacher_id}
+    targets.update(_director_ids(school_id))
+    targets.update(c.participants.values_list("user_id", flat=True))
+    actor_id = instance.added_by_id
+    if actor_id in targets:
+        targets.remove(actor_id)
+    if not targets:
+        return
+    params = dict(
+        school_id=school_id,
+        user_ids=list(targets),
+        title="Nuevo participante en queja",
+        body=f"Queja #{c.id}",
+        data={
+            "type": "complaint_participant",
+            "complaint_id": c.id,
+            "user_id": instance.user_id,
+        },
+        kind="complaint",
+    )
+    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+        push_to_users(**params)
+    else:
+        push_to_users.delay(**params)
 
 
 @receiver(post_save, sender=Announcement)
