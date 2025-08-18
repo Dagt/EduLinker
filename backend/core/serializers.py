@@ -223,6 +223,9 @@ class EventSerializer(serializers.ModelSerializer):
     )
     attachments = serializers.SerializerMethodField()
     photos = serializers.SerializerMethodField()
+    computed_status = serializers.CharField(
+        source="computed_status", read_only=True
+    )
 
     class Meta:
         model = Event
@@ -236,12 +239,13 @@ class EventSerializer(serializers.ModelSerializer):
             "end_at",
             "created_by",
             "status",
+            "computed_status",
             "group_ids",
             "audiences",
             "attachments",
             "photos",
         ]
-        read_only_fields = ["created_by", "status"]
+        read_only_fields = ["created_by", "status", "computed_status"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
