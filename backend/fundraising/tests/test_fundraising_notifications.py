@@ -4,6 +4,7 @@ from datetime import date
 from django.db.backends.sqlite3.base import DatabaseWrapper as SQLiteWrapper
 
 from core.models import Group, School, SchoolYear, User
+from notifications.models import NotificationPreference
 from fundraising.models import (
     ExpenseEvidence,
     FundraisingEvent,
@@ -70,7 +71,7 @@ def test_notify_new_ledger(monkeypatch):
     assert school_id == school.id
     assert set(user_ids) == {teacher.id, director2.id}
     assert data == {"event_id": event.id}
-    assert kind == "fundraising"
+    assert kind == NotificationPreference.Kind.FUNDRAISING
 
 
 @pytest.mark.django_db
@@ -135,4 +136,4 @@ def test_notify_new_expense_evidence(monkeypatch):
     assert school_id == school.id
     assert set(user_ids) == {teacher.id, director2.id}
     assert data == {"event_id": event.id}
-    assert kind == "fundraising"
+    assert kind == NotificationPreference.Kind.FUNDRAISING

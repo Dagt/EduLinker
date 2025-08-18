@@ -37,6 +37,9 @@ class NotificationPreference(models.Model):
         SURVEY = "survey", "Encuestas"
         COMPLAINT = "complaint", "Quejas"
         COMPLAINT_MESSAGE = "complaint_message", "Mensajes de queja"
+        HOMEWORK = "homework", "Tareas"
+        FUNDRAISING = "fundraising", "Recaudaciones"
+        CHAT = "chat", "Chats"
         PUSH = "push", "Push"
 
     school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="notif_prefs")

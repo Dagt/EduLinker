@@ -13,6 +13,7 @@ from core.models import (
     User,
 )
 from core.utils import get_group_audience_user_ids
+from notifications.models import NotificationPreference
 from notifications.tasks import push_to_users
 
 def _director_ids(school_id):
@@ -82,7 +83,7 @@ def notify_new_announcement(sender, instance: Announcement, created, **kwargs):
         title=f"Nuevo anuncio: {instance.title}",
         body=instance.message[:80],
         data={"type": "announcement", "announcement_id": instance.id},
-        kind="event",
+        kind=NotificationPreference.Kind.EVENT,
     )
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
         push_to_users(**params)
@@ -113,7 +114,7 @@ def notify_new_homework(sender, instance: Homework, created, **kwargs):
         title=f"Nueva tarea: {instance.title}",
         body=f"Entrega el {instance.due_date:%Y-%m-%d}",
         data={"homework_id": instance.id},
-        kind="homework",
+        kind=NotificationPreference.Kind.HOMEWORK,
     )
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
         push_to_users(**params)

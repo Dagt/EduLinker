@@ -7,7 +7,9 @@ from notifications.models import DeviceToken, NotificationPreference
 
 @pytest.mark.django_db
 def test_notification_pref_crud_and_token_deactivation():
-    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    school = School(name="S", slug="s", subdomain="s", active=True)
+    school.auto_create_schema = False
+    school.save()
     user = User.objects.create_user(username="u@x.com", email="u@x.com", password="p", role="PADRE", school=school)
 
     client = APIClient()
@@ -26,7 +28,7 @@ def test_notification_pref_crud_and_token_deactivation():
 
     res = client.post(
         "/api/v1/notifications/prefs/",
-        {"kind": "event"},
+        {"kind": NotificationPreference.Kind.HOMEWORK},
         format="json",
     )
     assert res.status_code in (200, 201)

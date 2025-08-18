@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from core.models import User
+from notifications.models import NotificationPreference
 from notifications.tasks import push_to_users
 
 from .models import ExpenseEvidence, FundraisingGroupLedger
@@ -33,7 +34,7 @@ def notify_new_ledger(sender, instance: FundraisingGroupLedger, created, **kwarg
         title="Nuevo registro de recaudación",
         body=str(instance.amount_collected),
         data={"event_id": instance.event_id},
-        kind="fundraising",
+        kind=NotificationPreference.Kind.FUNDRAISING,
     )
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
         push_to_users(**params)
@@ -64,7 +65,7 @@ def notify_new_expense_evidence(sender, instance: ExpenseEvidence, created, **kw
         title="Nuevo gasto registrado",
         body=instance.concept[:80],
         data={"event_id": ledger.event_id},
-        kind="fundraising",
+        kind=NotificationPreference.Kind.FUNDRAISING,
     )
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
         push_to_users(**params)
