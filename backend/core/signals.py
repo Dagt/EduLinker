@@ -4,6 +4,7 @@ from django.conf import settings
 
 from core.models import (
     Announcement,
+    Event,
     Complaint,
     ComplaintMessage,
     Group,
@@ -12,7 +13,7 @@ from core.models import (
     ParentStudent,
     User,
 )
-from core.utils import get_group_audience_user_ids
+from core.utils import get_group_audience_user_ids, get_event_audience_user_ids
 from notifications.tasks import push_to_users
 
 def _director_ids(school_id):
@@ -82,6 +83,27 @@ def notify_new_announcement(sender, instance: Announcement, created, **kwargs):
         title=f"Nuevo anuncio: {instance.title}",
         body=instance.message[:80],
         data={"type": "announcement", "announcement_id": instance.id},
+        kind="event",
+    )
+    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+        push_to_users(**params)
+    else:
+        push_to_users.delay(**params)
+
+
+@receiver(post_save, sender=Event)
+def notify_new_event(sender, instance: Event, created, **kwargs):
+    if not created:
+        return
+    user_ids = get_event_audience_user_ids(instance)
+    if not user_ids:
+        return
+    params = dict(
+        school_id=instance.school_id,
+        user_ids=user_ids,
+        title=f"Nuevo evento: {instance.title}",
+        body=f"Inicia {instance.start_at:%Y-%m-%d %H:%M}",
+        data={"type": "event", "event_id": instance.id},
         kind="event",
     )
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):

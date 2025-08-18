@@ -10,6 +10,7 @@ from django.db.models import Q
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from notifications.tasks import push_to_users
 
 from .models import (
     Announcement,
@@ -61,6 +62,7 @@ from .serializers import (
     StudentSerializer,
 )
 from .throttles import ComplaintCreateThrottle, EventCreateThrottle
+from .utils import get_event_audience_user_ids
 
 
 def _visible_group_ids(user):
@@ -499,6 +501,15 @@ class EventCancelView(generics.UpdateAPIView):
         prev_status = event.status
         event.status = Event.Status.CANCELLED
         event.save()
+        user_ids = get_event_audience_user_ids(event)
+        if user_ids:
+            push_to_users.delay(
+                event.school_id,
+                user_ids,
+                f"Evento cancelado: {event.title}",
+                f"Iba a iniciar {event.start_at:%Y-%m-%d %H:%M}",
+                {"type": "event_cancelled", "event_id": event.id},
+            )
         from audit.models import AuditLog
         AuditLog.objects.create(
             school_id=self.request.school_id,
