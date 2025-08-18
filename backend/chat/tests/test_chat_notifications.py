@@ -90,7 +90,7 @@ def test_notify_chat_message(monkeypatch):
     NotificationPreference.objects.create(
         school=school,
         user=parent_other,
-        kind=NotificationPreference.Kind.PUSH,
+        kind=NotificationPreference.Kind.CHAT,
         enabled=False,
     )
 
@@ -116,4 +116,4 @@ def test_notify_chat_message(monkeypatch):
     assert school_id == school.id
     assert set(user_ids) == {teacher.id, parent_vocal.id}
     assert data == {"type": "chat_message", "chat_id": chat.id}
-    assert kind == NotificationPreference.Kind.PUSH
+    assert kind == NotificationPreference.Kind.CHAT
