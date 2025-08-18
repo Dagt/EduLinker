@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from datetime import timedelta
+import uuid
 
 from core.models import (
     School,
@@ -207,3 +208,42 @@ def test_events_ics_forbids_cross_school_access():
     )
     res = client.get("/api/v1/events/ics/")
     assert res.status_code == 403
+
+
+@pytest.mark.django_db
+def test_events_ics_accepts_token():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="2025",
+        start_date="2025-01-01",
+        end_date="2025-12-31",
+        is_current=True,
+    )
+    teacher = User.objects.create_user(
+        username="t@x.com",
+        email="t@x.com",
+        password="p",
+        role="MAESTRO_TITULAR",
+        school=school,
+    )
+    Event.objects.create(
+        school=school,
+        school_year=sy,
+        scope="GLOBAL",
+        title="Global",
+        start_at=timezone.now(),
+        end_at=timezone.now() + timedelta(hours=1),
+        created_by=teacher,
+    )
+    client = APIClient()
+    res = client.get(f"/api/v1/events/ics/?token={teacher.ics_token}")
+    assert res.status_code == 200
+    assert "SUMMARY:Global" in res.content.decode()
+
+
+@pytest.mark.django_db
+def test_events_ics_rejects_invalid_token():
+    client = APIClient()
+    res = client.get(f"/api/v1/events/ics/?token={uuid.uuid4()}")
+    assert res.status_code == 404
