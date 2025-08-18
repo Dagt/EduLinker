@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from core.models import Event, Complaint, User, Homework
 from notifications.tasks import push_to_users
-from surveys.models import Survey
+from surveys.models import Survey, SurveyVote
 from core.utils import get_group_audience_user_ids, get_event_audience_user_ids
 from fundraising.models import FundraisingGroupLedger
 
@@ -87,12 +87,32 @@ def remind_surveys_to_close():
     total_push = 0
     for s in surveys:
         if s.scope == "SCHOOL":
-            user_ids = list(User.objects.filter(school_id=s.school_id, is_active=True).values_list("id", flat=True))
+            user_ids = list(
+                User.objects.filter(school_id=s.school_id, is_active=True).values_list(
+                    "id", flat=True
+                )
+            )
         else:
             user_ids = get_group_audience_user_ids(s.school_id, [s.group_id])
-        if user_ids:
-            push_to_users.delay(s.school_id, user_ids, f"Encuesta por cerrar: {s.title}", f"Cierra el {s.end_at:%Y-%m-%d %H:%M}", {"type": "survey", "survey_id": s.id})
-            total_push += len(user_ids)
+
+        if not user_ids:
+            continue
+
+        voted_ids = set(
+            SurveyVote.objects.filter(survey_id=s.id).values_list("voter_id", flat=True)
+        )
+        pending_user_ids = [uid for uid in user_ids if uid not in voted_ids]
+
+        if pending_user_ids:
+            push_to_users.delay(
+                s.school_id,
+                pending_user_ids,
+                f"Encuesta por cerrar: {s.title}",
+                f"Cierra el {s.end_at:%Y-%m-%d %H:%M}",
+                {"type": "survey", "survey_id": s.id},
+            )
+            total_push += len(pending_user_ids)
+
     return {"surveys": surveys.count(), "recipients": total_push}
 
 
