@@ -22,9 +22,10 @@ test('renders data and opens attachment', async () => {
   apiGetMock
     .mockResolvedValueOnce({ id: 1, title: 'Event', start_at: '2025-01-01' })
     .mockResolvedValueOnce([{ id: 1, file_url: 'https://f', filename: 'file.pdf' }])
-    .mockResolvedValueOnce([]);
+    .mockResolvedValueOnce([])
+    .mockResolvedValueOnce({ status: null });
   const { getByText } = render(<EventDetail eventId={1} />);
-  await waitFor(() => expect(apiGetMock).toHaveBeenCalledTimes(3));
+  await waitFor(() => getByText('file.pdf'));
   fireEvent.press(getByText('file.pdf'));
   expect(openURLMock).toHaveBeenCalledWith('https://f');
 });
@@ -35,6 +36,7 @@ test('uploads attachment when allowed', async () => {
     .mockResolvedValueOnce({ id: 1, title: 'Event', start_at: '2025-01-01' })
     .mockResolvedValueOnce([])
     .mockResolvedValueOnce([])
+    .mockResolvedValueOnce({ status: null })
     .mockResolvedValueOnce([{ id: 2, file_url: 'https://u', filename: 'u.pdf' }]);
   uploadMock.mockResolvedValue('https://u');
   const { getByTestId } = render(<EventDetail eventId={1} />);
@@ -48,7 +50,8 @@ test('hides upload button for parents', async () => {
   apiGetMock
     .mockResolvedValueOnce({ id: 1, title: 'Event', start_at: '2025-01-01' })
     .mockResolvedValueOnce([])
-    .mockResolvedValueOnce([]);
+    .mockResolvedValueOnce([])
+    .mockResolvedValueOnce({ status: null });
   const { queryByTestId } = render(<EventDetail eventId={1} />);
   await waitFor(() => expect(apiGetMock).toHaveBeenCalled());
   expect(queryByTestId('upload-attachment')).toBeNull();

@@ -11,6 +11,7 @@ from .views import (
     EventAttachmentListCreateView,
     EventCancelView,
     EventPhotoListCreateView,
+    EventRSVPView,
     EventListCreateView,
     ActivityPhotoCreateView,
     ActivityPhotoListView,
@@ -91,6 +92,7 @@ urlpatterns = [
     path("events/<int:pk>/", EventDetailView.as_view(), name="event-detail"),
     path("events/<int:pk>/edit/", EventUpdateView.as_view(), name="event-update"),
     path("events/<int:pk>/cancel/", EventCancelView.as_view(), name="event-cancel"),
+    path("events/<int:pk>/rsvp/", EventRSVPView.as_view(), name="event-rsvp"),
     path(
         "events/<int:pk>/attachments/",
         EventAttachmentListCreateView.as_view(),

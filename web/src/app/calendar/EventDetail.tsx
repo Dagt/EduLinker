@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import EventPhotoGallery from "./EventPhotoGallery";
 import { useTranslation } from "react-i18next";
@@ -25,6 +25,7 @@ interface Props {
 export default function EventDetail({ eventId }: Props) {
   const [event, setEvent] = useState<Event | null>(null);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [rsvp, setRsvp] = useState<string | null>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -37,8 +38,23 @@ export default function EventDetail({ eventId }: Props) {
         tk
       );
       setAttachments(at);
+      const r = await apiGet<{ status: string | null }>(
+        `/events/${eventId}/rsvp/`,
+        tk
+      );
+      setRsvp(r.status);
     })();
   }, [eventId]);
+
+  async function send(status: string) {
+    const tk = getToken();
+    const r = await apiPost<{ status: string }>(
+      `/events/${eventId}/rsvp/`,
+      { status },
+      tk
+    );
+    setRsvp(r.status);
+  }
 
   if (!event) return <div>{t("General.loading")}</div>;
 
@@ -58,6 +74,13 @@ export default function EventDetail({ eventId }: Props) {
           </li>
         ))}
       </ul>
+      <div>
+        <h4>{t("EventDetail.rsvp")}</h4>
+        <p>{rsvp || t("EventDetail.no_rsvp")}</p>
+        <button onClick={() => send("YES")}>{t("EventDetail.yes")}</button>
+        <button onClick={() => send("NO")}>{t("EventDetail.no")}</button>
+        <button onClick={() => send("MAYBE")}>{t("EventDetail.maybe")}</button>
+      </div>
       <EventPhotoGallery eventId={eventId} />
     </div>
   );

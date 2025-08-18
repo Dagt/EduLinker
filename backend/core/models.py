@@ -356,6 +356,24 @@ class Event(models.Model):
         indexes = [models.Index(fields=["school", "start_at"])]
 
 
+class EventRSVP(models.Model):
+    class Status(models.TextChoices):
+        YES = "YES", "Yes"
+        NO = "NO", "No"
+        MAYBE = "MAYBE", "Maybe"
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="rsvps")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="event_rsvps")
+    status = models.CharField(max_length=10, choices=Status.choices)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "user"], name="unique_event_rsvp"
+            )
+        ]
+
+
 class EventGroupAudience(models.Model):
     event = models.ForeignKey(
         Event, on_delete=models.CASCADE, related_name="group_audiences"
