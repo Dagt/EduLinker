@@ -690,7 +690,10 @@ class AnnouncementListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         scope = serializer.validated_data.get("scope")
         group = serializer.validated_data.get("group")
-        if scope == Announcement.Scope.GRUPO:
+        if scope == Announcement.Scope.GLOBAL:
+            if not is_director(self.request.user):
+                raise PermissionDenied("Only directors can create global announcements")
+        elif scope == Announcement.Scope.GRUPO:
             if not _can_manage_group(self.request.user, group):
                 raise PermissionDenied("Cannot create announcement for this group")
         serializer.save(school_id=self.request.school_id, teacher=self.request.user)
