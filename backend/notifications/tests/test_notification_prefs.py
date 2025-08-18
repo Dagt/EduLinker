@@ -6,13 +6,26 @@ from notifications.models import DeviceToken, NotificationPreference
 
 
 @pytest.mark.django_db
-def test_notification_pref_crud_and_token_deactivation():
+@pytest.mark.parametrize(
+    "kind",
+    [
+        NotificationPreference.Kind.EVENT,
+        NotificationPreference.Kind.HOMEWORK,
+        NotificationPreference.Kind.FUNDRAISING,
+        NotificationPreference.Kind.CHAT,
+    ],
+)
+def test_notification_pref_crud_and_token_deactivation(kind):
     school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
-    user = User.objects.create_user(username="u@x.com", email="u@x.com", password="p", role="PADRE", school=school)
+    user = User.objects.create_user(
+        username="u@x.com", email="u@x.com", password="p", role="PADRE", school=school
+    )
 
     client = APIClient()
     token = str(RefreshToken.for_user(user).access_token)
-    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id))
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
 
     DeviceToken.objects.create(school=school, user=user, token="abc", platform="web")
 
@@ -26,7 +39,7 @@ def test_notification_pref_crud_and_token_deactivation():
 
     res = client.post(
         "/api/v1/notifications/prefs/",
-        {"kind": NotificationPreference.Kind.EVENT},
+        {"kind": kind},
         format="json",
     )
     assert res.status_code in (200, 201)
