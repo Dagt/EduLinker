@@ -100,10 +100,7 @@ def notify_complaint_status_change(sender, instance: Complaint, created, **kwarg
         },
         kind="complaint",
     )
-    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
-        push_to_users(**params)
-    else:
-        push_to_users.delay(**params)
+    push_to_users.delay(**params)
 
 
 @receiver(post_save, sender=ComplaintParticipant)
@@ -132,10 +129,7 @@ def notify_new_complaint_participant(sender, instance: ComplaintParticipant, cre
         },
         kind="complaint",
     )
-    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
-        push_to_users(**params)
-    else:
-        push_to_users.delay(**params)
+    push_to_users.delay(**params)
 
 
 @receiver(post_save, sender=Announcement)
