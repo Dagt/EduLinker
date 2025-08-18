@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from collections import defaultdict
 
-from core.models import Event, Complaint, User, Homework
+from core.models import Event, Complaint, User, Homework, EventRSVP
 from notifications.tasks import push_to_users
 from surveys.models import Survey
 from core.utils import get_group_audience_user_ids, get_event_audience_user_ids
@@ -25,14 +25,21 @@ def send_event_reminders():
         for ev in events:
             user_ids = get_event_audience_user_ids(ev)
             if user_ids:
-                push_to_users.delay(
-                    ev.school_id,
-                    user_ids,
-                    f"Recordatorio: {ev.title}",
-                    f"Inicia {ev.start_at:%Y-%m-%d %H:%M}",
-                    {"type": "event", "event_id": ev.id},
+                no_ids = set(
+                    EventRSVP.objects.filter(
+                        event=ev, status=EventRSVP.Status.NO
+                    ).values_list("user_id", flat=True)
                 )
-                total_push += len(user_ids)
+                user_ids = [uid for uid in user_ids if uid not in no_ids]
+                if user_ids:
+                    push_to_users.delay(
+                        ev.school_id,
+                        user_ids,
+                        f"Recordatorio: {ev.title}",
+                        f"Inicia {ev.start_at:%Y-%m-%d %H:%M}",
+                        {"type": "event", "event_id": ev.id},
+                    )
+                    total_push += len(user_ids)
     return {"events": total_events, "recipients": total_push}
 
 @shared_task

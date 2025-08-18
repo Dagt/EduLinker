@@ -10,6 +10,7 @@ from django.db.models import Q
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from notifications.tasks import push_to_users
 
 from .models import (
@@ -19,6 +20,7 @@ from .models import (
     Complaint,
     ComplaintMessage,
     Event,
+    EventRSVP,
     School,
     SchoolYear,
     SpecialistAssignment,
@@ -587,6 +589,37 @@ class EventPhotoListCreateView(generics.ListCreateAPIView):
             entity_id=event.id,
             metadata={"photo_id": photo.id, "caption": photo.caption},
         )
+
+
+class EventRSVPView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _get_event(self):
+        return get_object_or_404(
+            Event, pk=self.kwargs["pk"], school_id=self.request.school_id
+        )
+
+    def get(self, request, *args, **kwargs):
+        event = self._get_event()
+        if not can_view_event(request.user, event):
+            raise PermissionDenied("Cannot view RSVP for this event")
+        rsvp = EventRSVP.objects.filter(event=event, user=request.user).first()
+        return Response({"status": rsvp.status if rsvp else None})
+
+    def post(self, request, *args, **kwargs):
+        event = self._get_event()
+        if not can_view_event(request.user, event):
+            raise PermissionDenied("Cannot RSVP to this event")
+        status_value = request.data.get("status")
+        if status_value not in EventRSVP.Status.values:
+            return Response(
+                {"detail": "Invalid status"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        rsvp, _ = EventRSVP.objects.update_or_create(
+            event=event, user=request.user, defaults={"status": status_value}
+        )
+        return Response({"status": rsvp.status})
 
 
 class ActivityPhotoListView(generics.ListAPIView):

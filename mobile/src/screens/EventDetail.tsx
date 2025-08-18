@@ -32,6 +32,7 @@ export default function EventDetail({ eventId }: Props) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [role, setRole] = useState('guest');
+  const [rsvp, setRsvp] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -42,6 +43,8 @@ export default function EventDetail({ eventId }: Props) {
       setAttachments(at);
       const ph = await apiGet(`/events/${eventId}/photos/`);
       setPhotos(ph);
+      const rv = await apiGet(`/events/${eventId}/rsvp/`);
+      setRsvp(rv.status);
     })();
   }, [eventId]);
 
@@ -56,6 +59,11 @@ export default function EventDetail({ eventId }: Props) {
     } catch (e) {
       Alert.alert(i18n.t('general.error'));
     }
+  }
+
+  async function sendRsvp(status: string) {
+    const res = await apiPost(`/events/${eventId}/rsvp/`, { status });
+    setRsvp(res.status);
   }
 
   const canUpload = ['DIRECTOR', 'MAESTRO_TITULAR', 'MAESTRO_ITINERANTE', 'VOCAL'].includes(role);
@@ -75,6 +83,13 @@ export default function EventDetail({ eventId }: Props) {
       {canUpload && (
         <Button title={i18n.t('eventDetail.upload')} onPress={upload} testID="upload-attachment" />
       )}
+      <View style={{ marginTop: 16 }}>
+        <Text>{i18n.t('eventDetail.rsvp')}</Text>
+        <Text>{rsvp || i18n.t('eventDetail.no_rsvp')}</Text>
+        <Button title="Yes" onPress={() => sendRsvp('YES')} testID="rsvp-yes" />
+        <Button title="No" onPress={() => sendRsvp('NO')} testID="rsvp-no" />
+        <Button title="Maybe" onPress={() => sendRsvp('MAYBE')} testID="rsvp-maybe" />
+      </View>
       <FlatList
         data={photos}
         keyExtractor={(p) => String(p.id)}
