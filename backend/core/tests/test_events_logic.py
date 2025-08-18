@@ -34,6 +34,7 @@ def test_event_creation_update_and_cancel_permissions():
         format="json",
     )
     assert res.status_code in (200, 201)
+    assert res.json()["computed_status"] == Event.Status.ACTIVE
 
     # Parent cannot create global or group events
     parent_token = str(RefreshToken.for_user(parent).access_token)
@@ -105,4 +106,44 @@ def test_event_creation_update_and_cancel_permissions():
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {teacher_token}", HTTP_X_SCHOOL_ID=str(school.id))
     res = client.patch(f"/api/v1/events/{event_id}/cancel/", {}, format="json")
     assert res.status_code == 200
-    assert res.json()["status"] == Event.Status.CANCELLED
+    data = res.json()
+    assert data["status"] == Event.Status.CANCELLED
+    assert data["computed_status"] == Event.Status.CANCELLED
+
+
+@pytest.mark.django_db
+def test_event_computed_status_past():
+    school = School.objects.create(name="S", slug="s", subdomain="s", active=True)
+    sy = SchoolYear.objects.create(
+        school=school,
+        name="cy",
+        start_date="2025-08-01",
+        end_date="2026-07-01",
+        is_current=True,
+    )
+    director = User.objects.create_user(
+        username="d@x.com",
+        email="d@x.com",
+        password="p",
+        role="DIRECTOR",
+        school=school,
+    )
+    past_start = timezone.now() - timedelta(hours=2)
+    past_end = timezone.now() - timedelta(hours=1)
+    event = Event.objects.create(
+        school=school,
+        school_year=sy,
+        scope=Event.Scope.GLOBAL,
+        title="Old",
+        start_at=past_start,
+        end_at=past_end,
+        created_by=director,
+    )
+    client = APIClient()
+    token = str(RefreshToken.for_user(director).access_token)
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {token}", HTTP_X_SCHOOL_ID=str(school.id)
+    )
+    res = client.get(f"/api/v1/events/{event.id}/")
+    assert res.status_code == 200
+    assert res.json()["computed_status"] == Event.Status.PAST

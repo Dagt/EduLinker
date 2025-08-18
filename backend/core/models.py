@@ -321,6 +321,7 @@ class Event(models.Model):
     class Status(models.TextChoices):
         ACTIVE = "ACTIVE", "Active"
         CANCELLED = "CANCELLED", "Cancelled"
+        PAST = "PAST", "Past"
 
     school = models.ForeignKey(
         School, on_delete=models.CASCADE, related_name="events"
@@ -340,6 +341,16 @@ class Event(models.Model):
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.ACTIVE
     )
+
+    @property
+    def is_past(self):
+        return self.end_at < timezone.now()
+
+    @property
+    def computed_status(self):
+        if self.status == Event.Status.CANCELLED:
+            return Event.Status.CANCELLED
+        return Event.Status.PAST if self.is_past else Event.Status.ACTIVE
 
     class Meta:
         indexes = [models.Index(fields=["school", "start_at"])]
