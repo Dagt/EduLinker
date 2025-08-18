@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django_tenants.models import TenantMixin
+import uuid
 
 from .roles import Roles as UserRoles
 
@@ -60,6 +61,7 @@ class User(AbstractUser):
     email = models.EmailField()
     role = models.CharField(max_length=20, choices=UserRoles.choices)
     phone = models.CharField(max_length=20, blank=True)
+    ics_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
     class Meta:
         constraints = [

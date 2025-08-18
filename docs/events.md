@@ -11,6 +11,18 @@ Endpoints para gestionar eventos del calendario.
 - `POST /api/v1/events/<id>/photos/` – Agrega una foto al evento.
 - `GET /api/v1/events/ics/` – Exporta los eventos como calendario ICS.
 
+## Exportación mediante token
+
+Cada usuario dispone de un `ics_token` único generado al crearse. Este token
+permite descargar el calendario sin autenticación:
+
+```
+GET /api/v1/events/ics/?token=<ics_token>
+```
+
+El valor del token puede consultarse en el perfil del usuario (por ejemplo
+mediante la API de usuarios) y debe mantenerse privado.
+
 ## Recordatorios
 
 Los recordatorios de eventos se envían automáticamente a las horas

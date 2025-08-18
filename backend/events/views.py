@@ -4,22 +4,33 @@ from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 
-from core.models import Event
+from core.models import Event, User
 from core.permissions import user_can_view_event
 
 
 class EventsICSView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        school_id = request.school_id
-        if not school_id:
-            return HttpResponseBadRequest("Missing X-SCHOOL-ID header")
-        if request.user.school_id != school_id:
-            raise PermissionDenied("Invalid school")
+        token = request.query_params.get("token")
+        if token:
+            try:
+                user = User.objects.get(ics_token=token)
+            except User.DoesNotExist:
+                return HttpResponse(status=404)
+            school_id = user.school_id
+        else:
+            if not request.user.is_authenticated:
+                return HttpResponse(status=401)
+            school_id = request.school_id
+            if not school_id:
+                return HttpResponseBadRequest("Missing X-SCHOOL-ID header")
+            if request.user.school_id != school_id:
+                raise PermissionDenied("Invalid school")
+            user = request.user
 
         events_qs = Event.objects.filter(school_id=school_id).filter(
-            user_can_view_event(request.user)
+            user_can_view_event(user)
         )
 
         cal = Calendar()
