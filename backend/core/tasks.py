@@ -2,7 +2,7 @@ from celery import shared_task
 from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, Case, When, IntegerField
 from collections import defaultdict
 
 from core.models import Event, Complaint, User, Homework, EventRSVP
@@ -108,7 +108,7 @@ def send_fundraising_weekly_summary():
     now = timezone.now()
     start = now - timedelta(days=7)
     ledgers = FundraisingGroupLedger.objects.filter(created_at__gte=start, created_at__lt=now)
-    summary = (
+    summary_qs = (
         ledgers.values(
             "event_id",
             "event__name",
@@ -116,12 +116,23 @@ def send_fundraising_weekly_summary():
             "group__name",
             "event__school_id",
         )
-        .annotate(total=Sum("amount_collected"))
+        .annotate(
+            total=Sum("amount_collected"),
+            missing_evidence=Sum(
+                Case(
+                    When(expenses__isnull=True, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+        )
         .order_by("event_id", "group_id")
     )
 
+    summary = list(summary_qs)
     data_per_school = defaultdict(list)
     for item in summary:
+        item["missing_evidence"] = item["missing_evidence"] > 0
         data_per_school[item["event__school_id"]].append(item)
 
     for school_id, items in data_per_school.items():
@@ -130,7 +141,12 @@ def send_fundraising_weekly_summary():
         )
         if not director_ids:
             continue
-        lines = [f"{i['event__name']} - {i['group__name']}: {i['total']}" for i in items]
+        lines = []
+        for i in items:
+            line = f"{i['event__name']} - {i['group__name']}: {i['total']}"
+            if i["missing_evidence"]:
+                line += " (falta evidencia)"
+            lines.append(line)
         body = "\n".join(lines)
         push_to_users.delay(
             school_id,
@@ -140,4 +156,4 @@ def send_fundraising_weekly_summary():
             {"type": "fundraising_summary"},
         )
 
-    return list(summary)
+    return summary
