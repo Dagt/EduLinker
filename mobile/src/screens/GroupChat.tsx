@@ -89,6 +89,14 @@ export default function GroupChat() {
     PADRE: "#3498db",
     MAESTRO_TITULAR: "#2ecc71",
     ADMIN: "#e74c3c",
+    VOCAL: "#9b59b6",
+  };
+
+  const roleLabels: Record<string, string> = {
+    PADRE: "PADRE",
+    MAESTRO_TITULAR: "MAESTRO_TITULAR",
+    ADMIN: "ADMIN",
+    VOCAL: "VOCAL",
   };
 
   return (
@@ -133,7 +141,7 @@ export default function GroupChat() {
                     backgroundColor: roleColors[item.author_role] || "#7f8c8d",
                   }}
                 >
-                  {item.author_role}
+                  {roleLabels[item.author_role] || item.author_role}
                 </Text>
               )}
             </View>
