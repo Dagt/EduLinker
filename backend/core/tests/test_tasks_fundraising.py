@@ -3,7 +3,11 @@ from django.utils import timezone
 from datetime import timedelta
 
 from core.models import School, SchoolYear, Group, User
-from fundraising.models import FundraisingEvent, FundraisingGroupLedger
+from fundraising.models import (
+    FundraisingEvent,
+    FundraisingGroupLedger,
+    ExpenseEvidence,
+)
 from core.tasks import send_fundraising_weekly_summary, push_to_users
 
 
@@ -52,17 +56,25 @@ def test_send_fundraising_weekly_summary(monkeypatch):
         date="2025-10-10",
     )
 
-    FundraisingGroupLedger.objects.create(
+    ledger1 = FundraisingGroupLedger.objects.create(
         event=event,
         group=g1,
         amount_collected="100.00",
         created_by=teacher,
     )
-    FundraisingGroupLedger.objects.create(
+    ledger2 = FundraisingGroupLedger.objects.create(
         event=event,
         group=g2,
         amount_collected="200.00",
         created_by=teacher,
+    )
+    ExpenseEvidence.objects.create(
+        ledger=ledger1,
+        group=g1,
+        uploader=teacher,
+        file_url="http://file",
+        amount="10.00",
+        concept="Food",
     )
     old = FundraisingGroupLedger.objects.create(
         event=event,
@@ -83,15 +95,20 @@ def test_send_fundraising_weekly_summary(monkeypatch):
     summary = send_fundraising_weekly_summary()
 
     assert len(summary) == 2
-    totals = {(s["group__name"], s["event__name"]): s["total"] for s in summary}
-    assert totals[("G1", "Fair")] == 100
-    assert totals[("G2", "Fair")] == 200
+    totals = {(s["group__name"], s["event__name"]): s for s in summary}
+    assert totals[("G1", "Fair")]["total"] == 100
+    assert totals[("G2", "Fair")]["total"] == 200
+    assert totals[("G1", "Fair")]["missing_evidence"] is False
+    assert totals[("G2", "Fair")]["missing_evidence"] is True
 
     assert len(calls) == 1
     args, kwargs = calls[0]
     assert args[0] == school.id
     assert director.id in args[1]
     body = args[3]
-    assert "G1" in body and "100" in body
-    assert "G2" in body and "200" in body
+    lines = body.splitlines()
+    line_g1 = [l for l in lines if "G1" in l][0]
+    line_g2 = [l for l in lines if "G2" in l][0]
+    assert "falta evidencia" not in line_g1
+    assert "falta evidencia" in line_g2
 
