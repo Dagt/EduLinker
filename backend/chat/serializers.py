@@ -10,12 +10,14 @@ from .models import ChatMessage
 
 class ChatMessageSerializer(serializers.ModelSerializer):
     attachment = serializers.FileField(write_only=True, required=False)
+    author_display = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatMessage
         fields = [
             "id",
             "author",
+            "author_display",
             "author_role",
             "message_text",
             "attachment",
@@ -24,6 +26,7 @@ class ChatMessageSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = [
+            "author_display",
             "author_role",
             "attachment_url",
             "message_type",
@@ -65,4 +68,15 @@ class ChatMessageSerializer(serializers.ModelSerializer):
             validated_data["message_type"] = "text"
 
         return ChatMessage.objects.create(**validated_data)
+
+    def get_author_display(self, obj):
+        author = getattr(obj, "author", None)
+        if author is None:
+            return None
+        get_full_name = getattr(author, "get_full_name", None)
+        if callable(get_full_name):
+            full_name = get_full_name()
+            if full_name:
+                return full_name
+        return str(author)
 

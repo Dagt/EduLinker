@@ -54,3 +54,10 @@ def test_serializer_creates_attachment_message(tmp_path):
     assert mock_client.called
     assert mock_create.call_args[1]["message_type"] == "attachment"
     assert "attachment_url" in mock_create.call_args[1]
+
+
+def test_get_author_display_uses_full_name():
+    author = SimpleNamespace(role="PADRE", get_full_name=lambda: "John Doe")
+    obj = SimpleNamespace(author=author)
+    serializer = ChatMessageSerializer()
+    assert serializer.get_author_display(obj) == "John Doe"
