@@ -3,39 +3,46 @@
 exports[`AnalyticsDashboard matches snapshot 1`] = `
 <DocumentFragment>
   <nav
-    style="display: flex; gap: 12px; padding: 12px; border-bottom: 1px solid rgb(238, 238, 238);"
+    class="nav"
   >
     <a
+      class=""
       href="/dashboard"
     >
       Dashboard
     </a>
     <a
+      class=""
       href="/calendar"
     >
       Calendario
     </a>
     <a
+      class=""
       href="/complaints"
     >
       Quejas
     </a>
     <a
+      class=""
       href="/sugerencias"
     >
       Sugerencias
     </a>
     <a
+      class=""
       href="/surveys"
     >
       Encuestas
     </a>
     <a
+      class=""
       href="/fundraising"
     >
       Recaudación
     </a>
     <a
+      class=""
       href="/analytics"
     >
       Analíticas
@@ -53,6 +60,37 @@ exports[`AnalyticsDashboard matches snapshot 1`] = `
       </option>
     </select>
   </nav>
+  <style>
+    
+        .nav {
+          display: flex;
+          gap: 1rem;
+          padding: 1rem;
+          background: #1d4ed8;
+          color: white;
+          align-items: center;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .nav :global(a) {
+          color: inherit;
+          padding: 0.25rem 0.5rem;
+          border-radius: 0.25rem;
+          transition: background 0.2s;
+        }
+        .nav :global(a:hover) {
+          background: #2563eb;
+        }
+        .nav :global(a.active) {
+          background: #1e40af;
+        }
+        .nav :global(select) {
+          color: #111827;
+          padding: 0.25rem;
+          border-radius: 0.25rem;
+          border: none;
+        }
+      
+  </style>
   <main
     style="padding: 16px;"
   >

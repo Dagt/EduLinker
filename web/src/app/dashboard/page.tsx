@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
+import Card from "@/components/Card";
 import { getToken } from "@/lib/auth";
 import { apiGet } from "@/lib/api";
 import { useTranslation } from "react-i18next";
@@ -49,12 +50,12 @@ function DashboardContent() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
+      <main className="container">
         <h2>{t("Dashboard.welcome", { name })}</h2>
         <button onClick={load}>{t("Dashboard.refresh")}</button>
         {kpis && (
-          <div style={{ display: "grid", gap: 32 }}>
-            <section>
+          <div className="grid">
+            <Card>
               <h3>{t("Dashboard.complaintsByGroup")}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={complaintsData}>
@@ -64,8 +65,8 @@ function DashboardContent() {
                   <Bar dataKey="total" fill="#8884d8" />
                 </BarChart>
               </ResponsiveContainer>
-            </section>
-            <section>
+            </Card>
+            <Card>
               <h3>{t("Dashboard.fundraisingByGroup")}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={fundraisingData}>
@@ -75,8 +76,8 @@ function DashboardContent() {
                   <Bar dataKey="total" fill="#82ca9d" />
                 </BarChart>
               </ResponsiveContainer>
-            </section>
-            <section>
+            </Card>
+            <Card>
               <h3>{t("Dashboard.surveysParticipation")}</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={surveysData}>
@@ -86,10 +87,20 @@ function DashboardContent() {
                   <Bar dataKey="total" fill="#ffc658" />
                 </BarChart>
               </ResponsiveContainer>
-            </section>
+            </Card>
           </div>
         )}
       </main>
+      <style jsx>{`
+        .container {
+          padding: 1rem;
+        }
+        .grid {
+          display: grid;
+          gap: 2rem;
+          margin-top: 1rem;
+        }
+      `}</style>
     </>
   );
 }
