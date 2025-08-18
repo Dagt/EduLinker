@@ -42,7 +42,7 @@ def notify_new_chat_message(sender, instance: ChatMessage, created, **kwargs):
         title="Nuevo mensaje en chat",
         body=(instance.message_text or "")[:80],
         data={"type": "chat_message", "chat_id": instance.chat_id},
-        kind=NotificationPreference.Kind.PUSH,
+        kind=NotificationPreference.Kind.CHAT,
     )
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
         push_to_users(**params)

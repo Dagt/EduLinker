@@ -26,7 +26,7 @@ def test_notification_pref_crud_and_token_deactivation():
 
     res = client.post(
         "/api/v1/notifications/prefs/",
-        {"kind": "event"},
+        {"kind": NotificationPreference.Kind.EVENT},
         format="json",
     )
     assert res.status_code in (200, 201)

@@ -16,6 +16,7 @@ from core.models import (
 )
 from core.utils import get_group_audience_user_ids, get_event_audience_user_ids
 from notifications.tasks import push_to_users
+from notifications.models import NotificationPreference
 
 def _director_ids(school_id):
     return list(User.objects.filter(school_id=school_id, role="DIRECTOR").values_list("id", flat=True))
@@ -211,7 +212,7 @@ def notify_new_homework(sender, instance: Homework, created, **kwargs):
         title=f"Nueva tarea: {instance.title}",
         body=f"Entrega el {instance.due_date:%Y-%m-%d}",
         data={"homework_id": instance.id},
-        kind="homework",
+        kind=NotificationPreference.Kind.HOMEWORK,
     )
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
         push_to_users(**params)

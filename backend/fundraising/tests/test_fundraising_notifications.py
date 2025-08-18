@@ -9,6 +9,7 @@ from fundraising.models import (
     FundraisingEvent,
     FundraisingGroupLedger,
 )
+from notifications.models import NotificationPreference
 
 
 SQLiteWrapper.set_schema = lambda self, schema_name, tenant_type="", include_public=False: None
@@ -70,7 +71,7 @@ def test_notify_new_ledger(monkeypatch):
     assert school_id == school.id
     assert set(user_ids) == {teacher.id, director2.id}
     assert data == {"event_id": event.id}
-    assert kind == "fundraising"
+    assert kind == NotificationPreference.Kind.FUNDRAISING
 
 
 @pytest.mark.django_db
@@ -135,4 +136,4 @@ def test_notify_new_expense_evidence(monkeypatch):
     assert school_id == school.id
     assert set(user_ids) == {teacher.id, director2.id}
     assert data == {"event_id": event.id}
-    assert kind == "fundraising"
+    assert kind == NotificationPreference.Kind.FUNDRAISING
