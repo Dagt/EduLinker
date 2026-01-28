@@ -26,7 +26,27 @@
     "copyLink": "Copiar enlace",
     "copied": "Enlace copiado al portapapeles",
     "copyError": "No se pudo copiar el enlace",
-    "confidential": "Mantén este enlace privado. Cualquiera con él puede acceder al calendario."
+    "confidential": "Mantén este enlace privado. Cualquiera con él puede acceder al calendario.",
+    "regenerateToken": "Regenerar token del calendario",
+    "regenerateConfirm": "¿Regenerar tu token del calendario? El enlace anterior quedará inválido.",
+    "regenerateSuccess": "Token del calendario regenerado",
+    "regenerateError": "No se pudo regenerar el token",
+    "editHeader": "Editar perfil",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "preferredLanguage": "Idioma preferido",
+    "languageSpanish": "Español",
+    "languageEnglish": "Inglés",
+    "saveProfile": "Guardar perfil",
+    "updateSuccess": "Perfil actualizado",
+    "updateError": "No se pudo actualizar el perfil",
+    "passwordHeader": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "updatePassword": "Actualizar contraseña",
+    "passwordSuccess": "Contraseña actualizada",
+    "passwordError": "No se pudo actualizar la contraseña"
   },
   "Dashboard": {
     "welcome": "Bienvenido, {{name}}",
@@ -260,7 +280,9 @@
     "eventsByScope": "Eventos por alcance",
     "surveysParticipation": "Participación en encuestas",
     "attendanceByGroup": "Asistencia a eventos por grupo",
-    "attendanceYes": "Asistencia confirmada"
+    "attendanceYes": "Asistencia confirmada",
+    "accessSettingsTitle": "Configuración de acceso a analíticas",
+    "accessSettingsDescription": "La dirección controla el acceso a analíticas. Los permisos futuros aparecerán aquí."
   },
   "AnalyticsDashboard": {
     "unauthorized": "No autorizado",

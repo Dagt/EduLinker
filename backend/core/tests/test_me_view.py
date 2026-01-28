@@ -36,3 +36,4 @@ def test_me_view_returns_ics_token_and_subscription_url():
     assert data["calendar_subscription_url"].endswith(
         f"/api/v1/events/ics/?token={user.ics_token}&school_id={school.id}"
     )
+    assert data["preferred_language"] == "es"

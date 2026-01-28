@@ -1,5 +1,8 @@
 # Analytics Overview
 
+Only directors can access analytics endpoints, and all responses are scoped to
+the `X-SCHOOL-ID` header for multi-tenant safety.
+
 The analytics overview endpoint (`/api/v1/analytics/overview/`) provides high level
 metrics for a school. It includes headline counts for complaints, suggestions,
 fundraising, surveys, and events:

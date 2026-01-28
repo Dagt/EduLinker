@@ -76,6 +76,30 @@ export async function getNotificationPreferences(){
   return apiGet("/notifications/preferences/");
 }
 
+export async function getMe(){
+  return apiGet("/me/");
+}
+
+export async function updateMe(body: {
+  first_name: string;
+  last_name: string;
+  preferred_language: string;
+}){
+  return apiPutAuth("/me/", body);
+}
+
+export async function regenerateIcsToken(){
+  return apiPost("/me/regenerate-ics/", {});
+}
+
+export async function changePassword(body: {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}){
+  return apiPost("/auth/change-password/", body);
+}
+
 export async function updateNotificationPreferences(body: {[key: string]: boolean}){
   return apiPutAuth("/notifications/preferences/", body);
 }

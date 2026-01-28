@@ -1,4 +1,5 @@
 import io
+import uuid
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -64,6 +65,7 @@ from .serializers import (
     VocalAssignmentSerializer,
     UserSerializer,
     UserDetailSerializer,
+    UserUpdateSerializer,
     StudentSerializer,
 )
 from .throttles import ComplaintCreateThrottle, EventCreateThrottle
@@ -112,11 +114,45 @@ class UserDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
         return self.request.user
 
 
-class MeView(UserDetailView):
-    pass
+class MeView(generics.RetrieveUpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        return self.request.user
+
+    def get_serializer_class(self):
+        if self.request.method in ("PUT", "PATCH"):
+            return UserUpdateSerializer
+        return UserDetailSerializer
+
+    def perform_update(self, serializer):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        serializer.save()
+
+
+class RegenerateICSTokenView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        if request.user.school_id != request.school_id:
+            raise PermissionDenied("Invalid school")
+        request.user.ics_token = uuid.uuid4()
+        request.user.save(update_fields=["ics_token"])
+        serializer = UserDetailSerializer(request.user, context={"request": request})
+        return Response(
+            {
+                "ics_token": serializer.data["ics_token"],
+                "calendar_subscription_url": serializer.data["calendar_subscription_url"],
+            }
+        )
 
 
 class CurrentSchoolView(generics.RetrieveAPIView):

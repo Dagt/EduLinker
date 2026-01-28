@@ -19,5 +19,11 @@ Guías y referencias para los distintos módulos de EduLinker.
 ## Perfil y calendario
 
 El endpoint `/api/v1/me/` devuelve los datos del usuario autenticado, incluyendo
-el `ics_token` y el enlace de suscripción al calendario con el parámetro
-`school_id`. Usa este endpoint para mostrar el token en la interfaz de perfil.
+el `ics_token`, el idioma preferido y el enlace de suscripción al calendario con
+el parámetro `school_id`. Usa este endpoint para mostrar el token en la interfaz
+de perfil y para actualizar nombre e idioma vía `PUT /api/v1/me/`.
+
+Nuevos endpoints relacionados:
+
+- `POST /api/v1/me/regenerate-ics/`: regenera el token de calendario del usuario autenticado.
+- `POST /api/v1/auth/change-password/`: cambia la contraseña validando la actual.

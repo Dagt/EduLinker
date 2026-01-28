@@ -26,7 +26,27 @@
     "copyLink": "Copy calendar link",
     "copied": "Link copied to clipboard",
     "copyError": "Unable to copy the link",
-    "confidential": "Keep this link private. Anyone with it can access your calendar."
+    "confidential": "Keep this link private. Anyone with it can access your calendar.",
+    "regenerateToken": "Regenerate calendar token",
+    "regenerateConfirm": "Regenerate your calendar token? This will invalidate the previous link.",
+    "regenerateSuccess": "Calendar token regenerated",
+    "regenerateError": "Unable to regenerate token",
+    "editHeader": "Edit profile",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "preferredLanguage": "Preferred language",
+    "languageSpanish": "Spanish",
+    "languageEnglish": "English",
+    "saveProfile": "Save profile",
+    "updateSuccess": "Profile updated",
+    "updateError": "Unable to update profile",
+    "passwordHeader": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "updatePassword": "Update password",
+    "passwordSuccess": "Password updated",
+    "passwordError": "Unable to update password"
   },
   "Dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -260,7 +280,9 @@
     "eventsByScope": "Events by scope",
     "surveysParticipation": "Survey participation",
     "attendanceByGroup": "Event attendance by group",
-    "attendanceYes": "Confirmed attendance"
+    "attendanceYes": "Confirmed attendance",
+    "accessSettingsTitle": "Analytics access settings",
+    "accessSettingsDescription": "Directors control access to analytics. Future role permissions will appear here."
   },
   "AnalyticsDashboard": {
     "unauthorized": "Unauthorized",

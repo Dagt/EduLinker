@@ -57,6 +57,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "role",
+            "preferred_language",
             "ics_token",
             "calendar_subscription_url",
         ]
@@ -68,6 +69,23 @@ class UserDetailSerializer(serializers.ModelSerializer):
             return ""
         base = request.build_absolute_uri("/api/v1/events/ics/")
         return f"{base}?token={user.ics_token}&school_id={user.school_id}"
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "preferred_language"]
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError("Passwords do not match")
+        return attrs
 
 
 class StudentSerializer(serializers.ModelSerializer):

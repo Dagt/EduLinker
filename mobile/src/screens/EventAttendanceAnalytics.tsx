@@ -1,21 +1,35 @@
 import { useEffect, useState } from "react";
 import { ScrollView, View, Text } from "react-native";
 import i18n from "../i18n";
+import { getMe } from "../api";
 import { getEventAttendanceAnalytics } from "../services/analytics";
 
 export default function EventAttendanceAnalytics() {
   const [attendance, setAttendance] = useState<any>(null);
+  const [role, setRole] = useState<string>("");
 
   useEffect(() => {
     (async () => {
       try {
-        const data = await getEventAttendanceAnalytics();
-        setAttendance(data);
+        const me = await getMe();
+        setRole(me.role);
+        if (me.role === "DIRECTOR") {
+          const data = await getEventAttendanceAnalytics();
+          setAttendance(data);
+        }
       } catch (err) {
         console.error(err);
       }
     })();
   }, []);
+
+  if (role && role !== "DIRECTOR") {
+    return (
+      <View style={{ padding: 16 }}>
+        <Text>{i18n.t("analytics.attendanceTitle")}</Text>
+      </View>
+    );
+  }
 
   if (!attendance) {
     return (

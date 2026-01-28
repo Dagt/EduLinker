@@ -65,6 +65,10 @@ export function apiPatch<T>(path: string, body: any, token?: string): Promise<T>
   return request<T>(path, { method: "PATCH", body: JSON.stringify(body) }, token);
 }
 
+export function apiPut<T>(path: string, body: any, token?: string): Promise<T> {
+  return request<T>(path, { method: "PUT", body: JSON.stringify(body) }, token);
+}
+
 export function apiDelete<T>(path: string, token?: string): Promise<T> {
   return request<T>(path, { method: "DELETE" }, token);
 }
@@ -157,6 +161,26 @@ export async function getEventAttendanceAnalytics(
 
 export async function getMe(token?: string) {
   return apiGet(`/me/`, token);
+}
+
+export async function updateMe(body: {
+  first_name: string;
+  last_name: string;
+  preferred_language: string;
+}, token?: string) {
+  return apiPut(`/me/`, body, token);
+}
+
+export async function regenerateIcsToken(token?: string) {
+  return apiPost(`/me/regenerate-ics/`, {}, token);
+}
+
+export async function changePassword(body: {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}, token?: string) {
+  return apiPost(`/auth/change-password/`, body, token);
 }
 
 // Survey voting
