@@ -11,6 +11,9 @@ fundraising, surveys, and events:
 - `events_cancelled`: number of events marked as cancelled.
 - `events_by_scope`: list with the total events grouped by scope (GLOBAL or GROUP).
 - `fundraising_total`: overall amount collected across all fundraising events.
+- `rsvp_by_group`: list of RSVP totals grouped by group (YES, MAYBE, NO).
+- `rsvp_attendance_rate_by_group`: attendance rate based on confirmed YES RSVPs
+  divided by the number of parents in each group.
 
 ## Complaints analytics
 
@@ -43,3 +46,39 @@ survey participation and engagement by group:
 
 - `participation_rate_by_group`: percentage of survey votes relative to the
   number of parents in each group.
+- `rsvp_by_group`: RSVP totals grouped by group.
+- `rsvp_attendance_rate_by_group`: attendance rate based on confirmed YES RSVPs
+  divided by the number of parents in each group.
+
+## Event attendance analytics
+
+The attendance endpoint (`/api/v1/analytics/events/attendance/`) provides RSVP
+attendance totals and participation rates over a date range, and can be filtered
+by `group_id` or `event_id`:
+
+```
+GET /api/v1/analytics/events/attendance/?from=2025-01-01&to=2025-01-31
+```
+
+Example response:
+
+```json
+{
+  "attending_yes": 12,
+  "attending_no": 4,
+  "attending_maybe": 3,
+  "participation_rate": 0.6,
+  "attendance_by_group": [
+    {
+      "group_id": 10,
+      "attending_yes": 5,
+      "attending_no": 1,
+      "attending_maybe": 2,
+      "participation_rate": 0.5
+    }
+  ]
+}
+```
+
+Only directors can access attendance analytics and the response is always scoped
+to the `X-SCHOOL-ID` header.

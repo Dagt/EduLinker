@@ -18,6 +18,7 @@ from .models import (
     EventGroupAudience,
     EventAttachment,
     EventPhoto,
+    EventRSVP,
     Announcement,
     Homework,
     ActivityPhoto,
@@ -43,6 +44,30 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "first_name", "last_name", "email", "role"]
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    calendar_subscription_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "ics_token",
+            "calendar_subscription_url",
+        ]
+        read_only_fields = ["ics_token", "calendar_subscription_url"]
+
+    def get_calendar_subscription_url(self, user):
+        request = self.context.get("request")
+        if not request:
+            return ""
+        base = request.build_absolute_uri("/api/v1/events/ics/")
+        return f"{base}?token={user.ics_token}&school_id={user.school_id}"
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -223,9 +248,7 @@ class EventSerializer(serializers.ModelSerializer):
     )
     attachments = serializers.SerializerMethodField()
     photos = serializers.SerializerMethodField()
-    computed_status = serializers.CharField(
-        source="computed_status", read_only=True
-    )
+    computed_status = serializers.CharField(read_only=True)
 
     class Meta:
         model = Event
@@ -246,6 +269,12 @@ class EventSerializer(serializers.ModelSerializer):
             "photos",
         ]
         read_only_fields = ["created_by", "status", "computed_status"]
+
+
+class EventRSVPStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=EventRSVP.Status.choices, allow_null=True, required=False
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

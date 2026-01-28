@@ -6,6 +6,7 @@ from .views import (
     FundraisingAnalyticsView,
     EngagementAnalyticsView,
     EventsAnalyticsView,
+    AttendanceAnalyticsView,
 )
 
 app_name = "analytics"
@@ -35,5 +36,10 @@ urlpatterns = [
         "analytics/events/",
         EventsAnalyticsView.as_view(),
         name="analytics-events",
+    ),
+    path(
+        "analytics/events/attendance/",
+        AttendanceAnalyticsView.as_view(),
+        name="analytics-events-attendance",
     ),
 ]

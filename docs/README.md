@@ -15,3 +15,9 @@ Guías y referencias para los distintos módulos de EduLinker.
 - [Surveys API](surveys.md)
 - [Casos de uso](use_cases.md)
 - [OpenAPI schema](../backend/docs/openapi.json) (generado con `python backend/manage.py spectacular --file backend/docs/openapi.json`)
+
+## Perfil y calendario
+
+El endpoint `/api/v1/me/` devuelve los datos del usuario autenticado, incluyendo
+el `ics_token` y el enlace de suscripción al calendario con el parámetro
+`school_id`. Usa este endpoint para mostrar el token en la interfaz de perfil.

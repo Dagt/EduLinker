@@ -6,7 +6,8 @@
     "suggestions": "Sugerencias",
     "surveys": "Encuestas",
     "fundraising": "Recaudación",
-    "analytics": "Analíticas"
+    "analytics": "Analíticas",
+    "profile": "Perfil"
   },
   "UploadButton": {
     "presignError": "Error de presign",
@@ -14,6 +15,18 @@
   },
   "General": {
     "loading": "Cargando..."
+  },
+  "Profile": {
+    "header": "Perfil",
+    "name": "Nombre",
+    "email": "Correo",
+    "role": "Rol",
+    "icsToken": "Token ICS",
+    "calendarLink": "Enlace de suscripción al calendario",
+    "copyLink": "Copiar enlace",
+    "copied": "Enlace copiado al portapapeles",
+    "copyError": "No se pudo copiar el enlace",
+    "confidential": "Mantén este enlace privado. Cualquiera con él puede acceder al calendario."
   },
   "Dashboard": {
     "welcome": "Bienvenido, {{name}}",
@@ -245,7 +258,9 @@
     "complaintsByGroup": "Quejas por grupo",
     "fundraisingByGroup": "Recaudación por grupo",
     "eventsByScope": "Eventos por alcance",
-    "surveysParticipation": "Participación en encuestas"
+    "surveysParticipation": "Participación en encuestas",
+    "attendanceByGroup": "Asistencia a eventos por grupo",
+    "attendanceYes": "Asistencia confirmada"
   },
   "AnalyticsDashboard": {
     "unauthorized": "No autorizado",

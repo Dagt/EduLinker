@@ -21,6 +21,7 @@ import {
   getComplaintsAnalytics,
   getFundraisingAnalytics,
   getEngagementAnalytics,
+  getEventAttendanceAnalytics,
 } from '@/lib/api';
 
 jest.mock('@/lib/auth', () => ({ getToken: () => 'token' }));
@@ -31,6 +32,7 @@ const overview = { events_by_scope: [{ scope: 'GLOBAL', total: 3 }] };
 const complaints = { complaints_by_group: [{ group: 1, total: 2 }] };
 const fundraising = { fundraising_by_group: [{ group__id: 1, total: 100 }] };
 const engagement = { surveys_participation: [{ group_id: 1, total: 4 }] };
+const attendance = { attending_yes: 5, attendance_by_group: [{ group_id: 1, attending_yes: 2, attending_no: 1, attending_maybe: 0, participation_rate: 0.5 }] };
 
 beforeAll(() => {
   (global as any).ResizeObserver = class {
@@ -46,6 +48,7 @@ describe('AnalyticsPage', () => {
     (getComplaintsAnalytics as jest.Mock).mockReset();
     (getFundraisingAnalytics as jest.Mock).mockReset();
     (getEngagementAnalytics as jest.Mock).mockReset();
+    (getEventAttendanceAnalytics as jest.Mock).mockReset();
   });
 
   it('renders KPIs and charts', async () => {
@@ -53,15 +56,17 @@ describe('AnalyticsPage', () => {
     (getComplaintsAnalytics as jest.Mock).mockResolvedValue(complaints);
     (getFundraisingAnalytics as jest.Mock).mockResolvedValue(fundraising);
     (getEngagementAnalytics as jest.Mock).mockResolvedValue(engagement);
+    (getEventAttendanceAnalytics as jest.Mock).mockResolvedValue(attendance);
     render(<AnalyticsPage />);
     await screen.findByText('Quejas por grupo', { selector: 'h3' });
     expect(screen.getByText('Recaudación por grupo', { selector: 'h3' })).toBeInTheDocument();
     expect(screen.getByText('Eventos por alcance', { selector: 'h3' })).toBeInTheDocument();
     expect(screen.getByText('Participación en encuestas', { selector: 'h3' })).toBeInTheDocument();
+    expect(screen.getByText('Asistencia a eventos por grupo', { selector: 'h3' })).toBeInTheDocument();
     expect(screen.getByText('2', { selector: 'strong' })).toBeInTheDocument();
     expect(screen.getByText('100', { selector: 'strong' })).toBeInTheDocument();
     expect(screen.getByText('3', { selector: 'strong' })).toBeInTheDocument();
     expect(screen.getByText('4', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('5', { selector: 'strong' })).toBeInTheDocument();
   });
 });
-

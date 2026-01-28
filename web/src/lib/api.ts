@@ -142,6 +142,23 @@ export async function getEngagementAnalytics(groupId?: number, token?: string) {
   return apiGet(`/analytics/engagement/${q}`, token);
 }
 
+export async function getEventAttendanceAnalytics(
+  params: { from?: string; to?: string; groupId?: number; eventId?: number } = {},
+  token?: string,
+) {
+  const search = new URLSearchParams();
+  if (params.from) search.set("from", params.from);
+  if (params.to) search.set("to", params.to);
+  if (params.groupId) search.set("group_id", String(params.groupId));
+  if (params.eventId) search.set("event_id", String(params.eventId));
+  const query = search.toString();
+  return apiGet(`/analytics/events/attendance/${query ? `?${query}` : ""}`, token);
+}
+
+export async function getMe(token?: string) {
+  return apiGet(`/me/`, token);
+}
+
 // Survey voting
 export async function voteSurvey(id: number, choiceId: number, token?: string) {
   return apiPost(`/surveys/${id}/vote`, { choiceId }, token);

@@ -7,6 +7,7 @@ import {
   getComplaintsAnalytics,
   getFundraisingAnalytics,
   getEngagementAnalytics,
+  getEventAttendanceAnalytics,
 } from "@/lib/api";
 import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
@@ -16,37 +17,41 @@ import ComplaintsChart from "./ComplaintsChart";
 import FundraisingChart from "./FundraisingChart";
 import EventsChart from "./EventsChart";
 import SurveysChart from "./SurveysChart";
+import AttendanceChart from "./AttendanceChart";
 
 export default function AnalyticsPage() {
   const [overview, setOverview] = useState<any>(null);
   const [complaints, setComplaints] = useState<any>(null);
   const [fundraising, setFundraising] = useState<any>(null);
   const [engagement, setEngagement] = useState<any>(null);
+  const [attendance, setAttendance] = useState<any>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
     (async () => {
       try {
         const tk = getToken();
-        const [ov, comp, fund, eng] = await Promise.all([
+        const [ov, comp, fund, eng, att] = await Promise.all([
           getAnalytics(tk),
           getComplaintsAnalytics(tk),
           getFundraisingAnalytics(tk),
           getEngagementAnalytics(undefined, tk),
+          getEventAttendanceAnalytics({}, tk),
         ]);
         setOverview(ov);
         setComplaints(comp);
         setFundraising(fund);
         setEngagement(eng);
+        setAttendance(att);
       } catch (err) {
         console.error(err);
       }
     })();
   }, []);
 
-  if (!requireRole(["admin"])) return <p>{t("Analytics.unauthorized")}</p>;
+  if (!requireRole(["director"])) return <p>{t("Analytics.unauthorized")}</p>;
 
-  const ready = overview && complaints && fundraising && engagement;
+  const ready = overview && complaints && fundraising && engagement && attendance;
   const eventColors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
   const kpis = !ready
     ? []
@@ -79,6 +84,10 @@ export default function AnalyticsPage() {
             0
           ),
         },
+        {
+          label: t("Analytics.attendanceYes"),
+          value: attendance.attending_yes,
+        },
       ];
 
   return (
@@ -107,6 +116,10 @@ export default function AnalyticsPage() {
                 data={engagement.surveys_participation}
                 title={t("Analytics.surveysParticipation")}
               />
+              <AttendanceChart
+                data={attendance.attendance_by_group}
+                title={t("Analytics.attendanceByGroup")}
+              />
             </div>
           </>
         )}
@@ -114,4 +127,3 @@ export default function AnalyticsPage() {
     </>
   );
 }
-

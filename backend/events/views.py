@@ -3,6 +3,7 @@ from icalendar import Calendar, Event as ICalEvent
 from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 
 from core.models import Event, User
 from core.permissions import user_can_view_event
@@ -11,6 +12,7 @@ from core.permissions import user_can_view_event
 class EventsICSView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(responses=OpenApiTypes.BINARY)
     def get(self, request):
         token = request.query_params.get("token")
         if token:

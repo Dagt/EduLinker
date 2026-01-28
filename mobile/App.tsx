@@ -12,6 +12,8 @@ import SurveyCreate from "./src/screens/Surveys/Create";
 import EventCalendar from "./src/screens/EventCalendar";
 import Fundraising from "./src/screens/Fundraising";
 import VocalAssignments from "./src/screens/VocalAssignments";
+import ProfileScreen from "./src/screens/ProfileScreen";
+import EventAttendanceAnalytics from "./src/screens/EventAttendanceAnalytics";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
 import { getRole } from "./src/role";
@@ -28,7 +30,7 @@ if (process.env.NODE_ENV !== "test") {
 export default function App(){
   const [logged,setLogged]=useState(false);
   const [role,setRole]=useState("guest");
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events"|"vocalAssignments">("feed");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events"|"vocalAssignments"|"profile"|"attendanceAnalytics">("feed");
 
   useEffect(()=>{ if(logged){ (async()=> setRole(await getRole()))(); } },[logged]);
 
@@ -54,6 +56,10 @@ export default function App(){
             {(role==="MAESTRO_TITULAR"||role==="DIRECTOR") && (
               <Button title={i18n.t('menu.vocalAssignments')} onPress={()=>setView("vocalAssignments")} />
             )}
+            <Button title={i18n.t('menu.profile')} onPress={()=>setView("profile")} />
+            {role==="DIRECTOR" && (
+              <Button title={i18n.t('menu.attendanceAnalytics')} onPress={()=>setView("attendanceAnalytics")} />
+            )}
           </View>
           {view==="feed" ? <Feed/> :
            view==="chat" ? <GroupChat/> :
@@ -66,6 +72,8 @@ export default function App(){
            view==="createSurvey" ? <SurveyCreate/> :
            view==="fundraising" ? <Fundraising/> :
            view==="vocalAssignments" ? <VocalAssignments/> :
+           view==="profile" ? <ProfileScreen/> :
+           view==="attendanceAnalytics" ? <EventAttendanceAnalytics/> :
            <EventCalendar/>}
         </>
       ) : <Login onLoggedIn={()=>setLogged(true)}/> }
