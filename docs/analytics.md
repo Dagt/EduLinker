@@ -1,9 +1,11 @@
 # Analytics Overview
 
 The analytics overview endpoint (`/api/v1/analytics/overview/`) provides high level
-metrics for a school. In addition to existing data for complaints, suggestions,
-fundraising and surveys, the endpoint reports event statistics:
+metrics for a school. It includes headline counts for complaints, suggestions,
+fundraising, surveys, and events:
 
+- `complaints_total`: total number of complaints registered for the school.
+- `complaints_open`: count of open complaints.
 - `events_total`: total number of events registered for the school.
 - `events_upcoming`: count of upcoming active events.
 - `events_cancelled`: number of events marked as cancelled.
@@ -12,11 +14,16 @@ fundraising and surveys, the endpoint reports event statistics:
 
 ## Complaints analytics
 
-The complaints endpoint (`/api/v1/analytics/complaints/`) now highlights the most
-active parents in the complaint system:
+The complaints endpoint (`/api/v1/analytics/complaints/`) provides complaint
+totals, group breakdowns, and highlights the most active parents:
 
+- `complaints_total`: total number of complaints in the selection.
+- `complaints_open`: total number of open complaints in the selection.
+- `complaints_by_group`: list of counts grouped by group id.
 - `top_parents_by_complaints`: list of up to five parents ordered by the number
   of complaints they have submitted.
+- `least_problematic_groups`: groups with fewer complaints and higher event
+  participation.
 
 ## Fundraising analytics
 
@@ -31,9 +38,8 @@ parameter:
 
 ## Engagement analytics
 
-The engagement endpoint (`/api/v1/analytics/engagement/`) adds a metric to measure
-survey participation:
+The engagement endpoint (`/api/v1/analytics/engagement/`) adds metrics to measure
+survey participation and engagement by group:
 
 - `participation_rate_by_group`: percentage of survey votes relative to the
   number of parents in each group.
-

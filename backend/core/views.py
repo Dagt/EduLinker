@@ -2,7 +2,6 @@ import io
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -36,6 +35,7 @@ from .permissions import (
     can_post_activity_photo,
     can_view_event,
     user_can_view_event,
+    is_admin_tenant,
     is_director,
     is_maestro_itinerante,
     is_maestro_titular,
@@ -271,12 +271,31 @@ class GroupMembersView(generics.GenericAPIView):
         )
 
 
-class ComplaintCreateView(generics.CreateAPIView):
+class ComplaintCreateView(generics.ListCreateAPIView):
     serializer_class = ComplaintSerializer
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [ComplaintCreateThrottle]
 
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        user = self.request.user
+        qs = Complaint.objects.filter(school_id=self.request.school_id)
+        if is_director(user) or is_admin_tenant(user):
+            return qs.order_by("-created_at")
+        return (
+            qs.filter(
+                Q(created_by=user)
+                | Q(target_teacher=user)
+                | Q(participants__user=user)
+            )
+            .distinct()
+            .order_by("-created_at")
+        )
+
     def perform_create(self, serializer):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
         user = self.request.user
         group = serializer.validated_data["group"]
         target_teacher = serializer.validated_data["target_teacher"]
