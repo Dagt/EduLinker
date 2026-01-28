@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import "@/i18n";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { usePathname } from "next/navigation";
+import { requireRole } from "@/lib/roles";
 
 export default function Nav() {
   const { t } = useTranslation();
@@ -17,8 +18,9 @@ export default function Nav() {
     { href: suggPath, label: t("Nav.suggestions") },
     { href: "/surveys", label: t("Nav.surveys") },
     { href: "/fundraising", label: t("Nav.fundraising") },
-    { href: "/analytics", label: t("Nav.analytics") },
-  ];
+    requireRole(["director"]) ? { href: "/analytics", label: t("Nav.analytics") } : null,
+    { href: "/profile", label: t("Nav.profile") },
+  ].filter(Boolean) as { href: string; label: string }[];
   return (
     <>
       <nav className="nav">

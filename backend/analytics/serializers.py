@@ -22,6 +22,10 @@ class OverviewAnalyticsSerializer(serializers.Serializer):
     events_upcoming = serializers.IntegerField()
     events_cancelled = serializers.IntegerField()
     events_by_scope = serializers.ListField(child=serializers.JSONField())
+    rsvp_by_group = serializers.ListField(child=serializers.JSONField())
+    rsvp_attendance_rate_by_group = serializers.ListField(
+        child=serializers.JSONField()
+    )
 
 
 class ParentComplaintsSerializer(serializers.Serializer):
@@ -67,6 +71,10 @@ class EngagementAnalyticsSerializer(serializers.Serializer):
     participation_rate_by_group = serializers.ListField(
         child=serializers.JSONField()
     )
+    rsvp_by_group = serializers.ListField(child=serializers.JSONField())
+    rsvp_attendance_rate_by_group = serializers.ListField(
+        child=serializers.JSONField()
+    )
 
 
 class EventsAnalyticsSerializer(serializers.Serializer):
@@ -78,3 +86,12 @@ class EventsAnalyticsSerializer(serializers.Serializer):
     events_by_group = serializers.ListField(child=serializers.JSONField())
     events_by_scope = serializers.ListField(child=serializers.JSONField())
 
+
+class AttendanceAnalyticsSerializer(serializers.Serializer):
+    """Serializer for event attendance analytics."""
+
+    attending_yes = serializers.IntegerField()
+    attending_no = serializers.IntegerField()
+    attending_maybe = serializers.IntegerField()
+    participation_rate = serializers.FloatField()
+    attendance_by_group = serializers.ListField(child=serializers.JSONField())

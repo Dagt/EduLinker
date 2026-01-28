@@ -5,6 +5,7 @@ from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.utils import timezone
 from django.utils.dateparse import parse_date
+from drf_spectacular.utils import extend_schema
 
 from core.models import (
     Complaint,
@@ -13,6 +14,7 @@ from core.models import (
     Homework,
     EventGroupAudience,
     ParentStudent,
+    EventRSVP,
 )
 from core.permissions import IsDirector
 from fundraising.models import FundraisingGroupLedger
@@ -25,12 +27,71 @@ from .serializers import (
     FundraisingAnalyticsSerializer,
     EngagementAnalyticsSerializer,
     EventsAnalyticsSerializer,
+    AttendanceAnalyticsSerializer,
 )
+
+
+def _parent_counts_by_group(school_id, group_ids):
+    counts = {}
+    for group_id in group_ids:
+        parents = (
+            ParentStudent.objects.filter(
+                school_id=school_id, student__memberships__group_id=group_id
+            )
+            .values("parent_id")
+            .distinct()
+            .count()
+        )
+        counts[group_id] = parents
+    return counts
+
+
+def _rsvp_metrics_by_group(school_id, events_qs):
+    rsvp_counts = (
+        EventRSVP.objects.filter(event__in=events_qs)
+        .values("event__group_audiences__group_id", "status")
+        .annotate(total=Count("id"))
+        .order_by("event__group_audiences__group_id")
+    )
+    group_ids = {
+        item["event__group_audiences__group_id"]
+        for item in rsvp_counts
+        if item["event__group_audiences__group_id"] is not None
+    }
+    parent_counts = _parent_counts_by_group(school_id, group_ids)
+    totals_by_group = {}
+    for item in rsvp_counts:
+        group_id = item["event__group_audiences__group_id"]
+        if group_id is None:
+            continue
+        totals = totals_by_group.setdefault(
+            group_id,
+            {
+                "group_id": group_id,
+                "attending_yes": 0,
+                "attending_no": 0,
+                "attending_maybe": 0,
+            },
+        )
+        if item["status"] == EventRSVP.Status.YES:
+            totals["attending_yes"] += item["total"]
+        elif item["status"] == EventRSVP.Status.NO:
+            totals["attending_no"] += item["total"]
+        elif item["status"] == EventRSVP.Status.MAYBE:
+            totals["attending_maybe"] += item["total"]
+
+    attendance_rates = []
+    for group_id, totals in totals_by_group.items():
+        parents = parent_counts.get(group_id, 0)
+        rate = totals["attending_yes"] / parents if parents else 0
+        attendance_rates.append({"group_id": group_id, "rate": rate})
+    return list(totals_by_group.values()), attendance_rates
 
 
 class OverviewAnalyticsView(APIView):
     permission_classes = [IsDirector]
 
+    @extend_schema(responses=OverviewAnalyticsSerializer)
     def get(self, request):
         school_id = request.school_id
         if request.user.school_id != school_id:
@@ -96,6 +157,10 @@ class OverviewAnalyticsView(APIView):
             .annotate(total=Count("id"))
         )
 
+        rsvp_by_group, attendance_rates = _rsvp_metrics_by_group(
+            school_id, Event.objects.filter(school_id=school_id)
+        )
+
         serializer = OverviewAnalyticsSerializer(
             {
                 "complaints_total": total_complaints,
@@ -114,6 +179,8 @@ class OverviewAnalyticsView(APIView):
                 "events_upcoming": events_upcoming,
                 "events_cancelled": events_cancelled,
                 "events_by_scope": list(events_by_scope),
+                "rsvp_by_group": rsvp_by_group,
+                "rsvp_attendance_rate_by_group": attendance_rates,
             }
         )
         return Response(serializer.data)
@@ -122,6 +189,7 @@ class OverviewAnalyticsView(APIView):
 class ComplaintsAnalyticsView(APIView):
     permission_classes = [IsDirector]
 
+    @extend_schema(responses=ComplaintsAnalyticsSerializer)
     def get(self, request):
         school_id = request.school_id
         if request.user.school_id != school_id:
@@ -195,6 +263,7 @@ class ComplaintsAnalyticsView(APIView):
 class FundraisingAnalyticsView(APIView):
     permission_classes = [IsDirector]
 
+    @extend_schema(responses=FundraisingAnalyticsSerializer)
     def get(self, request):
         school_id = request.school_id
         if request.user.school_id != school_id:
@@ -228,6 +297,7 @@ class FundraisingAnalyticsView(APIView):
 class EngagementAnalyticsView(APIView):
     permission_classes = [IsDirector]
 
+    @extend_schema(responses=EngagementAnalyticsSerializer)
     def get(self, request):
         school_id = request.school_id
         if request.user.school_id != school_id:
@@ -269,12 +339,23 @@ class EngagementAnalyticsView(APIView):
             event_qs = event_qs.filter(group_id=group_id)
         event_data = event_qs.values("group_id").annotate(total=Count("id"))
 
+        events_for_rsvp = Event.objects.filter(school_id=school_id)
+        if group_id:
+            events_for_rsvp = events_for_rsvp.filter(
+                group_audiences__group_id=group_id
+            )
+        rsvp_by_group, attendance_rates = _rsvp_metrics_by_group(
+            school_id, events_for_rsvp
+        )
+
         serializer = EngagementAnalyticsSerializer(
             {
                 "surveys_participation": survey_data,
                 "homework_participation": list(homework_data),
                 "events_participation": list(event_data),
                 "participation_rate_by_group": participation_rate,
+                "rsvp_by_group": rsvp_by_group,
+                "rsvp_attendance_rate_by_group": attendance_rates,
             }
         )
         return Response(serializer.data)
@@ -283,6 +364,7 @@ class EngagementAnalyticsView(APIView):
 class EventsAnalyticsView(APIView):
     permission_classes = [IsDirector]
 
+    @extend_schema(responses=EventsAnalyticsSerializer)
     def get(self, request):
         school_id = request.school_id
         if request.user.school_id != school_id:
@@ -368,3 +450,82 @@ class EventsAnalyticsView(APIView):
         )
         return Response(serializer.data)
 
+
+class AttendanceAnalyticsView(APIView):
+    permission_classes = [IsDirector]
+
+    @extend_schema(responses=AttendanceAnalyticsSerializer)
+    def get(self, request):
+        school_id = request.school_id
+        if request.user.school_id != school_id:
+            raise PermissionDenied("Invalid school")
+
+        from_date = request.query_params.get("from")
+        to_date = request.query_params.get("to")
+        group_id = request.query_params.get("group_id")
+        event_id = request.query_params.get("event_id")
+
+        events_qs = Event.objects.filter(school_id=school_id)
+        if from_date:
+            parsed_from = parse_date(from_date)
+            if parsed_from:
+                events_qs = events_qs.filter(start_at__date__gte=parsed_from)
+        if to_date:
+            parsed_to = parse_date(to_date)
+            if parsed_to:
+                events_qs = events_qs.filter(start_at__date__lte=parsed_to)
+        if event_id:
+            events_qs = events_qs.filter(id=event_id)
+        if group_id:
+            events_qs = events_qs.filter(group_audiences__group_id=group_id)
+
+        rsvp_qs = EventRSVP.objects.filter(event__in=events_qs)
+        counts = {status: 0 for status in EventRSVP.Status.values}
+        for item in rsvp_qs.values("status").annotate(total=Count("id")):
+            counts[item["status"]] = item["total"]
+
+        attending_yes = counts[EventRSVP.Status.YES]
+        attending_no = counts[EventRSVP.Status.NO]
+        attending_maybe = counts[EventRSVP.Status.MAYBE]
+
+        group_ids = set(
+            events_qs.values_list("group_audiences__group_id", flat=True)
+        )
+        group_ids.discard(None)
+        if group_id:
+            group_ids = {int(group_id)}
+
+        total_parents = 0
+        if group_ids:
+            total_parents = ParentStudent.objects.filter(
+                school_id=school_id, student__memberships__group_id__in=group_ids
+            ).values("parent_id").distinct().count()
+        elif events_qs.filter(scope=Event.Scope.GLOBAL).exists():
+            total_parents = ParentStudent.objects.filter(
+                school_id=school_id
+            ).values("parent_id").distinct().count()
+
+        participation_rate = attending_yes / total_parents if total_parents else 0
+
+        attendance_by_group, group_rates = _rsvp_metrics_by_group(
+            school_id, events_qs
+        )
+        rates_map = {item["group_id"]: item["rate"] for item in group_rates}
+        attendance_by_group = [
+            {
+                **item,
+                "participation_rate": rates_map.get(item["group_id"], 0),
+            }
+            for item in attendance_by_group
+        ]
+
+        serializer = AttendanceAnalyticsSerializer(
+            {
+                "attending_yes": attending_yes,
+                "attending_no": attending_no,
+                "attending_maybe": attending_maybe,
+                "participation_rate": participation_rate,
+                "attendance_by_group": attendance_by_group,
+            }
+        )
+        return Response(serializer.data)

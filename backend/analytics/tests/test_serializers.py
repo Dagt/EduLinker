@@ -17,8 +17,9 @@ def test_overview_serializer_structure():
         "events_upcoming": 0,
         "events_cancelled": 0,
         "events_by_scope": [],
+        "rsvp_by_group": [],
+        "rsvp_attendance_rate_by_group": [],
     }
 
     serializer = OverviewAnalyticsSerializer(data)
     assert serializer.data == data
-

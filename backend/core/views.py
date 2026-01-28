@@ -10,6 +10,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 from notifications.tasks import push_to_users
 
 from .models import (
@@ -54,6 +55,7 @@ from .serializers import (
     EventAttachmentSerializer,
     EventPhotoSerializer,
     EventSerializer,
+    EventRSVPStatusSerializer,
     ActivityPhotoSerializer,
     GroupSerializer,
     GroupCreateSerializer,
@@ -61,6 +63,7 @@ from .serializers import (
     SpecialistAssignmentSerializer,
     VocalAssignmentSerializer,
     UserSerializer,
+    UserDetailSerializer,
     StudentSerializer,
 )
 from .throttles import ComplaintCreateThrottle, EventCreateThrottle
@@ -104,12 +107,16 @@ def _can_manage_group(user, group):
     return False
 
 
-class MeView(generics.RetrieveAPIView):
-    serializer_class = UserSerializer
+class UserDetailView(generics.RetrieveAPIView):
+    serializer_class = UserDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+
+class MeView(UserDetailView):
+    pass
 
 
 class CurrentSchoolView(generics.RetrieveAPIView):
@@ -618,6 +625,7 @@ class EventRSVPView(APIView):
             Event, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
 
+    @extend_schema(responses=EventRSVPStatusSerializer)
     def get(self, request, *args, **kwargs):
         event = self._get_event()
         if not can_view_event(request.user, event):
@@ -625,6 +633,7 @@ class EventRSVPView(APIView):
         rsvp = EventRSVP.objects.filter(event=event, user=request.user).first()
         return Response({"status": rsvp.status if rsvp else None})
 
+    @extend_schema(request=EventRSVPStatusSerializer, responses=EventRSVPStatusSerializer)
     def post(self, request, *args, **kwargs):
         event = self._get_event()
         if not can_view_event(request.user, event):

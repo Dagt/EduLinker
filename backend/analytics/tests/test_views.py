@@ -219,6 +219,8 @@ def test_director_accesses_analytics_endpoints():
     assert data["surveys_participation_by_survey"][0]["votes"] == 1
     scopes = {item["scope"]: item["total"] for item in data["events_by_scope"]}
     assert scopes == {"GLOBAL": 1, "GROUP": 1}
+    assert "rsvp_by_group" in data
+    assert "rsvp_attendance_rate_by_group" in data
 
     res = client.get("/api/v1/analytics/complaints/")
     assert res.status_code == 200
@@ -292,4 +294,3 @@ def test_analytics_forbids_cross_school_access():
     )
     res = client.get("/api/v1/analytics/overview/")
     assert res.status_code == 403
-

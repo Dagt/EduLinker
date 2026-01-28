@@ -22,7 +22,7 @@ from .views import (
     AssignSpecialistView,
     VocalAssignmentCreateView,
     VocalAssignmentDeactivateView,
-    MeView,
+    UserDetailView,
     CurrentSchoolView,
     SchoolYearRolloverView,
     EventDetailView,
@@ -44,7 +44,7 @@ api_docs_urlpatterns = [
 ]
 
 urlpatterns = [
-    path("me/", MeView.as_view(), name="me"),
+    path("me/", UserDetailView.as_view(), name="me"),
     path("schools/current/", CurrentSchoolView.as_view(), name="current-school"),
     path(
         "school-years/rollover/",
@@ -114,4 +114,3 @@ urlpatterns = [
     path("", include("suggestions.urls")),
     path("", include("fundraising.urls")),
 ]
-

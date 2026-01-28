@@ -64,7 +64,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "No response body"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ComplaintsAnalytics"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -82,7 +89,64 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "No response body"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EngagementAnalytics"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/analytics/events/": {
+            "get": {
+                "operationId": "v1_analytics_events_retrieve",
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EventsAnalytics"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/analytics/events/attendance/": {
+            "get": {
+                "operationId": "v1_analytics_events_attendance_retrieve",
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AttendanceAnalytics"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -100,7 +164,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "No response body"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FundraisingAnalytics"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -118,7 +189,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "No response body"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OverviewAnalytics"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -562,6 +640,32 @@
             }
         },
         "/api/v1/complaints/": {
+            "get": {
+                "operationId": "v1_complaints_list",
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Complaint"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
             "post": {
                 "operationId": "v1_complaints_create",
                 "tags": [
@@ -964,6 +1068,42 @@
             }
         },
         "/api/v1/events/{id}/attachments/": {
+            "get": {
+                "operationId": "v1_events_attachments_list",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EventAttachment"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
             "post": {
                 "operationId": "v1_events_attachments_create",
                 "parameters": [
@@ -1233,6 +1373,42 @@
             }
         },
         "/api/v1/events/{id}/photos/": {
+            "get": {
+                "operationId": "v1_events_photos_list",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EventPhoto"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
             "post": {
                 "operationId": "v1_events_photos_create",
                 "parameters": [
@@ -1287,9 +1463,19 @@
                 }
             }
         },
-        "/api/v1/events/ics/": {
+        "/api/v1/events/{id}/rsvp/": {
             "get": {
-                "operationId": "v1_events_ics_retrieve",
+                "operationId": "v1_events_rsvp_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
                 "tags": [
                     "v1"
                 ],
@@ -1300,7 +1486,93 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "No response body"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EventRSVPStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1_events_rsvp_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "v1"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EventRSVPStatus"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EventRSVPStatus"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EventRSVPStatus"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwtAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EventRSVPStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/events/ics/": {
+            "get": {
+                "operationId": "v1_events_ics_retrieve",
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -1590,6 +1862,34 @@
                 ],
                 "responses": {
                     "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/fundraising-events/{id}/export/": {
+            "get": {
+                "operationId": "v1_fundraising_events_export_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
                         "description": "No response body"
                     }
                 }
@@ -2104,6 +2404,34 @@
                 }
             }
         },
+        "/api/v1/groups/{id}/members/": {
+            "get": {
+                "operationId": "v1_groups_members_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "v1"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/groups/create/": {
             "post": {
                 "operationId": "v1_groups_create_create",
@@ -2554,7 +2882,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "$ref": "#/components/schemas/UserDetail"
                                 }
                             }
                         },
@@ -3490,6 +3818,36 @@
                     }
                 }
             },
+            "AttendanceAnalytics": {
+                "type": "object",
+                "description": "Serializer for event attendance analytics.",
+                "properties": {
+                    "attending_yes": {
+                        "type": "integer"
+                    },
+                    "attending_no": {
+                        "type": "integer"
+                    },
+                    "attending_maybe": {
+                        "type": "integer"
+                    },
+                    "participation_rate": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "attendance_by_group": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "attendance_by_group",
+                    "attending_maybe",
+                    "attending_no",
+                    "attending_yes",
+                    "participation_rate"
+                ]
+            },
             "AuditLog": {
                 "type": "object",
                 "properties": {
@@ -3513,9 +3871,8 @@
                     },
                     "entity_id": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": 0,
-                        "format": "int64"
+                        "maximum": 2147483647,
+                        "minimum": 0
                     },
                     "metadata": {},
                     "created_at": {
@@ -3543,6 +3900,10 @@
                     },
                     "author": {
                         "type": "integer"
+                    },
+                    "author_display": {
+                        "type": "string",
+                        "readOnly": true
                     },
                     "author_role": {
                         "type": "string",
@@ -3574,6 +3935,7 @@
                 "required": [
                     "attachment_url",
                     "author",
+                    "author_display",
                     "author_role",
                     "created_at",
                     "id",
@@ -3604,7 +3966,7 @@
                     "status": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/Status230Enum"
+                                "$ref": "#/components/schemas/Status337Enum"
                             }
                         ],
                         "readOnly": true
@@ -3723,9 +4085,49 @@
                 "type": "object",
                 "properties": {
                     "status": {
-                        "$ref": "#/components/schemas/Status230Enum"
+                        "$ref": "#/components/schemas/Status337Enum"
                     }
                 }
+            },
+            "ComplaintsAnalytics": {
+                "type": "object",
+                "description": "Serializer for the complaints analytics endpoint.",
+                "properties": {
+                    "complaints_total": {
+                        "type": "integer"
+                    },
+                    "complaints_open": {
+                        "type": "integer"
+                    },
+                    "complaints_by_group": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "top_parents_by_complaints": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ParentComplaints"
+                        }
+                    },
+                    "least_problematic_groups": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GroupParticipation"
+                        }
+                    },
+                    "events_by_group": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "complaints_by_group",
+                    "complaints_open",
+                    "complaints_total",
+                    "events_by_group",
+                    "least_problematic_groups",
+                    "top_parents_by_complaints"
+                ]
             },
             "DeviceToken": {
                 "type": "object",
@@ -3746,6 +4148,44 @@
                     "id",
                     "platform",
                     "token"
+                ]
+            },
+            "EngagementAnalytics": {
+                "type": "object",
+                "description": "Serializer for the engagement analytics endpoint.",
+                "properties": {
+                    "surveys_participation": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "homework_participation": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "events_participation": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "participation_rate_by_group": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "rsvp_by_group": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "rsvp_attendance_rate_by_group": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "events_participation",
+                    "homework_participation",
+                    "participation_rate_by_group",
+                    "rsvp_attendance_rate_by_group",
+                    "rsvp_by_group",
+                    "surveys_participation"
                 ]
             },
             "Event": {
@@ -3789,6 +4229,10 @@
                         ],
                         "readOnly": true
                     },
+                    "computed_status": {
+                        "type": "string",
+                        "readOnly": true
+                    },
                     "group_ids": {
                         "type": "array",
                         "items": {
@@ -3815,6 +4259,7 @@
                 "required": [
                     "attachments",
                     "audiences",
+                    "computed_status",
                     "created_by",
                     "end_at",
                     "id",
@@ -3897,6 +4342,31 @@
                     "photo_url"
                 ]
             },
+            "EventRSVPStatus": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/EventRSVPStatusStatusEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    }
+                }
+            },
+            "EventRSVPStatusStatusEnum": {
+                "enum": [
+                    "YES",
+                    "NO",
+                    "MAYBE"
+                ],
+                "type": "string",
+                "description": "* `YES` - Yes\n* `NO` - No\n* `MAYBE` - Maybe"
+            },
             "EventScopeEnum": {
                 "enum": [
                     "GLOBAL",
@@ -3908,10 +4378,67 @@
             "EventStatusEnum": {
                 "enum": [
                     "ACTIVE",
-                    "CANCELLED"
+                    "CANCELLED",
+                    "PAST"
                 ],
                 "type": "string",
-                "description": "* `ACTIVE` - Active\n* `CANCELLED` - Cancelled"
+                "description": "* `ACTIVE` - Active\n* `CANCELLED` - Cancelled\n* `PAST` - Past"
+            },
+            "EventsAnalytics": {
+                "type": "object",
+                "description": "Serializer for the events analytics endpoint.",
+                "properties": {
+                    "events_by_day": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "events_by_week": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "events_by_month": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "events_by_group": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "events_by_scope": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "events_by_day",
+                    "events_by_group",
+                    "events_by_month",
+                    "events_by_scope",
+                    "events_by_week"
+                ]
+            },
+            "FundraisingAnalytics": {
+                "type": "object",
+                "description": "Serializer for the fundraising analytics endpoint.",
+                "properties": {
+                    "fundraising_by_group": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "fundraising_by_event": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "fundraising_total": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "fundraising_by_event",
+                    "fundraising_by_group",
+                    "fundraising_total"
+                ]
             },
             "FundraisingEvent": {
                 "type": "object",
@@ -3951,9 +4478,8 @@
                     },
                     "grade_level": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": 0,
-                        "format": "int64"
+                        "maximum": 32767,
+                        "minimum": 0
                     },
                     "school_year": {
                         "type": "integer"
@@ -3984,15 +4510,34 @@
                     },
                     "grade_level": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": 0,
-                        "format": "int64"
+                        "maximum": 32767,
+                        "minimum": 0
                     }
                 },
                 "required": [
                     "grade_level",
                     "id",
                     "name"
+                ]
+            },
+            "GroupParticipation": {
+                "type": "object",
+                "description": "Serializer for group participation and complaints.",
+                "properties": {
+                    "group": {
+                        "type": "integer"
+                    },
+                    "complaints": {
+                        "type": "integer"
+                    },
+                    "participation": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "complaints",
+                    "group",
+                    "participation"
                 ]
             },
             "Homework": {
@@ -4047,10 +4592,13 @@
                     "survey",
                     "complaint",
                     "complaint_message",
+                    "homework",
+                    "fundraising",
+                    "chat",
                     "push"
                 ],
                 "type": "string",
-                "description": "* `event` - Eventos\n* `survey` - Encuestas\n* `complaint` - Quejas\n* `complaint_message` - Mensajes de queja\n* `push` - Push"
+                "description": "* `event` - Eventos\n* `survey` - Encuestas\n* `complaint` - Quejas\n* `complaint_message` - Mensajes de queja\n* `homework` - Tareas\n* `fundraising` - Recaudación\n* `chat` - Chat\n* `push` - Push"
             },
             "NotificationPreference": {
                 "type": "object",
@@ -4074,6 +4622,104 @@
             "NullEnum": {
                 "enum": [
                     null
+                ]
+            },
+            "OverviewAnalytics": {
+                "type": "object",
+                "description": "Serializer for the overview analytics endpoint.",
+                "properties": {
+                    "complaints_total": {
+                        "type": "integer"
+                    },
+                    "complaints_open": {
+                        "type": "integer"
+                    },
+                    "suggestions_total": {
+                        "type": "integer"
+                    },
+                    "complaints_by_group": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "fundraising_by_group": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "fundraising_by_event": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "fundraising_total": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "surveys_participation": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "surveys_participation_by_survey": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "suggestions_by_status": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "events_total": {
+                        "type": "integer"
+                    },
+                    "events_upcoming": {
+                        "type": "integer"
+                    },
+                    "events_cancelled": {
+                        "type": "integer"
+                    },
+                    "events_by_scope": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "rsvp_by_group": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "rsvp_attendance_rate_by_group": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "complaints_by_group",
+                    "complaints_open",
+                    "complaints_total",
+                    "events_by_scope",
+                    "events_cancelled",
+                    "events_total",
+                    "events_upcoming",
+                    "fundraising_by_event",
+                    "fundraising_by_group",
+                    "fundraising_total",
+                    "rsvp_attendance_rate_by_group",
+                    "rsvp_by_group",
+                    "suggestions_by_status",
+                    "suggestions_total",
+                    "surveys_participation",
+                    "surveys_participation_by_survey"
+                ]
+            },
+            "ParentComplaints": {
+                "type": "object",
+                "description": "Serializer for parent complaint totals.",
+                "properties": {
+                    "created_by": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "created_by",
+                    "total"
                 ]
             },
             "PatchedAnnouncement": {
@@ -4122,7 +4768,7 @@
                 "type": "object",
                 "properties": {
                     "status": {
-                        "$ref": "#/components/schemas/Status230Enum"
+                        "$ref": "#/components/schemas/Status337Enum"
                     }
                 }
             },
@@ -4165,6 +4811,10 @@
                                 "$ref": "#/components/schemas/EventStatusEnum"
                             }
                         ],
+                        "readOnly": true
+                    },
+                    "computed_status": {
+                        "type": "string",
                         "readOnly": true
                     },
                     "group_ids": {
@@ -4398,7 +5048,7 @@
                     "teacher"
                 ]
             },
-            "Status230Enum": {
+            "Status337Enum": {
                 "enum": [
                     "OPEN",
                     "IN_REVIEW",
@@ -4464,9 +5114,8 @@
                     },
                     "option_index": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": 0,
-                        "format": "int64"
+                        "maximum": 32767,
+                        "minimum": 0
                     }
                 },
                 "required": [
@@ -4527,10 +5176,12 @@
                     },
                     "first_name": {
                         "type": "string",
+                        "title": "Nombre",
                         "maxLength": 150
                     },
                     "last_name": {
                         "type": "string",
+                        "title": "Apellido",
                         "maxLength": 150
                     },
                     "email": {
@@ -4544,6 +5195,49 @@
                 },
                 "required": [
                     "email",
+                    "id",
+                    "role"
+                ]
+            },
+            "UserDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "title": "Nombre",
+                        "maxLength": 150
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "title": "Apellido",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/RoleEnum"
+                    },
+                    "ics_token": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "calendar_subscription_url": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "calendar_subscription_url",
+                    "email",
+                    "ics_token",
                     "id",
                     "role"
                 ]
