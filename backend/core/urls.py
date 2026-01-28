@@ -22,7 +22,7 @@ from .views import (
     AssignSpecialistView,
     VocalAssignmentCreateView,
     VocalAssignmentDeactivateView,
-    UserDetailView,
+    MeView,
     CurrentSchoolView,
     SchoolYearRolloverView,
     EventDetailView,
@@ -32,6 +32,7 @@ from .views import (
     HomeworkListCreateView,
     HomeworkDetailView,
     FeedView,
+    RegenerateICSTokenView,
 )
 
 api_docs_urlpatterns = [
@@ -44,7 +45,8 @@ api_docs_urlpatterns = [
 ]
 
 urlpatterns = [
-    path("me/", UserDetailView.as_view(), name="me"),
+    path("me/", MeView.as_view(), name="me"),
+    path("me/regenerate-ics/", RegenerateICSTokenView.as_view(), name="me-regenerate-ics"),
     path("schools/current/", CurrentSchoolView.as_view(), name="current-school"),
     path(
         "school-years/rollover/",

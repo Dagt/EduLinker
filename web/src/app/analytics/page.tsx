@@ -1,15 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
-import { getToken } from "@/lib/auth";
 import {
   getAnalytics,
   getComplaintsAnalytics,
   getFundraisingAnalytics,
   getEngagementAnalytics,
   getEventAttendanceAnalytics,
+  getMe,
 } from "@/lib/api";
-import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
 import KPICards from "./KPICards";
@@ -25,31 +24,44 @@ export default function AnalyticsPage() {
   const [fundraising, setFundraising] = useState<any>(null);
   const [engagement, setEngagement] = useState<any>(null);
   const [attendance, setAttendance] = useState<any>(null);
+  const [role, setRole] = useState<string>("");
   const { t } = useTranslation();
 
   useEffect(() => {
     (async () => {
       try {
-        const tk = getToken();
-        const [ov, comp, fund, eng, att] = await Promise.all([
-          getAnalytics(tk),
-          getComplaintsAnalytics(tk),
-          getFundraisingAnalytics(tk),
-          getEngagementAnalytics(undefined, tk),
-          getEventAttendanceAnalytics({}, tk),
-        ]);
-        setOverview(ov);
-        setComplaints(comp);
-        setFundraising(fund);
-        setEngagement(eng);
-        setAttendance(att);
+        const me = await getMe();
+        setRole(me.role);
+        if (me.role === "DIRECTOR") {
+          const [ov, comp, fund, eng, att] = await Promise.all([
+            getAnalytics(),
+            getComplaintsAnalytics(),
+            getFundraisingAnalytics(),
+            getEngagementAnalytics(),
+            getEventAttendanceAnalytics({}),
+          ]);
+          setOverview(ov);
+          setComplaints(comp);
+          setFundraising(fund);
+          setEngagement(eng);
+          setAttendance(att);
+        }
       } catch (err) {
         console.error(err);
       }
     })();
   }, []);
 
-  if (!requireRole(["director"])) return <p>{t("Analytics.unauthorized")}</p>;
+  if (role && role !== "DIRECTOR") {
+    return (
+      <>
+        <Nav />
+        <main style={{ padding: 16 }}>
+          <h2>{t("Analytics.header")}</h2>
+        </main>
+      </>
+    );
+  }
 
   const ready = overview && complaints && fundraising && engagement && attendance;
   const eventColors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
@@ -120,6 +132,10 @@ export default function AnalyticsPage() {
                 data={attendance.attendance_by_group}
                 title={t("Analytics.attendanceByGroup")}
               />
+              <section style={{ border: "1px solid #e5e7eb", padding: 16, borderRadius: 8 }}>
+                <h3>{t("Analytics.accessSettingsTitle")}</h3>
+                <p>{t("Analytics.accessSettingsDescription")}</p>
+              </section>
             </div>
           </>
         )}

@@ -11,6 +11,7 @@ const profile = {
   email: 'ana@example.com',
   role: 'DIRECTOR',
   ics_token: 'token-123',
+  preferred_language: 'es',
   calendar_subscription_url: 'https://example.com/api/v1/events/ics/?token=token-123&school_id=1',
 };
 

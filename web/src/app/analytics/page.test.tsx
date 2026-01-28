@@ -22,10 +22,9 @@ import {
   getFundraisingAnalytics,
   getEngagementAnalytics,
   getEventAttendanceAnalytics,
+  getMe,
 } from '@/lib/api';
 
-jest.mock('@/lib/auth', () => ({ getToken: () => 'token' }));
-jest.mock('@/lib/roles', () => ({ requireRole: () => true }));
 jest.mock('@/lib/api');
 
 const overview = { events_by_scope: [{ scope: 'GLOBAL', total: 3 }] };
@@ -49,9 +48,11 @@ describe('AnalyticsPage', () => {
     (getFundraisingAnalytics as jest.Mock).mockReset();
     (getEngagementAnalytics as jest.Mock).mockReset();
     (getEventAttendanceAnalytics as jest.Mock).mockReset();
+    (getMe as jest.Mock).mockReset();
   });
 
   it('renders KPIs and charts', async () => {
+    (getMe as jest.Mock).mockResolvedValue({ role: 'DIRECTOR' });
     (getAnalytics as jest.Mock).mockResolvedValue(overview);
     (getComplaintsAnalytics as jest.Mock).mockResolvedValue(complaints);
     (getFundraisingAnalytics as jest.Mock).mockResolvedValue(fundraising);
@@ -68,5 +69,13 @@ describe('AnalyticsPage', () => {
     expect(screen.getByText('3', { selector: 'strong' })).toBeInTheDocument();
     expect(screen.getByText('4', { selector: 'strong' })).toBeInTheDocument();
     expect(screen.getByText('5', { selector: 'strong' })).toBeInTheDocument();
+  });
+
+  it('hides analytics for non-director roles', async () => {
+    (getMe as jest.Mock).mockResolvedValue({ role: 'PARENT' });
+    render(<AnalyticsPage />);
+    expect(await screen.findByText('Analíticas')).toBeInTheDocument();
+    expect(screen.queryByText('Asistencia a eventos por grupo', { selector: 'h3' })).not.toBeInTheDocument();
+    expect(getAnalytics).not.toHaveBeenCalled();
   });
 });
