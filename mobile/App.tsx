@@ -14,6 +14,9 @@ import Fundraising from "./src/screens/Fundraising";
 import VocalAssignments from "./src/screens/VocalAssignments";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import EventAttendanceAnalytics from "./src/screens/EventAttendanceAnalytics";
+import AdminUsers from "./src/screens/AdminUsers";
+import AdminStudents from "./src/screens/AdminStudents";
+import AdminGroups from "./src/screens/AdminGroups";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
 import { getRole } from "./src/role";
@@ -30,7 +33,7 @@ if (process.env.NODE_ENV !== "test") {
 export default function App(){
   const [logged,setLogged]=useState(false);
   const [role,setRole]=useState("guest");
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events"|"vocalAssignments"|"profile"|"attendanceAnalytics">("feed");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events"|"vocalAssignments"|"profile"|"attendanceAnalytics"|"adminUsers"|"adminStudents"|"adminGroups">("feed");
 
   useEffect(()=>{ if(logged){ (async()=> setRole(await getRole()))(); } },[logged]);
 
@@ -60,6 +63,13 @@ export default function App(){
             {role==="DIRECTOR" && (
               <Button title={i18n.t('menu.attendanceAnalytics')} onPress={()=>setView("attendanceAnalytics")} />
             )}
+            {role==="DIRECTOR" && (
+              <>
+                <Button title={i18n.t('menu.adminUsers')} onPress={()=>setView("adminUsers")} />
+                <Button title={i18n.t('menu.adminStudents')} onPress={()=>setView("adminStudents")} />
+                <Button title={i18n.t('menu.adminGroups')} onPress={()=>setView("adminGroups")} />
+              </>
+            )}
           </View>
           {view==="feed" ? <Feed/> :
            view==="chat" ? <GroupChat/> :
@@ -74,6 +84,9 @@ export default function App(){
            view==="vocalAssignments" ? <VocalAssignments/> :
            view==="profile" ? <ProfileScreen/> :
            view==="attendanceAnalytics" ? <EventAttendanceAnalytics/> :
+           view==="adminUsers" ? <AdminUsers/> :
+           view==="adminStudents" ? <AdminStudents/> :
+           view==="adminGroups" ? <AdminGroups/> :
            <EventCalendar/>}
         </>
       ) : <Login onLoggedIn={()=>setLogged(true)}/> }

@@ -14,6 +14,11 @@ export const protectedRoutes: Record<string, string[]> = {
   "/groups/assign-homeroom": ["admin"],
   "/groups/assign-specialist": ["admin"],
   "/groups/assign-vocal": ["admin"],
+  "/users": ["admin"],
+  "/users/create": ["admin"],
+  "/students": ["admin"],
+  "/students/create": ["admin"],
+  "/students/edit": ["admin"],
   "/audit": ["director"],
 };
 
