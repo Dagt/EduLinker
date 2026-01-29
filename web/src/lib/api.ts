@@ -183,6 +183,86 @@ export async function changePassword(body: {
   return apiPost(`/auth/change-password/`, body, token);
 }
 
+export async function requestPasswordReset(body: { email: string }, token?: string) {
+  return apiPost(`/auth/password-reset/`, body, token);
+}
+
+export async function confirmPasswordReset(body: {
+  uid: string;
+  token: string;
+  new_password: string;
+}, token?: string) {
+  return apiPost(`/auth/password-reset/confirm/`, body, token);
+}
+
+export async function listUsers(
+  params: { name?: string; email?: string; status?: string; role?: string } = {},
+  token?: string,
+) {
+  const search = new URLSearchParams(params as Record<string, string>);
+  const query = search.toString();
+  return apiGet(`/users/${query ? `?${query}` : ""}`, token);
+}
+
+export async function createUser(body: any, token?: string) {
+  return apiPost(`/users/`, body, token);
+}
+
+export async function updateUserRole(
+  id: number,
+  body: { role?: string; is_active?: boolean },
+  token?: string,
+) {
+  return apiPatch(`/users/${id}/role/`, body, token);
+}
+
+export async function listStudents(
+  params: { name?: string; grade_level?: string } = {},
+  token?: string,
+) {
+  const search = new URLSearchParams(params as Record<string, string>);
+  const query = search.toString();
+  return apiGet(`/students/${query ? `?${query}` : ""}`, token);
+}
+
+export async function createStudent(body: any, token?: string) {
+  return apiPost(`/students/`, body, token);
+}
+
+export async function updateStudent(id: number, body: any, token?: string) {
+  return apiPatch(`/students/${id}/`, body, token);
+}
+
+export async function updateStudentGroups(
+  id: number,
+  body: { group_ids: number[]; replace_existing?: boolean; allow_multiple_groups?: boolean },
+  token?: string,
+) {
+  return apiPatch(`/students/${id}/groups/`, body, token);
+}
+
+export async function listAuditLogs(
+  params: {
+    actor?: string;
+    action?: string;
+    entity_type?: string;
+    date_from?: string;
+    date_to?: string;
+  } = {},
+  token?: string,
+) {
+  const search = new URLSearchParams(params as Record<string, string>);
+  const query = search.toString();
+  return apiGet(`/audit-logs/${query ? `?${query}` : ""}`, token);
+}
+
+export function getChatWebSocketUrl(groupId: number, token: string) {
+  const base = process.env.NEXT_PUBLIC_API_URL!.replace(/\/api\/v1\/?$/, "");
+  const wsBase = base.replace(/^http/, "ws");
+  const query = new URLSearchParams({ token }).toString();
+  return `${wsBase}/ws/groups/${groupId}/chat/?${query}`;
+}
+
 // Survey voting
 export async function voteSurvey(id: number, choiceId: number, token?: string) {
   return apiPost(`/surveys/${id}/vote`, { choiceId }, token);

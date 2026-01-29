@@ -7,6 +7,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   data: {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function AttendanceChart({ data, title }: Props) {
+  const { t } = useTranslation();
   return (
     <section>
       <h3>{title}</h3>
@@ -30,9 +32,9 @@ export default function AttendanceChart({ data, title }: Props) {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="attending_yes" stackId="a" fill="#22c55e" name="YES" />
-            <Bar dataKey="attending_maybe" stackId="a" fill="#fbbf24" name="MAYBE" />
-            <Bar dataKey="attending_no" stackId="a" fill="#ef4444" name="NO" />
+            <Bar dataKey="attending_yes" stackId="a" fill="#22c55e" name={t("Analytics.attendanceYes")} />
+            <Bar dataKey="attending_maybe" stackId="a" fill="#fbbf24" name={t("Analytics.attendingMaybe")} />
+            <Bar dataKey="attending_no" stackId="a" fill="#ef4444" name={t("Analytics.attendingNo")} />
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -13,3 +13,33 @@ a {
 * {
   box-sizing: border-box;
 }
+
+button {
+  background: #1f2937;
+  color: #fff;
+  border: 1px solid #111827;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+input,
+textarea,
+select {
+  border: 1px solid #6b7280;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}

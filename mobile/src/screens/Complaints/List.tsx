@@ -42,10 +42,10 @@ export default function ComplaintsList({ onSelect, refresh }: { onSelect: (item:
   return (
     <View style={{ padding: 16 }}>
       <Text style={{ fontSize: 18, marginBottom: 8 }}>{i18n.t('complaints.title')}</Text>
-      <TextInput placeholder="Group ID" value={groupId} onChangeText={setGroupId} />
-      <TextInput placeholder="Teacher ID" value={teacherId} onChangeText={setTeacherId} />
+      <TextInput placeholder={i18n.t('complaints.groupId')} value={groupId} onChangeText={setGroupId} />
+      <TextInput placeholder={i18n.t('complaints.teacherId')} value={teacherId} onChangeText={setTeacherId} />
       <TextInput placeholder={i18n.t('complaints.placeholder')} value={content} onChangeText={setContent} />
-      <TextInput placeholder="Student ID" value={aboutStudentId} onChangeText={setAboutStudentId} />
+      <TextInput placeholder={i18n.t('complaints.studentId')} value={aboutStudentId} onChangeText={setAboutStudentId} />
       <Button title={i18n.t('complaints.send')} onPress={submit} />
       <FlatList
         data={items}
@@ -58,4 +58,3 @@ export default function ComplaintsList({ onSelect, refresh }: { onSelect: (item:
     </View>
   );
 }
-

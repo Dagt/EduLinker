@@ -166,6 +166,14 @@ class StudentCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
+class StudentGroupUpdateSerializer(serializers.Serializer):
+    group_ids = serializers.ListField(
+        child=serializers.IntegerField(), allow_empty=True
+    )
+    replace_existing = serializers.BooleanField(default=True)
+    allow_multiple_groups = serializers.BooleanField(default=False)
+
+
 class ParentStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParentStudent

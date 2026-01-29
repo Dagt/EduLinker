@@ -29,6 +29,7 @@ from .views import (
     UserRoleUpdateView,
     StudentListCreateView,
     StudentDetailUpdateView,
+    StudentGroupUpdateView,
     ParentStudentListCreateView,
     ParentStudentDeleteView,
     EventDetailView,
@@ -58,6 +59,7 @@ urlpatterns = [
     path("users/<int:pk>/role/", UserRoleUpdateView.as_view(), name="user-role-update"),
     path("students/", StudentListCreateView.as_view(), name="student-list-create"),
     path("students/<int:pk>/", StudentDetailUpdateView.as_view(), name="student-detail-update"),
+    path("students/<int:pk>/groups/", StudentGroupUpdateView.as_view(), name="student-groups-update"),
     path("parent-students/", ParentStudentListCreateView.as_view(), name="parent-student-list-create"),
     path("parent-students/<int:pk>/", ParentStudentDeleteView.as_view(), name="parent-student-delete"),
     path(

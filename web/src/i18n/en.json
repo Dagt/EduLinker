@@ -11,7 +11,8 @@
   },
   "UploadButton": {
     "presignError": "Presign error",
-    "s3Error": "Upload error"
+    "s3Error": "Upload error",
+    "fileLabel": "Upload file"
   },
   "General": {
     "loading": "Loading..."
@@ -186,7 +187,8 @@
     "send": "Send",
     "createLink": "Create suggestion",
     "delete": "Delete",
-    "deleteConfirm": "Delete this suggestion?"
+    "deleteConfirm": "Delete this suggestion?",
+    "deleteAria": "Delete suggestion {{title}}"
   },
   "ComplaintCreate": {
     "header": "Create private complaint",
@@ -281,6 +283,8 @@
     "surveysParticipation": "Survey participation",
     "attendanceByGroup": "Event attendance by group",
     "attendanceYes": "Confirmed attendance",
+    "attendingMaybe": "Maybe attending",
+    "attendingNo": "Not attending",
     "accessSettingsTitle": "Analytics access settings",
     "accessSettingsDescription": "Directors control access to analytics. Future role permissions will appear here."
   },

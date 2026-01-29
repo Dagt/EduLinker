@@ -11,7 +11,8 @@
   },
   "UploadButton": {
     "presignError": "Error de presign",
-    "s3Error": "Error de S3"
+    "s3Error": "Error de S3",
+    "fileLabel": "Subir archivo"
   },
   "General": {
     "loading": "Cargando..."
@@ -186,7 +187,8 @@
     "send": "Enviar",
     "createLink": "Crear sugerencia",
     "delete": "Eliminar",
-    "deleteConfirm": "¿Eliminar esta sugerencia?"
+    "deleteConfirm": "¿Eliminar esta sugerencia?",
+    "deleteAria": "Eliminar sugerencia {{title}}"
   },
   "ComplaintCreate": {
     "header": "Crear queja privada",
@@ -281,6 +283,8 @@
     "surveysParticipation": "Participación en encuestas",
     "attendanceByGroup": "Asistencia a eventos por grupo",
     "attendanceYes": "Asistencia confirmada",
+    "attendingMaybe": "Quizá asista",
+    "attendingNo": "No asistirá",
     "accessSettingsTitle": "Configuración de acceso a analíticas",
     "accessSettingsDescription": "La dirección controla el acceso a analíticas. Los permisos futuros aparecerán aquí."
   },

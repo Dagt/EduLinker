@@ -52,23 +52,33 @@ export default function SuggestionsPage() {
           <Link href="/suggestions/create">{t("createLink")}</Link>
         </p>
         <form onSubmit={handleSubmit(onSubmit)}>
+          <label htmlFor="suggestion-title">{t("title")}</label>
           <input
+            id="suggestion-title"
             placeholder={t("title")}
             {...register("title", { required: true })}
+            aria-required="true"
             style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
           />
+          <label htmlFor="suggestion-description">{t("description")}</label>
           <textarea
+            id="suggestion-description"
             placeholder={t("description")}
             {...register("description")}
             style={{ display: "block", margin: "8px 0", padding: 8, width: "100%", minHeight: 120 }}
           />
-          <button>{t("send")}</button>
+          <button type="submit">{t("send")}</button>
         </form>
         <ul>
           {items.map((s) => (
             <li key={s.id}>
               <Link href={`/suggestions/${s.id}`}>{s.title}</Link>: {s.description}
-              <button onClick={() => handleDelete(s.id)} style={{ marginLeft: 8 }}>
+              <button
+                type="button"
+                onClick={() => handleDelete(s.id)}
+                style={{ marginLeft: 8 }}
+                aria-label={t("deleteAria", { title: s.title })}
+              >
                 {t("delete")}
               </button>
             </li>

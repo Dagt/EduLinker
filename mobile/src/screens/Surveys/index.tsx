@@ -45,14 +45,14 @@ export default function Surveys({ onCreate }: { onCreate?: () => void }){
         <Button title={i18n.t('surveys.create')} onPress={onCreate} />
       )}
       <FlatList data={items} keyExtractor={(x)=>String(x.id)}
-        ListEmptyComponent={<Text>No hay encuestas</Text>}
+        ListEmptyComponent={<Text>{i18n.t('surveys.none')}</Text>}
         renderItem={({item})=> {
           const active = isActive(item);
           return (
             <TouchableOpacity onPress={()=>setSelected({id:item.id, type: active ? 'vote' : 'results'})}>
               <Text>
                 - {item.title || item.name}
-                {!active ? " (cerrada)" : ""}
+                {!active ? ` ${i18n.t('surveys.closedSuffix')}` : ""}
               </Text>
             </TouchableOpacity>
           );

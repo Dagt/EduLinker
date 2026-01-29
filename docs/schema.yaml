@@ -254,6 +254,37 @@ paths:
   /api/v1/audit-logs/:
     get:
       operationId: v1_audit_logs_list
+      parameters:
+      - in: query
+        name: actor
+        schema:
+          type: string
+      - in: query
+        name: action
+        schema:
+          type: string
+      - in: query
+        name: entity_type
+        schema:
+          type: string
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
       tags:
       - v1
       security:
@@ -403,6 +434,27 @@ paths:
   /api/v1/complaints/:
     get:
       operationId: v1_complaints_list
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
       tags:
       - v1
       security:
@@ -589,6 +641,45 @@ paths:
   /api/v1/events/:
     get:
       operationId: v1_events_list
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+      - in: query
+        name: from
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: to
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: group_id
+        schema:
+          type: integer
+      - in: query
+        name: scope
+        schema:
+          type: string
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
       tags:
       - v1
       security:
@@ -1521,6 +1612,31 @@ paths:
   /api/v1/users/:
     get:
       operationId: v1_users_list
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+      - in: query
+        name: role
+        schema:
+          type: string
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
       tags:
       - v1
       security:
@@ -1580,6 +1696,23 @@ paths:
   /api/v1/students/:
     get:
       operationId: v1_students_list
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: grade_level
+        schema:
+          type: integer
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
       tags:
       - v1
       security:
@@ -1654,6 +1787,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Student'
+          description: ''
+  /api/v1/students/{id}/groups/:
+    patch:
+      operationId: v1_students_groups_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentGroupUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StudentGroupUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StudentGroupUpdate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentGroupUpdateResponse'
           description: ''
   /api/v1/parent-students/:
     get:
@@ -2121,14 +2286,55 @@ paths:
           description: No response body
   /api/v1/suggestions/:
     get:
-      operationId: v1_suggestions_retrieve
+      operationId: v1_suggestions_list
+      parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+      - in: query
+        name: group_id
+        schema:
+          type: integer
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
       tags:
       - v1
       security:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Suggestion'
+          description: ''
     post:
       operationId: v1_suggestions_create
       tags:
@@ -2137,7 +2343,11 @@ paths:
       - jwtAuth: []
       responses:
         '201':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Suggestion'
+          description: ''
   /api/v1/suggestions/{id}/:
     get:
       operationId: v1_suggestions_retrieve_2
@@ -3638,6 +3848,30 @@ components:
       - new_password
       - token
       - uid
+    StudentGroupUpdate:
+      type: object
+      properties:
+        group_ids:
+          type: array
+          items:
+            type: integer
+        replace_existing:
+          type: boolean
+          default: true
+        allow_multiple_groups:
+          type: boolean
+          default: false
+      required:
+      - group_ids
+    StudentGroupUpdateResponse:
+      type: object
+      properties:
+        student:
+          $ref: '#/components/schemas/Student'
+        group_ids:
+          type: array
+          items:
+            type: integer
     VocalAssignment:
       type: object
       properties:

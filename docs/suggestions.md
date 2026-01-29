@@ -17,6 +17,17 @@ Gestión de sugerencias y mensajes asociados para mejorar la comunidad escolar.
 - `POST /api/v1/suggestions/{id}/messages/` – Agrega un mensaje a la sugerencia.
 - `PATCH /api/v1/suggestions/{id}/status/` – Cambia el estado (`OPEN`, `IN_REVIEW`, `CLOSED`).
 
+## Filtros y búsqueda
+
+`GET /api/v1/suggestions/` acepta:
+
+- `name`: nombre/apellido del creador.
+- `email`: correo del creador.
+- `status`: estado.
+- `group_id`: filtra por grupo.
+- `date_from`, `date_to`: rango de fechas.
+- `page`, `page_size`: paginación.
+
 ## Ejemplos
 
 ### Crear una sugerencia
@@ -62,4 +73,3 @@ fetch('/api/v1/suggestions/', {
 
 `200 OK` – lista de sugerencias visibles para el usuario.  
 `403 Forbidden` – si el usuario no pertenece a la escuela.
-

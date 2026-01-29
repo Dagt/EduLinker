@@ -54,6 +54,20 @@
    `api` y `web`, configura los dominios en `ALLOWED_HOSTS`, `NEXT_PUBLIC_API_URL`
    y `EXPO_PUBLIC_DOMAIN`, y genera certificados HTTPS (por ejemplo con Let's Encrypt).
 
+### Django Channels en Docker
+
+Para chat en tiempo real usa un servidor ASGI y Redis:
+
+```bash
+# Backend
+ASGI_APPLICATION=edulinker.asgi.application
+CHANNEL_LAYER_BACKEND=channels_redis.core.RedisChannelLayer
+REDIS_URL=redis://redis:6379/1
+```
+
+Ejecuta `daphne`, `uvicorn` o `gunicorn` con worker ASGI en la imagen del backend,
+exponiendo el mismo puerto HTTP (por defecto 8000).
+
 ## Kubernetes
 
 1. Construye y publica las imágenes en tu registry:
@@ -91,6 +105,12 @@
 
 5. Configura HTTPS mediante el `Ingress` (p. ej. usando `cert-manager`) y
    apunta tus dominios a la IP del balanceador.
+
+### Django Channels en Kubernetes
+
+- Asegura que el Deployment del API ejecute un servidor ASGI.
+- Incluye `REDIS_URL` y `CHANNEL_LAYER_BACKEND` en el `ConfigMap/Secret`.
+- El Service debe exponer el puerto del ASGI server (normalmente 8000).
 
 ## Manual
 

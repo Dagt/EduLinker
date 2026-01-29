@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import { apiGet } from "../api";
 import { getRole } from "../role";
 import EventPhotoUploader from "../components/EventPhotoUploader";
+import i18n from "../i18n";
 
 interface EventItem {
   id: number;
@@ -28,8 +29,8 @@ export default function EventCalendar() {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
-          "Permiso necesario",
-          "Activa las notificaciones para recibir recordatorios"
+          i18n.t("events.permissionTitle"),
+          i18n.t("events.permissionMessage")
         );
         return;
       }
@@ -42,11 +43,11 @@ export default function EventCalendar() {
     }
   }
 
-  if (role === "guest") return <Text>No autorizado</Text>;
+  if (role === "guest") return <Text>{i18n.t("general.unauthorized")}</Text>;
 
   return (
     <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Calendario</Text>
+      <Text style={{ fontSize: 18, marginBottom: 8 }}>{i18n.t("events.title")}</Text>
       <FlatList
         data={events}
         keyExtractor={(x) => String(x.id)}
@@ -55,7 +56,11 @@ export default function EventCalendar() {
             <Text style={{ flex: 1 }}>
               - {item.title} ({item.start_at})
             </Text>
-            <Button title="Recordar" onPress={() => remind(item)} testID={`remind-${item.id}`} />
+            <Button
+              title={i18n.t("events.remind")}
+              onPress={() => remind(item)}
+              testID={`remind-${item.id}`}
+            />
             <EventPhotoUploader eventId={item.id} />
           </View>
         )}
@@ -63,4 +68,3 @@ export default function EventCalendar() {
     </View>
   );
 }
-

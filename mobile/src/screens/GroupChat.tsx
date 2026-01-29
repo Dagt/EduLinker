@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { apiGet, apiPost, uploadFile } from "../api";
+import i18n from "../i18n";
 
 interface Group {
   id: number;
@@ -31,7 +32,7 @@ export default function GroupChat() {
       const data = await apiGet(`/chats/${groupId}/messages/`);
       setMsgs(data);
     } catch (e: any) {
-      Alert.alert("Error", e.message || "No se pudo cargar");
+      Alert.alert(i18n.t("general.error"), e.message || i18n.t("chat.loadError"));
     }
   }
 
@@ -41,7 +42,10 @@ export default function GroupChat() {
       setGroups(data);
       if (data.length) setGroupId(data[0].id);
     } catch (e: any) {
-      Alert.alert("Error", e.message || "No se pudieron cargar los grupos");
+      Alert.alert(
+        i18n.t("general.error"),
+        e.message || i18n.t("chat.loadGroupsError")
+      );
     }
   }
 
@@ -57,7 +61,7 @@ export default function GroupChat() {
       );
       setAttachment(url);
     } catch (e: any) {
-      Alert.alert("Error", e.message || "No se pudo adjuntar");
+      Alert.alert(i18n.t("general.error"), e.message || i18n.t("chat.attachError"));
     }
   }
 
@@ -73,7 +77,7 @@ export default function GroupChat() {
       setAttachmentPreview(null);
       loadMessages();
     } catch (e: any) {
-      Alert.alert("Error", e.message || "No se pudo enviar");
+      Alert.alert(i18n.t("general.error"), e.message || i18n.t("chat.sendError"));
     }
   }
 
@@ -93,15 +97,15 @@ export default function GroupChat() {
   };
 
   const roleLabels: Record<string, string> = {
-    PADRE: "PADRE",
-    MAESTRO_TITULAR: "MAESTRO_TITULAR",
-    ADMIN: "ADMIN",
-    VOCAL: "VOCAL",
+    PADRE: i18n.t("roles.PADRE"),
+    MAESTRO_TITULAR: i18n.t("roles.MAESTRO_TITULAR"),
+    ADMIN: i18n.t("roles.ADMIN"),
+    VOCAL: i18n.t("roles.VOCAL"),
   };
 
   return (
     <View style={{ flex: 1, padding: 12 }}>
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Chat Grupo</Text>
+      <Text style={{ fontSize: 18, marginBottom: 8 }}>{i18n.t("chat.title")}</Text>
       <FlatList
         data={groups}
         horizontal
@@ -162,16 +166,15 @@ export default function GroupChat() {
         />
       )}
       <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-        <Button title="Adjuntar" onPress={pickAttachment} />
+        <Button title={i18n.t("chat.attach")} onPress={pickAttachment} />
         <TextInput
           value={text}
           onChangeText={setText}
-          placeholder="Escribe un mensaje"
+          placeholder={i18n.t("chat.messagePlaceholder")}
           style={{ flex: 1, borderWidth: 1, padding: 8 }}
         />
-        <Button title="Enviar" onPress={send} />
+        <Button title={i18n.t("chat.send")} onPress={send} />
       </View>
     </View>
   );
 }
-

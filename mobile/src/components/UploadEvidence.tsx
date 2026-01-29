@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Button, Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { createExpenseEvidence, uploadFile } from "../api";
+import i18n from "../i18n";
 
 interface Props {
   ledgerId: number;
@@ -74,15 +75,15 @@ export default function UploadEvidence({ ledgerId, groupId, amount, concept, onU
 
   return (
     <View>
-      <Button title="Tomar foto" onPress={takePhoto} />
-      <Button title="Seleccionar foto" onPress={pickImage} />
+      <Button title={i18n.t("uploads.takePhoto")} onPress={takePhoto} />
+      <Button title={i18n.t("uploads.selectPhoto")} onPress={pickImage} />
       {image && (
         <Image
           source={{ uri: image }}
           style={{ width: 200, height: 200, marginVertical: 8 }}
         />
       )}
-      {fileUrl && <Button title="Subir" onPress={upload} />}
+      {fileUrl && <Button title={i18n.t("uploads.upload")} onPress={upload} />}
     </View>
   );
 }

@@ -68,6 +68,10 @@ export async function apiPutAuth(path: string, body: any){
   return request(path, { method:"PUT", body: JSON.stringify(body) });
 }
 
+export async function apiPatchAuth(path: string, body: any){
+  return request(path, { method:"PATCH", body: JSON.stringify(body) });
+}
+
 export async function apiDeleteAuth(path: string){
   return request(path, { method: "DELETE" });
 }
@@ -100,8 +104,86 @@ export async function changePassword(body: {
   return apiPost("/auth/change-password/", body);
 }
 
+export async function requestPasswordReset(body: { email: string }){
+  return apiPost("/auth/password-reset/", body);
+}
+
+export async function confirmPasswordReset(body: {
+  uid: string;
+  token: string;
+  new_password: string;
+}){
+  return apiPost("/auth/password-reset/confirm/", body);
+}
+
 export async function updateNotificationPreferences(body: {[key: string]: boolean}){
   return apiPutAuth("/notifications/preferences/", body);
+}
+
+// Users API helpers
+export async function listUsers(params: {
+  name?: string;
+  email?: string;
+  status?: string;
+  role?: string;
+} = {}){
+  const search = new URLSearchParams(params as Record<string, string>);
+  const query = search.toString();
+  return apiGet(`/users/${query ? `?${query}` : ""}`);
+}
+
+export async function createUser(body: any){
+  return apiPost("/users/", body);
+}
+
+export async function updateUserRole(id: number, body: { role?: string; is_active?: boolean }){
+  return apiPatchAuth(`/users/${id}/role/`, body);
+}
+
+// Students API helpers
+export async function listStudents(params: {
+  name?: string;
+  grade_level?: string;
+} = {}){
+  const search = new URLSearchParams(params as Record<string, string>);
+  const query = search.toString();
+  return apiGet(`/students/${query ? `?${query}` : ""}`);
+}
+
+export async function createStudent(body: any){
+  return apiPost("/students/", body);
+}
+
+export async function updateStudent(id: number, body: any){
+  return apiPatchAuth(`/students/${id}/`, body);
+}
+
+export async function updateStudentGroups(
+  id: number,
+  body: { group_ids: number[]; replace_existing?: boolean; allow_multiple_groups?: boolean }
+){
+  return apiPatchAuth(`/students/${id}/groups/`, body);
+}
+
+// Audit logs API helpers
+export async function listAuditLogs(params: {
+  actor?: string;
+  action?: string;
+  entity_type?: string;
+  date_from?: string;
+  date_to?: string;
+} = {}){
+  const search = new URLSearchParams(params as Record<string, string>);
+  const query = search.toString();
+  return apiGet(`/audit-logs/${query ? `?${query}` : ""}`);
+}
+
+export async function getChatWebSocketUrl(groupId: number, token: string){
+  const base = getApiUrl()
+    .replace(/\/api\/v1\/?$/, "")
+    .replace(/^http/, "ws");
+  const query = new URLSearchParams({ token }).toString();
+  return `${base}/ws/groups/${groupId}/chat/?${query}`;
 }
 
 // Complaints API helpers

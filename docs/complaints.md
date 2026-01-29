@@ -18,6 +18,15 @@ Gestión de quejas privadas entre padres, docentes y dirección.
 - `POST /api/v1/complaints/{id}/participants/` – Agrega un participante a la queja.
 - `PATCH /api/v1/complaints/{id}/status/` – Cambia el estado (`OPEN`, `IN_REVIEW`, `ESCALATED`, `RESOLVED`, `CLOSED`).
 
+## Filtros y búsqueda
+
+`GET /api/v1/complaints/` acepta:
+
+- `name`: nombre/apellido del creador.
+- `email`: correo del creador.
+- `status`: estado.
+- `page`, `page_size`: paginación.
+
 ## Ejemplos
 
 ### Crear una queja

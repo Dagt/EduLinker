@@ -86,9 +86,9 @@ export default function EventDetail({ eventId }: Props) {
       <View style={{ marginTop: 16 }}>
         <Text>{i18n.t('eventDetail.rsvp')}</Text>
         <Text>{rsvp || i18n.t('eventDetail.no_rsvp')}</Text>
-        <Button title="Yes" onPress={() => sendRsvp('YES')} testID="rsvp-yes" />
-        <Button title="No" onPress={() => sendRsvp('NO')} testID="rsvp-no" />
-        <Button title="Maybe" onPress={() => sendRsvp('MAYBE')} testID="rsvp-maybe" />
+        <Button title={i18n.t('eventDetail.rsvpYes')} onPress={() => sendRsvp('YES')} testID="rsvp-yes" />
+        <Button title={i18n.t('eventDetail.rsvpNo')} onPress={() => sendRsvp('NO')} testID="rsvp-no" />
+        <Button title={i18n.t('eventDetail.rsvpMaybe')} onPress={() => sendRsvp('MAYBE')} testID="rsvp-maybe" />
       </View>
       <FlatList
         data={photos}
