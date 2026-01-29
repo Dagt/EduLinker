@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
+import RequireRole from "@/components/RequireRole";
 import { apiGet } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
 
@@ -51,12 +51,10 @@ export default function AuditPage() {
     load();
   }, [page, actor, actionFilter, entityType, dateFrom, dateTo, t]);
 
-  if (!requireRole(["director"])) return <p>{t("AuditLogs.unauthorized")}</p>;
-
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <>
+    <RequireRole allowed={["director"]}>
       <Nav />
       <main style={{ padding: 16 }}>
         <h2>{t("AuditLogs.header")}</h2>
@@ -140,7 +138,6 @@ export default function AuditPage() {
           </button>
         </div>
       </main>
-    </>
+    </RequireRole>
   );
 }
-

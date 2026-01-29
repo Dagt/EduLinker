@@ -2,7 +2,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { setToken, setRefreshToken } from "@/lib/auth";
+import { getMe } from "@/lib/api";
+import { setUserRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
+import Link from "next/link";
 import "@/i18n";
 
 type FormData = { email: string; password: string };
@@ -24,6 +27,10 @@ export default function Login(){
     const data = await res.json();
     setToken(data.access);
     if(data.refresh) setRefreshToken(data.refresh);
+    try {
+      const me = await getMe(data.access);
+      if (me?.role) setUserRole(me.role);
+    } catch {}
     location.href = "/dashboard";
   }
 
@@ -48,6 +55,9 @@ export default function Login(){
         />
         {errors.password && <p style={{color:"red"}}>{errors.password.message as string}</p>}
         <button style={{padding:10, width:"100%"}}>{t("Login.login")}</button>
+        <p style={{ marginTop: 8 }}>
+          <Link href="/reset-password/request">{t("Login.resetPassword")}</Link>
+        </p>
         {error && <p style={{color:"red"}}>{error}</p>}
       </form>
     </main>

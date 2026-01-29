@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
+import RequireRole from "@/components/RequireRole";
 import { apiGet } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
 import Link from "next/link";
@@ -27,14 +27,12 @@ export default function GroupList() {
     load();
   }, []);
 
-  if (!requireRole(["admin"])) return <p>{t("GroupList.unauthorized")}</p>;
-
   const visibleGroups = groups.filter((group) =>
     group.name?.toLowerCase().includes(filter.toLowerCase())
   );
 
   return (
-    <>
+    <RequireRole allowed={["admin", "director"]}>
       <Nav />
       <main style={{ padding: 16 }}>
         <h2>{t("GroupList.header")}</h2>
@@ -50,10 +48,12 @@ export default function GroupList() {
         {error && <p>{error}</p>}
         <ul>
           {visibleGroups.map((g) => (
-            <li key={g.id}>{g.name}</li>
+            <li key={g.id}>
+              <Link href={`/groups/${g.id}`}>{g.name}</Link>
+            </li>
           ))}
         </ul>
       </main>
-    </>
+    </RequireRole>
   );
 }

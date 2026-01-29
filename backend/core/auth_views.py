@@ -15,7 +15,11 @@ from .serializers import (
 )
 from .models import User
 
-from .throttles import LoginThrottle
+from .throttles import (
+    LoginThrottle,
+    PasswordResetRequestThrottle,
+    PasswordResetConfirmThrottle,
+)
 
 
 class LoginView(TokenObtainPairView):
@@ -44,6 +48,7 @@ class ChangePasswordView(APIView):
 
 class PasswordResetRequestView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [PasswordResetRequestThrottle]
 
     def post(self, request, *args, **kwargs):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -71,6 +76,7 @@ class PasswordResetRequestView(APIView):
 
 class PasswordResetConfirmView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [PasswordResetConfirmThrottle]
 
     def post(self, request, *args, **kwargs):
         serializer = PasswordResetConfirmSerializer(data=request.data)

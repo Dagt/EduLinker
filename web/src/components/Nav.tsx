@@ -19,9 +19,10 @@ export default function Nav() {
     { href: "/surveys", label: t("Nav.surveys") },
     { href: "/fundraising", label: t("Nav.fundraising") },
     requireRole(["director"]) ? { href: "/analytics", label: t("Nav.analytics") } : null,
-    requireRole(["admin"]) ? { href: "/users", label: t("Nav.users") } : null,
-    requireRole(["admin"]) ? { href: "/students", label: t("Nav.students") } : null,
-    requireRole(["admin"]) ? { href: "/groups", label: t("Nav.groups") } : null,
+    requireRole(["admin", "director"]) ? { href: "/users", label: t("Nav.users") } : null,
+    requireRole(["admin", "director"]) ? { href: "/students", label: t("Nav.students") } : null,
+    requireRole(["admin", "director"]) ? { href: "/groups", label: t("Nav.groups") } : null,
+    requireRole(["admin", "director"]) ? { href: "/parent-students", label: t("Nav.parentStudents") } : null,
     { href: "/profile", label: t("Nav.profile") },
   ].filter(Boolean) as { href: string; label: string }[];
   return (

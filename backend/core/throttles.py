@@ -5,6 +5,14 @@ class LoginThrottle(AnonRateThrottle):
     scope = 'login'
 
 
+class PasswordResetRequestThrottle(AnonRateThrottle):
+    scope = 'password_reset_request'
+
+
+class PasswordResetConfirmThrottle(AnonRateThrottle):
+    scope = 'password_reset_confirm'
+
+
 class ComplaintCreateThrottle(UserRateThrottle):
     scope = 'complaint'
 

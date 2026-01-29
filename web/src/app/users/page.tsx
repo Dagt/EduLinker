@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
+import RequireRole from "@/components/RequireRole";
 import { getToken } from "@/lib/auth";
 import { listUsers, updateUserRole } from "@/lib/api";
-import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
 import Link from "next/link";
@@ -61,8 +61,6 @@ export default function UserList() {
     load();
   }, []);
 
-  if (!requireRole(["admin"])) return <p>{t("UserList.unauthorized")}</p>;
-
   async function submitFilters(e: React.FormEvent) {
     e.preventDefault();
     await load();
@@ -85,7 +83,7 @@ export default function UserList() {
   }
 
   return (
-    <>
+    <RequireRole allowed={["admin", "director"]}>
       <Nav />
       <main style={{ padding: 16 }}>
         <h2>{t("UserList.header")}</h2>
@@ -194,6 +192,6 @@ export default function UserList() {
           </tbody>
         </table>
       </main>
-    </>
+    </RequireRole>
   );
 }

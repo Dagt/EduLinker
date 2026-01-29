@@ -17,6 +17,9 @@ import EventAttendanceAnalytics from "./src/screens/EventAttendanceAnalytics";
 import AdminUsers from "./src/screens/AdminUsers";
 import AdminStudents from "./src/screens/AdminStudents";
 import AdminGroups from "./src/screens/AdminGroups";
+import AdminParentStudents from "./src/screens/AdminParentStudents";
+import GroupDetail from "./src/screens/GroupDetail";
+import ResetPassword from "./src/screens/ResetPassword";
 import { View, Button } from "react-native";
 import i18n from "./src/i18n";
 import { getRole } from "./src/role";
@@ -33,7 +36,7 @@ if (process.env.NODE_ENV !== "test") {
 export default function App(){
   const [logged,setLogged]=useState(false);
   const [role,setRole]=useState("guest");
-  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events"|"vocalAssignments"|"profile"|"attendanceAnalytics"|"adminUsers"|"adminStudents"|"adminGroups">("feed");
+  const [view,setView]=useState<"feed"|"chat"|"complaints"|"suggestions"|"homeworks"|"createHomework"|"createAnnouncement"|"surveys"|"createSurvey"|"fundraising"|"events"|"vocalAssignments"|"profile"|"attendanceAnalytics"|"adminUsers"|"adminStudents"|"adminGroups"|"adminParentStudents"|"groupDetail"|"resetPassword">("feed");
 
   useEffect(()=>{ if(logged){ (async()=> setRole(await getRole()))(); } },[logged]);
 
@@ -56,18 +59,20 @@ export default function App(){
             <Button title={i18n.t('menu.surveys')} onPress={()=>setView("surveys")} />
             <Button title={i18n.t('menu.fundraising')} onPress={()=>setView("fundraising")} />
             <Button title={i18n.t('menu.events')} onPress={()=>setView("events")} />
-            {(role==="MAESTRO_TITULAR"||role==="DIRECTOR") && (
+            {(role==="MAESTRO_TITULAR"||role==="DIRECTOR"||role==="ADMIN_TENANT") && (
               <Button title={i18n.t('menu.vocalAssignments')} onPress={()=>setView("vocalAssignments")} />
             )}
             <Button title={i18n.t('menu.profile')} onPress={()=>setView("profile")} />
-            {role==="DIRECTOR" && (
+            {(role==="DIRECTOR"||role==="ADMIN_TENANT") && (
               <Button title={i18n.t('menu.attendanceAnalytics')} onPress={()=>setView("attendanceAnalytics")} />
             )}
-            {role==="DIRECTOR" && (
+            {(role==="DIRECTOR"||role==="ADMIN_TENANT") && (
               <>
                 <Button title={i18n.t('menu.adminUsers')} onPress={()=>setView("adminUsers")} />
                 <Button title={i18n.t('menu.adminStudents')} onPress={()=>setView("adminStudents")} />
                 <Button title={i18n.t('menu.adminGroups')} onPress={()=>setView("adminGroups")} />
+                <Button title={i18n.t('menu.adminParentStudents')} onPress={()=>setView("adminParentStudents")} />
+                <Button title={i18n.t('menu.groupDetail')} onPress={()=>setView("groupDetail")} />
               </>
             )}
           </View>
@@ -87,9 +92,11 @@ export default function App(){
            view==="adminUsers" ? <AdminUsers/> :
            view==="adminStudents" ? <AdminStudents/> :
            view==="adminGroups" ? <AdminGroups/> :
+           view==="adminParentStudents" ? <AdminParentStudents/> :
+           view==="groupDetail" ? <GroupDetail/> :
            <EventCalendar/>}
         </>
-      ) : <Login onLoggedIn={()=>setLogged(true)}/> }
+      ) : view==="resetPassword" ? <ResetPassword/> : <Login onLoggedIn={()=>setLogged(true)} onResetPassword={() => setView("resetPassword")} /> }
     </View>
   );
 }

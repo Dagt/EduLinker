@@ -229,6 +229,45 @@ class UserRoleUpdateView(generics.UpdateAPIView):
         )
 
 
+class UserDeactivateView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdminTenant]
+
+    def post(self, request, *args, **kwargs):
+        if request.user.school_id != request.school_id:
+            raise PermissionDenied("Invalid school")
+        user = get_object_or_404(User, pk=self.kwargs["pk"], school_id=request.school_id)
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+        AuditLog.objects.create(
+            school_id=request.school_id,
+            actor=request.user,
+            action="deactivate",
+            entity_type="user",
+            entity_id=user.id,
+        )
+        return Response({"detail": "User deactivated"}, status=status.HTTP_200_OK)
+
+
+class UserAnonymizeView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdminTenant]
+
+    def post(self, request, *args, **kwargs):
+        if request.user.school_id != request.school_id:
+            raise PermissionDenied("Invalid school")
+        user = get_object_or_404(User, pk=self.kwargs["pk"], school_id=request.school_id)
+        user.anonymize()
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+        AuditLog.objects.create(
+            school_id=request.school_id,
+            actor=request.user,
+            action="anonymize",
+            entity_type="user",
+            entity_id=user.id,
+        )
+        return Response({"detail": "User anonymized"}, status=status.HTTP_200_OK)
+
+
 class StudentListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsDirector]
     pagination_class = DefaultPagination
@@ -473,6 +512,14 @@ class GroupListView(generics.ListAPIView):
         )
 
 
+class GroupDetailView(generics.RetrieveAPIView):
+    serializer_class = GroupSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Group.objects.filter(school_id=self.request.school_id)
+
+
 class GroupCreateView(generics.CreateAPIView):
     serializer_class = GroupCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -600,12 +647,51 @@ class GroupMembersView(generics.GenericAPIView):
                 children_relations__student__memberships__group=group
             ).distinct()
         )
+        specialists = User.objects.filter(
+            specialist_assignments__group=group
+        ).distinct()
+        homeroom_teacher = None
+        if group.homeroom_teacher_id:
+            homeroom_teacher = User.objects.filter(
+                id=group.homeroom_teacher_id
+            ).first()
         return Response(
             {
                 "students": StudentSerializer(students, many=True).data,
                 "parents": UserSerializer(parents, many=True).data,
+                "teachers": {
+                    "homeroom": UserSerializer(homeroom_teacher).data if homeroom_teacher else None,
+                    "specialists": UserSerializer(specialists, many=True).data,
+                },
             }
         )
+
+
+class GroupVocalsView(generics.ListAPIView):
+    serializer_class = VocalAssignmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        group = get_object_or_404(
+            Group, pk=self.kwargs["pk"], school_id=self.request.school_id
+        )
+        user = self.request.user
+        allowed = False
+        if is_director(user):
+            allowed = True
+        elif group.homeroom_teacher_id == user.id:
+            allowed = True
+        elif SpecialistAssignment.objects.filter(group=group, teacher=user).exists():
+            allowed = True
+        elif VocalAssignment.objects.filter(
+            group=group, parent=user, active=True
+        ).exists():
+            allowed = True
+        if not allowed:
+            raise PermissionDenied("Not allowed to view vocal assignments")
+        return VocalAssignment.objects.filter(
+            school_id=self.request.school_id, group=group
+        ).order_by("-start_at")
 
 
 class ComplaintCreateView(generics.ListCreateAPIView):
