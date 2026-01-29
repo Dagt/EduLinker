@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime, parse_date
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -15,8 +16,8 @@ from drf_spectacular.utils import extend_schema
 from notifications.tasks import push_to_users
 
 from audit.models import AuditLog
-from audit.serializers import AuditLogSerializer
 from core.pagination import DefaultPagination
+from core.filters import ComplaintFilter, EventFilter, StudentFilter, UserFilter
 
 from .models import (
     Announcement,
@@ -75,6 +76,7 @@ from .serializers import (
     UserRoleUpdateSerializer,
     StudentSerializer,
     StudentCreateSerializer,
+    StudentGroupUpdateSerializer,
     ParentStudentSerializer,
 )
 from .throttles import ComplaintCreateThrottle, EventCreateThrottle
@@ -164,55 +166,11 @@ class RegenerateICSTokenView(APIView):
         )
 
 
-class AuditLogListView(generics.ListAPIView):
-    serializer_class = AuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated, IsDirector]
-    pagination_class = DefaultPagination
-
-    def get_queryset(self):
-        if self.request.user.school_id != self.request.school_id:
-            raise PermissionDenied("Invalid school")
-
-        qs = AuditLog.objects.filter(school_id=self.request.school_id)
-        actor = self.request.query_params.get("actor")
-        action = self.request.query_params.get("action")
-        entity_type = self.request.query_params.get("entity_type")
-        date_from = self.request.query_params.get("date_from")
-        date_to = self.request.query_params.get("date_to")
-
-        if actor:
-            actor_filter = Q(actor__username__icontains=actor) | Q(
-                actor__email__icontains=actor
-            )
-            try:
-                actor_id = int(actor)
-                actor_filter |= Q(actor__id=actor_id)
-            except (TypeError, ValueError):
-                pass
-            qs = qs.filter(actor_filter)
-
-        if action:
-            qs = qs.filter(action__icontains=action)
-
-        if entity_type:
-            qs = qs.filter(entity_type__icontains=entity_type)
-
-        if date_from:
-            start = parse_datetime(date_from) or parse_date(date_from)
-            if start:
-                qs = qs.filter(created_at__gte=start)
-
-        if date_to:
-            end = parse_datetime(date_to) or parse_date(date_to)
-            if end:
-                qs = qs.filter(created_at__lte=end)
-
-        return qs
-
-
 class UserListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsDirector]
     pagination_class = DefaultPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserFilter
 
     def get_queryset(self):
         if self.request.user.school_id != self.request.school_id:
@@ -274,6 +232,8 @@ class UserRoleUpdateView(generics.UpdateAPIView):
 class StudentListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsDirector]
     pagination_class = DefaultPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StudentFilter
 
     def get_queryset(self):
         if self.request.user.school_id != self.request.school_id:
@@ -328,6 +288,100 @@ class StudentDetailUpdateView(generics.RetrieveUpdateAPIView):
             action="update",
             entity_type="student",
             entity_id=student.id,
+        )
+
+
+class StudentGroupUpdateView(generics.UpdateAPIView):
+    serializer_class = StudentGroupUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        return Student.objects.filter(school_id=self.request.school_id)
+
+    def _validate_school_year_constraints(self, groups, allow_multiple):
+        if allow_multiple:
+            return
+        seen_years = {}
+        for group in groups:
+            if not group.school_year_id:
+                continue
+            if group.school_year_id in seen_years:
+                raise PermissionDenied(
+                    "Student already assigned to a group in this school year"
+                )
+            seen_years[group.school_year_id] = group.id
+
+    def update(self, request, *args, **kwargs):
+        student = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        group_ids = serializer.validated_data.get("group_ids", [])
+        replace_existing = serializer.validated_data.get("replace_existing", True)
+        allow_multiple = serializer.validated_data.get("allow_multiple_groups", False)
+
+        groups = list(
+            Group.objects.filter(id__in=group_ids, school_id=request.school_id)
+        )
+        if len(groups) != len(set(group_ids)):
+            raise PermissionDenied("Group mismatch for school")
+
+        existing_memberships = GroupMembership.objects.filter(
+            student=student, school_id=request.school_id
+        )
+        existing_group_ids = set(existing_memberships.values_list("group_id", flat=True))
+        target_group_ids = set(group_ids)
+
+        if replace_existing:
+            combined_groups = groups
+        else:
+            combined_groups = list(
+                Group.objects.filter(
+                    id__in=existing_group_ids, school_id=request.school_id
+                )
+            ) + groups
+        self._validate_school_year_constraints(combined_groups, allow_multiple)
+
+        if replace_existing:
+            existing_memberships.exclude(group_id__in=target_group_ids).delete()
+        new_group_ids = target_group_ids - existing_group_ids
+        if new_group_ids:
+            GroupMembership.objects.bulk_create(
+                [
+                    GroupMembership(
+                        school_id=request.school_id,
+                        student=student,
+                        group_id=group_id,
+                    )
+                    for group_id in new_group_ids
+                ]
+            )
+
+        final_group_ids = set(
+            GroupMembership.objects.filter(
+                student=student, school_id=request.school_id
+            ).values_list("group_id", flat=True)
+        )
+        AuditLog.objects.create(
+            school_id=request.school_id,
+            actor=request.user,
+            action="group_update",
+            entity_type="student",
+            entity_id=student.id,
+            metadata={
+                "from_groups": sorted(existing_group_ids),
+                "to_groups": sorted(final_group_ids),
+                "replace_existing": replace_existing,
+                "allow_multiple_groups": allow_multiple,
+            },
+        )
+        return Response(
+            {
+                "student": StudentSerializer(student).data,
+                "group_ids": sorted(final_group_ids),
+            },
+            status=status.HTTP_200_OK,
         )
 
 
@@ -559,6 +613,8 @@ class ComplaintCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [ComplaintCreateThrottle]
     pagination_class = DefaultPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ComplaintFilter
 
     def get_queryset(self):
         if self.request.user.school_id != self.request.school_id:
@@ -725,6 +781,8 @@ class EventListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [EventCreateThrottle]
     pagination_class = DefaultPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = EventFilter
 
     def get_queryset(self):
         user = self.request.user

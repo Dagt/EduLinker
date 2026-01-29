@@ -10,6 +10,7 @@ from .serializers import AuditLogSerializer
 from core.permissions import IsDirector
 from core.pagination import DefaultPagination
 
+
 class AuditLogListView(generics.ListAPIView):
     serializer_class = AuditLogSerializer
     permission_classes = [permissions.IsAuthenticated, IsDirector]

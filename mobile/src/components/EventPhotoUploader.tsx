@@ -1,6 +1,7 @@
 import { Alert, Button } from 'react-native';
 import { postEventPhoto } from '../api';
 import { pickAndUpload } from '../services/uploads';
+import i18n from '../i18n';
 
 interface Props {
   eventId: number;
@@ -13,11 +14,15 @@ export default function EventPhotoUploader({ eventId }: Props) {
       if (!url) return;
       await postEventPhoto(eventId, { photo_url: url });
     } catch (e) {
-      Alert.alert('Error', 'No se pudo subir la imagen');
+      Alert.alert(i18n.t('general.error'), i18n.t('uploads.uploadFailed'));
     }
   }
 
   return (
-    <Button title="Subir Foto" onPress={handle} testID={`photo-${eventId}`} />
+    <Button
+      title={i18n.t('uploads.uploadPhoto')}
+      onPress={handle}
+      testID={`photo-${eventId}`}
+    />
   );
 }

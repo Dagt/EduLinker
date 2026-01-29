@@ -13,6 +13,18 @@ Endpoints para gestionar eventos del calendario.
 - `POST /api/v1/events/<id>/photos/` – Agrega una foto al evento.
 - `GET /api/v1/events/ics/` – Exporta los eventos como calendario ICS.
 
+## Filtros y búsqueda
+
+`GET /api/v1/events/` acepta:
+
+- `name`: título o nombre del creador.
+- `email`: correo del creador.
+- `status`: `ACTIVE`, `CANCELLED`, `PAST`.
+- `from`, `to`: rango de fechas (ISO).
+- `group_id`: filtra por grupo.
+- `scope`: `GLOBAL` o `GROUP`.
+- `page`, `page_size`: paginación.
+
 ## Exportación mediante token
 
 Cada usuario dispone de un `ics_token` único generado al crearse. Este token

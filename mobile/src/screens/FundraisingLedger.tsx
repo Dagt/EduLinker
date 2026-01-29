@@ -42,32 +42,31 @@ export default function FundraisingLedger(){
   };
 
   if(role!=="treasurer" && role!=="admin") return <Text>{i18n.t('general.unauthorized')}</Text>;
-  if(loading) return <Text>Loading...</Text>;
+  if(loading) return <Text>{i18n.t('general.loading')}</Text>;
   if(error) return <Text>{i18n.t('general.error')}</Text>;
 
   if(selected){
     return (
       <View style={{padding:16}}>
         <Text style={{fontSize:18, marginBottom:8}}>{selected.group__name}</Text>
-        <Text>Total: {selected.total}</Text>
-        <Button title="Back" onPress={()=>setSelected(null)} />
+        <Text>{i18n.t("fundraising.total")}: {selected.total}</Text>
+        <Button title={i18n.t("general.back")} onPress={()=>setSelected(null)} />
       </View>
     );
   }
 
   return (
     <View style={{padding:16}}>
-      <Text style={{fontSize:18, marginBottom:8}}>Fundraising Ledger</Text>
-      <TextInput placeholder="Event ID" value={eventId} onChangeText={setEventId} />
-      <TextInput placeholder="Group ID" value={groupId} onChangeText={setGroupId} />
-      <TextInput placeholder="Amount" value={amount} onChangeText={setAmount} />
-      <Button title="Add" onPress={submit} />
+      <Text style={{fontSize:18, marginBottom:8}}>{i18n.t("fundraising.ledgerTitle")}</Text>
+      <TextInput placeholder={i18n.t("fundraising.eventId")} value={eventId} onChangeText={setEventId} />
+      <TextInput placeholder={i18n.t("fundraising.groupId")} value={groupId} onChangeText={setGroupId} />
+      <TextInput placeholder={i18n.t("fundraising.amount")} value={amount} onChangeText={setAmount} />
+      <Button title={i18n.t("fundraising.add")} onPress={submit} />
       <FlatList data={items} keyExtractor={(_,i)=>String(i)}
-        ListEmptyComponent={<Text>No items</Text>}
+        ListEmptyComponent={<Text>{i18n.t("general.noItems")}</Text>}
         renderItem={({item})=> (
           <Text onPress={()=>setSelected(item)}>- {item.group__name}: {item.total}</Text>
         )} />
     </View>
   );
 }
-

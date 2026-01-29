@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Button, Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { apiPostAuth } from "../api";
+import i18n from "../i18n";
 
 interface Props {
   onPhoto?: (url: string) => void;
@@ -34,7 +35,7 @@ export default function PhotoPicker({ onPhoto }: Props) {
       );
       fd.append("Content-Type", asset.mimeType || "image/jpeg");
       const s3Res = await fetch(upload.url, { method: "POST", body: fd });
-      if (!s3Res.ok) throw new Error("Upload failed");
+      if (!s3Res.ok) throw new Error(i18n.t("uploads.uploadFailed"));
       onPhoto && onPhoto(file_url);
     } catch (e) {
       console.error(e);
@@ -67,8 +68,8 @@ export default function PhotoPicker({ onPhoto }: Props) {
 
   return (
     <View>
-      <Button title="Tomar foto" onPress={takePhoto} />
-      <Button title="Seleccionar foto" onPress={pickImage} />
+      <Button title={i18n.t("uploads.takePhoto")} onPress={takePhoto} />
+      <Button title={i18n.t("uploads.selectPhoto")} onPress={pickImage} />
       {image && (
         <Image
           source={{ uri: image }}
@@ -78,4 +79,3 @@ export default function PhotoPicker({ onPhoto }: Props) {
     </View>
   );
 }
-

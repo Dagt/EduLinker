@@ -41,6 +41,17 @@ escuela (`school_id`) enviado mediante el encabezado `X-SCHOOL-ID`.
 - Los endpoints de usuarios, alumnos y relaciones padre-alumno siempre
   filtran por `school_id` y validan que los registros pertenezcan a la misma
   escuela, evitando fugas de información entre instituciones.
+- La actualización de membresías de alumnos (`/students/{id}/groups/`) está
+  restringida a **DIRECTOR** y **ADMIN_TENANT**.
+- Los logs de auditoría (`/audit-logs/`) están limitados a **DIRECTOR** y
+  **ADMIN_TENANT**.
+- Los endpoints de grupos para asignar titulares, especialistas o vocales
+  requieren **DIRECTOR** o **ADMIN_TENANT**. El listado de miembros del grupo
+  permite además al maestro titular, especialistas asignados y vocales activos.
+- El cambio de rol/estado de usuario (`/users/{id}/role/`) es exclusivo de
+  **ADMIN_TENANT**; los directores sólo pueden listar/crear usuarios.
+- Los endpoints de restablecimiento/cambio de contraseña están disponibles
+  para el usuario autenticado o el flujo de recuperación por correo.
 
 Estas normas garantizan que cada usuario interactúe únicamente con la
 información de su propia institución y según las responsabilidades de su rol.

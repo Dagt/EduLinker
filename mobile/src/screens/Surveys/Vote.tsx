@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, Button } from "react-native";
 import { getSurvey, voteSurvey, getSurveyResults } from "../../api";
+import i18n from "../../i18n";
 
 type Props = { surveyId: number; onBack?: () => void };
 
@@ -22,32 +23,32 @@ export default function SurveyVote({ surveyId, onBack }: Props){
   }
 
   async function vote(idx: number){
-    if(!isActive()){ setMsg("Encuesta no activa"); return; }
-    if(hasVoted){ setMsg("Ya votaste"); return; }
+    if(!isActive()){ setMsg(i18n.t("surveys.inactive")); return; }
+    if(hasVoted){ setMsg(i18n.t("surveys.alreadyVoted")); return; }
     try{
       await voteSurvey(surveyId, idx);
       setHasVoted(true);
-      setMsg("Voto registrado");
+      setMsg(i18n.t("surveys.voteRecorded"));
       const res = await getSurveyResults(surveyId);
       setResults(res.results || {});
-    }catch(err:any){ setMsg(err.message || "Error"); }
+    }catch(err:any){ setMsg(err.message || i18n.t("general.error")); }
   }
 
-  if(!survey) return <Text>Cargando...</Text>;
+  if(!survey) return <Text>{i18n.t("general.loading")}</Text>;
   const active = isActive();
 
   return (
     <View style={{padding:16}}>
-      {onBack ? <Button title="Volver" onPress={onBack} /> : null}
+      {onBack ? <Button title={i18n.t("general.back")} onPress={onBack} /> : null}
       <Text style={{fontSize:18, marginBottom:8}}>{survey.title}</Text>
-      {!active && <Text style={{marginBottom:8}}>Encuesta no activa</Text>}
+      {!active && <Text style={{marginBottom:8}}>{i18n.t("surveys.inactive")}</Text>}
       {survey.options.map((opt:string, idx:number)=>(
         <Button key={idx} title={opt} onPress={()=>vote(idx)} disabled={!active} />
       ))}
       {msg? <Text>{msg}</Text>: null}
       {Object.keys(results).length>0 && (
         <View style={{marginTop:16}}>
-          <Text>Resultados:</Text>
+          <Text>{i18n.t("surveys.resultsLabel")}</Text>
           {survey.options.map((opt:string, idx:number)=>(
             <Text key={idx}>{opt}: {results[String(idx)] || 0}</Text>
           ))}

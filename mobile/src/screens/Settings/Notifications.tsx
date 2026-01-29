@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { View, Text, Switch } from "react-native";
 import { apiGet, apiPostAuth, apiPutAuth } from "../../api";
+import i18n from "../../i18n";
 
 interface Pref { id?: number; enabled: boolean }
 
 const CHANNELS = [
-  { kind: "event", label: "Eventos" },
-  { kind: "survey", label: "Encuestas" },
-  { kind: "complaint", label: "Quejas" },
-  { kind: "complaint_message", label: "Mensajes de queja" },
+  { kind: "event", label: i18n.t("notificationSettings.event") },
+  { kind: "survey", label: i18n.t("notificationSettings.survey") },
+  { kind: "complaint", label: i18n.t("notificationSettings.complaint") },
+  { kind: "complaint_message", label: i18n.t("notificationSettings.complaintMessage") },
 ];
 
 export default function Notifications(){

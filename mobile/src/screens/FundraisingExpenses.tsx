@@ -40,7 +40,7 @@ export default function FundraisingExpenses(){
       await postActivityPhoto({ photo_url: url });
       setFileUrl(url);
     }catch{
-      Alert.alert("Error", "No se pudo subir la imagen");
+      Alert.alert(i18n.t("general.error"), i18n.t("uploads.uploadFailed"));
     }
   };
 
@@ -59,36 +59,35 @@ export default function FundraisingExpenses(){
   };
 
   if(role!=="treasurer" && role!=="admin") return <Text>{i18n.t('general.unauthorized')}</Text>;
-  if(loading) return <Text>Loading...</Text>;
+  if(loading) return <Text>{i18n.t("general.loading")}</Text>;
   if(error) return <Text>{i18n.t('general.error')}</Text>;
 
   if(selected){
     return (
       <View style={{padding:16}}>
         <Text style={{fontSize:18, marginBottom:8}}>{selected.concept}</Text>
-        <Text>Amount: {selected.amount}</Text>
-        <Text>File: {selected.file_url}</Text>
-        <Button title="Back" onPress={()=>setSelected(null)} />
+        <Text>{i18n.t("fundraising.amount")}: {selected.amount}</Text>
+        <Text>{i18n.t("fundraising.file")}: {selected.file_url}</Text>
+        <Button title={i18n.t("general.back")} onPress={()=>setSelected(null)} />
       </View>
     );
   }
 
   return (
     <View style={{padding:16}}>
-      <Text style={{fontSize:18, marginBottom:8}}>Fundraising Expenses</Text>
-      <TextInput placeholder="Event ID" value={eventId} onChangeText={setEventId} />
-      <TextInput placeholder="Ledger ID" value={ledgerId} onChangeText={setLedgerId} />
-      <TextInput placeholder="Concept" value={concept} onChangeText={setConcept} />
-      <TextInput placeholder="Amount" value={amount} onChangeText={setAmount} />
-      <Button title="Pick Photo" onPress={pick} />
-      {fileUrl ? <Text>File: {fileUrl}</Text> : null}
-      <Button title="Add" onPress={submit} />
+      <Text style={{fontSize:18, marginBottom:8}}>{i18n.t("fundraising.expensesTitle")}</Text>
+      <TextInput placeholder={i18n.t("fundraising.eventId")} value={eventId} onChangeText={setEventId} />
+      <TextInput placeholder={i18n.t("fundraising.ledgerId")} value={ledgerId} onChangeText={setLedgerId} />
+      <TextInput placeholder={i18n.t("fundraising.concept")} value={concept} onChangeText={setConcept} />
+      <TextInput placeholder={i18n.t("fundraising.amount")} value={amount} onChangeText={setAmount} />
+      <Button title={i18n.t("uploads.pickPhoto")} onPress={pick} />
+      {fileUrl ? <Text>{i18n.t("fundraising.file")}: {fileUrl}</Text> : null}
+      <Button title={i18n.t("fundraising.add")} onPress={submit} />
       <FlatList data={items} keyExtractor={(_,i)=>String(i)}
-        ListEmptyComponent={<Text>No items</Text>}
+        ListEmptyComponent={<Text>{i18n.t("general.noItems")}</Text>}
         renderItem={({item})=>(
           <Text onPress={()=>setSelected(item)}>- {item.concept}: {item.amount}</Text>
         )} />
     </View>
   );
 }
-

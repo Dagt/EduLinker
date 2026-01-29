@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, FlatList, Button, Alert } from "react-native";
 import { apiGet, postActivityPhoto } from "../../api";
 import { pickAndUpload } from "../../services/uploads";
+import i18n from "../../i18n";
 
 export default function Homeworks(){
   const [items, setItems] = useState<any[]>([]);
@@ -13,19 +14,19 @@ export default function Homeworks(){
       if(!url) return;
       await postActivityPhoto({ homework: homework.id, photo_url: url });
     }catch{
-      Alert.alert("Error", "No se pudo subir la imagen");
+      Alert.alert(i18n.t("general.error"), i18n.t("uploads.uploadFailed"));
     }
   };
 
   return (
     <View style={{padding:16}}>
-      <Text style={{fontSize:18, marginBottom:8}}>Tareas</Text>
+      <Text style={{fontSize:18, marginBottom:8}}>{i18n.t("homeworks.title")}</Text>
       <FlatList data={items} keyExtractor={(x)=>String(x.id)}
-        ListEmptyComponent={<Text>No hay tareas</Text>}
+        ListEmptyComponent={<Text>{i18n.t("homeworks.none")}</Text>}
         renderItem={({item})=> (
           <View style={{marginBottom:8}}>
             <Text>- {item.title || item.name}</Text>
-            <Button title="Subir evidencia" onPress={() => upload(item)} />
+            <Button title={i18n.t("homeworks.uploadEvidence")} onPress={() => upload(item)} />
           </View>
         )} />
     </View>

@@ -3,8 +3,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from django.utils.dateparse import parse_date, parse_datetime
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Suggestion, SuggestionMessage
+from .filters import SuggestionFilter
 from .serializers import (
     SuggestionSerializer,
     SuggestionMessageSerializer,
@@ -22,6 +24,8 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
     serializer_class = SuggestionSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = DefaultPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SuggestionFilter
 
     def get_queryset(self):
         if self.request.user.school_id != self.request.school_id:

@@ -48,5 +48,11 @@ export default function UploadButton({ onUploaded }: Props) {
     (e.target as HTMLInputElement).value = "";
   }
 
-  return <input type="file" onChange={handle} />;
+  return (
+    <input
+      type="file"
+      onChange={handle}
+      aria-label={t("UploadButton.fileLabel")}
+    />
+  );
 }
