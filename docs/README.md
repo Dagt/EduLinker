@@ -15,6 +15,7 @@ Guías y referencias para los distintos módulos de EduLinker.
 - [Notifications API](notifications.md)
 - [Permissions Overview](permissions.md)
 - [Seeds de datos](seeds.md)
+- [Política de privacidad](privacy_policy.md)
 - [Suggestions API](suggestions.md)
 - [Surveys API](surveys.md)
 - [Casos de uso](use_cases.md)
