@@ -9,6 +9,9 @@ Todas las vistas de lista usan paginación por número de página.
 
 ## Filtros disponibles
 
+- **Usuarios** (`/api/v1/users/`): `name`, `email`, `status`, `role`.
+- **Alumnos** (`/api/v1/students/`): `name`, `grade_level`.
+- **Grupos** (`/api/v1/groups/`): `grade_level` (cuando aplique en el backend).
 - **Quejas** (`/api/v1/complaints/`): `status`.
 - **Eventos** (`/api/v1/events/`): `from`, `to`, `group_id`, `scope`.
 - **Sugerencias** (`/api/v1/suggestions/`): `status`, `date_from`, `date_to`, `group_id`.
