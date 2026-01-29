@@ -102,6 +102,20 @@ python backend/manage.py seed_demo
 python backend/manage.py runserver
 ```
 
+### Channels (WebSocket)
+
+Para habilitar chat en tiempo real:
+
+- Configura `ASGI_APPLICATION=edulinker.asgi.application`.
+- Provee un backend para `CHANNEL_LAYERS` (recomendado Redis):
+
+```bash
+export CHANNEL_LAYER_BACKEND=channels_redis.core.RedisChannelLayer
+export REDIS_URL=redis://localhost:6379/1
+```
+
+Ejecuta el servidor ASGI con un worker compatible (por ejemplo, `uvicorn` o `daphne`).
+
 ### Web
 ```bash
 cd web

@@ -27,6 +27,7 @@ from .serializers import (
 )
 from core.throttles import EventCreateThrottle
 from core.models import SchoolYear, Group, VocalAssignment
+from core.pagination import DefaultPagination
 
 
 def _user_group_ids(user, school_id):
@@ -46,6 +47,7 @@ class FundraisingEventListCreateView(generics.ListCreateAPIView):
     serializer_class = FundraisingEventSerializer
     permission_classes = [permissions.IsAuthenticated, IsDirector]
     throttle_classes = [EventCreateThrottle]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         return FundraisingEvent.objects.filter(school_id=self.request.school_id)
@@ -172,6 +174,7 @@ class FundraisingEventExportView(APIView):
 class FundraisingLedgerListCreateView(generics.ListCreateAPIView):
     serializer_class = FundraisingGroupLedgerSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         group_ids = _user_group_ids(self.request.user, self.request.school_id)
@@ -226,6 +229,7 @@ class FundraisingLedgerDetailView(generics.RetrieveUpdateDestroyAPIView):
 class ExpenseEvidenceListCreateView(generics.ListCreateAPIView):
     serializer_class = ExpenseEvidenceSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         group_ids = _user_group_ids(self.request.user, self.request.school_id)

@@ -30,6 +30,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 SHARED_APPS = [
     'django_tenants',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -90,6 +91,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'edulinker.wsgi.application'
+ASGI_APPLICATION = 'edulinker.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": os.getenv(
+            "CHANNEL_LAYER_BACKEND", "channels.layers.InMemoryChannelLayer"
+        ),
+        "CONFIG": {
+            "hosts": [os.getenv("REDIS_URL", "redis://localhost:6379/1")],
+        },
+    }
+}
 
 # Celery (dev)
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
@@ -156,6 +169,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'core.pagination.DefaultPagination',
+    'PAGE_SIZE': 20,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.UserRateThrottle',
@@ -238,4 +253,3 @@ LOGGING = {
         "level": "INFO",
     },
 }
-

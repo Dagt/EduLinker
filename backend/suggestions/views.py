@@ -2,6 +2,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
+from django.utils.dateparse import parse_date, parse_datetime
 
 from .models import Suggestion, SuggestionMessage
 from .serializers import (
@@ -15,10 +16,12 @@ from core.permissions import (
     can_update_suggestion_status,
     is_director,
 )
+from core.pagination import DefaultPagination
 
 class SuggestionListCreateView(generics.ListCreateAPIView):
     serializer_class = SuggestionSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         if self.request.user.school_id != self.request.school_id:
@@ -34,6 +37,19 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
         group_id = self.request.query_params.get("group_id")
         if group_id:
             qs = qs.filter(group_id=group_id)
+        status_filter = self.request.query_params.get("status")
+        date_from = self.request.query_params.get("date_from")
+        date_to = self.request.query_params.get("date_to")
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        if date_from:
+            start = parse_datetime(date_from) or parse_date(date_from)
+            if start:
+                qs = qs.filter(created_at__gte=start)
+        if date_to:
+            end = parse_datetime(date_to) or parse_date(date_to)
+            if end:
+                qs = qs.filter(created_at__lte=end)
         return qs
 
     def perform_create(self, serializer):

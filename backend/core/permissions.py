@@ -229,6 +229,13 @@ class IsDirector(BasePermission):
         return is_director(user) or is_admin_tenant(user)
 
 
+class IsAdminTenant(BasePermission):
+    """Allow access only to admin tenant users."""
+
+    def has_permission(self, request, view):
+        return is_admin_tenant(request.user)
+
+
 class IsDirectorOrReadOnly(BasePermission):
     """Allow directors to modify objects; others have read-only access."""
 
@@ -292,4 +299,3 @@ class CanAccessComplaint(BasePermission):
             return True
 
         return False
-

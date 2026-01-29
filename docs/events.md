@@ -26,6 +26,9 @@ El valor del token puede consultarse en el endpoint `/api/v1/me/` y debe
 mantenerse privado. El link de suscripción tiene acceso completo al calendario
 del usuario.
 
+Para instrucciones de suscripción en Google Calendar y Outlook revisa
+`docs/calendars.md`.
+
 ## RSVP
 
 El RSVP permite que padres y maestros confirmen su asistencia. El endpoint
