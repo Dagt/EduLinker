@@ -17,10 +17,15 @@ jest.mock('recharts', () => {
 jest.mock('next/navigation', () => ({
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams({ id: '1' }),
+  useParams: () => ({ id: '1' }),
 }));
 jest.mock('@/lib/api');
 jest.mock('@/lib/auth', () => ({ getToken: () => 'token' }));
 jest.mock('@/lib/roles', () => ({ requireRole: () => true }));
+jest.mock('@/components/RequireRole', () => ({
+  __esModule: true,
+  default: ({ children }: any) => children,
+}));
 
 import ComplaintCreate from './complaints/create/page';
 import ComplaintThread from './complaints/[id]/page';
@@ -47,11 +52,16 @@ import GroupEdit from './groups/edit/page';
 import AssignHomeroom from './groups/assign-homeroom/page';
 import AssignSpecialist from './groups/assign-specialist/page';
 import AssignVocal from './groups/assign-vocal/page';
+import GroupDetail from './groups/[id]/page';
 import UserList from './users/page';
 import UserCreate from './users/create/page';
 import StudentList from './students/page';
 import StudentCreate from './students/create/page';
 import StudentEdit from './students/edit/page';
+import ParentStudents from './parent-students/page';
+import ParentStudentCreate from './parent-students/create/page';
+import ResetPasswordRequest from './reset-password/request/page';
+import ResetPasswordConfirm from './reset-password/confirm/page';
 import {
   apiGet,
   getAnalytics,
@@ -59,6 +69,12 @@ import {
   getFundraisingAnalytics,
   getEngagementAnalytics,
   listFundraisingEvents,
+  getGroup,
+  listGroupMembers,
+  listGroupVocals,
+  listUsers,
+  listParentStudents,
+  listStudents,
 } from '@/lib/api';
 
 beforeAll(() => {
@@ -76,6 +92,12 @@ describe('internationalized pages render', () => {
     (getComplaintsAnalytics as jest.Mock).mockReset();
     (getFundraisingAnalytics as jest.Mock).mockReset();
     (getEngagementAnalytics as jest.Mock).mockReset();
+    (getGroup as jest.Mock).mockReset();
+    (listGroupMembers as jest.Mock).mockReset();
+    (listGroupVocals as jest.Mock).mockReset();
+    (listUsers as jest.Mock).mockReset();
+    (listParentStudents as jest.Mock).mockReset();
+    (listStudents as jest.Mock).mockReset();
   });
 
   it('renders ComplaintCreate', () => {
@@ -248,5 +270,39 @@ describe('internationalized pages render', () => {
   it('renders AssignVocal', () => {
     render(<AssignVocal />);
     expect(screen.getByRole('heading', { name: 'Asignar vocal' })).toBeInTheDocument();
+  });
+
+  it('renders GroupDetail', async () => {
+    (getGroup as jest.Mock).mockResolvedValue({ id: 1, name: '5A', grade_level: 5, homeroom_teacher: null });
+    (listGroupMembers as jest.Mock).mockResolvedValue({ students: [], parents: [], teachers: { homeroom: null, specialists: [] } });
+    (listGroupVocals as jest.Mock).mockResolvedValue([]);
+    (listUsers as jest.Mock).mockResolvedValue([]);
+    render(<GroupDetail />);
+    expect(await screen.findByText('Detalle del grupo')).toBeInTheDocument();
+  });
+
+  it('renders ParentStudents', async () => {
+    (listUsers as jest.Mock).mockResolvedValue([]);
+    (listParentStudents as jest.Mock).mockResolvedValue([]);
+    (listStudents as jest.Mock).mockResolvedValue([]);
+    render(<ParentStudents />);
+    expect(await screen.findByRole('heading', { name: 'Vínculos padre-alumno' })).toBeInTheDocument();
+  });
+
+  it('renders ParentStudentCreate', () => {
+    (listUsers as jest.Mock).mockResolvedValue([]);
+    (listStudents as jest.Mock).mockResolvedValue([]);
+    render(<ParentStudentCreate />);
+    expect(screen.getByRole('heading', { name: 'Crear vínculo padre-alumno' })).toBeInTheDocument();
+  });
+
+  it('renders ResetPasswordRequest', () => {
+    render(<ResetPasswordRequest />);
+    expect(screen.getByRole('heading', { name: 'Restablecer contraseña' })).toBeInTheDocument();
+  });
+
+  it('renders ResetPasswordConfirm', () => {
+    render(<ResetPasswordConfirm />);
+    expect(screen.getByRole('heading', { name: 'Definir nueva contraseña' })).toBeInTheDocument();
   });
 });

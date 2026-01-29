@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import Nav from "@/components/Nav";
+import RequireRole from "@/components/RequireRole";
 import { createStudent } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
 
@@ -16,8 +16,6 @@ export default function StudentCreate() {
     enrollment_code: "",
   });
   const [msg, setMsg] = useState("");
-
-  if (!requireRole(["admin"])) return <p>{t("StudentCreate.unauthorized")}</p>;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,7 +37,7 @@ export default function StudentCreate() {
   }
 
   return (
-    <>
+    <RequireRole allowed={["admin", "director"]}>
       <Nav />
       <main style={{ padding: 16 }}>
         <h2>{t("StudentCreate.header")}</h2>
@@ -72,6 +70,6 @@ export default function StudentCreate() {
         </form>
         {msg && <p>{msg}</p>}
       </main>
-    </>
+    </RequireRole>
   );
 }

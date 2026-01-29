@@ -165,6 +165,38 @@ export async function updateStudentGroups(
   return apiPatchAuth(`/students/${id}/groups/`, body);
 }
 
+export async function listParentStudents(){
+  return apiGet("/parent-students/");
+}
+
+export async function createParentStudent(body: { parent: number; student: number; relationship: string }){
+  return apiPost("/parent-students/", body);
+}
+
+export async function deleteParentStudent(id: number){
+  return apiDeleteAuth(`/parent-students/${id}/`);
+}
+
+export async function getGroup(id: number){
+  return apiGet(`/groups/${id}/`);
+}
+
+export async function listGroupMembers(id: number){
+  return apiGet(`/groups/${id}/members/`);
+}
+
+export async function listGroupVocals(id: number){
+  return apiGet(`/groups/${id}/vocals/`);
+}
+
+export async function assignHomeroom(groupId: number, teacherId: number){
+  return apiPatchAuth(`/groups/${groupId}/assign-homeroom-teacher/`, { homeroom_teacher: teacherId });
+}
+
+export async function assignSpecialist(groupId: number, body: { teacher: number; subject: string }){
+  return apiPost(`/groups/${groupId}/assign-specialist/`, body);
+}
+
 // Audit logs API helpers
 export async function listAuditLogs(params: {
   actor?: string;

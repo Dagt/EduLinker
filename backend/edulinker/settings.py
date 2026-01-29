@@ -184,6 +184,8 @@ REST_FRAMEWORK = {
         'user': '1000/day',
         'anon': '100/day',
         'login': '5/min',
+        'password_reset_request': '5/hour',
+        'password_reset_confirm': '5/hour',
         'complaint': '20/day',
         'survey': '50/day',
         'chat': '60/min',

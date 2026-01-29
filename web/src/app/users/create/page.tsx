@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import Nav from "@/components/Nav";
+import RequireRole from "@/components/RequireRole";
 import { createUser } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
 
@@ -17,8 +17,6 @@ export default function UserCreate() {
     password: "",
   });
   const [msg, setMsg] = useState("");
-
-  if (!requireRole(["admin"])) return <p>{t("UserCreate.unauthorized")}</p>;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,7 +32,7 @@ export default function UserCreate() {
   }
 
   return (
-    <>
+    <RequireRole allowed={["admin", "director"]}>
       <Nav />
       <main style={{ padding: 16 }}>
         <h2>{t("UserCreate.header")}</h2>
@@ -80,6 +78,6 @@ export default function UserCreate() {
         </form>
         {msg && <p>{msg}</p>}
       </main>
-    </>
+    </RequireRole>
   );
 }

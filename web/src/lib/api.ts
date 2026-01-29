@@ -241,6 +241,67 @@ export async function updateStudentGroups(
   return apiPatch(`/students/${id}/groups/`, body, token);
 }
 
+export async function listParentStudents(
+  params: { parent?: string; student?: string; relationship?: string } = {},
+  token?: string,
+) {
+  const search = new URLSearchParams(params as Record<string, string>);
+  const query = search.toString();
+  return apiGet(`/parent-students/${query ? `?${query}` : ""}`, token);
+}
+
+export async function createParentStudent(body: {
+  parent: number;
+  student: number;
+  relationship: string;
+}, token?: string) {
+  return apiPost(`/parent-students/`, body, token);
+}
+
+export async function deleteParentStudent(id: number, token?: string) {
+  return apiDelete(`/parent-students/${id}/`, token);
+}
+
+export async function getGroup(id: number, token?: string) {
+  return apiGet(`/groups/${id}/`, token);
+}
+
+export async function listGroupMembers(id: number, token?: string) {
+  return apiGet(`/groups/${id}/members/`, token);
+}
+
+export async function listGroupVocals(id: number, token?: string) {
+  return apiGet(`/groups/${id}/vocals/`, token);
+}
+
+export async function assignHomeroom(
+  groupId: number,
+  teacherId: number,
+  token?: string,
+) {
+  return apiPatch(`/groups/${groupId}/assign-homeroom-teacher/`, { homeroom_teacher: teacherId }, token);
+}
+
+export async function assignSpecialist(
+  groupId: number,
+  body: { teacher: number; subject: string },
+  token?: string,
+) {
+  return apiPost(`/groups/${groupId}/assign-specialist/`, body, token);
+}
+
+export async function assignVocal(
+  groupId: number,
+  parentId: number,
+  token?: string,
+) {
+  return apiPost(`/groups/vocal-assignments/`, { group: groupId, parent: parentId }, token);
+}
+
+export async function deactivateVocal(id: number, token?: string) {
+  return apiPost(`/groups/vocal-assignments/${id}/deactivate/`, {}, token);
+}
+
 export async function listAuditLogs(
   params: {
     actor?: string;

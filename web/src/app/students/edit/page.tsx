@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Nav from "@/components/Nav";
+import RequireRole from "@/components/RequireRole";
 import { apiGet, updateStudent } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { requireRole } from "@/lib/roles";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
 
@@ -39,8 +39,6 @@ export default function StudentEdit() {
     load();
   }, [id]);
 
-  if (!requireRole(["admin"])) return <p>{t("StudentEdit.unauthorized")}</p>;
-
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!id) return;
@@ -64,7 +62,7 @@ export default function StudentEdit() {
   }
 
   return (
-    <>
+    <RequireRole allowed={["admin", "director"]}>
       <Nav />
       <main style={{ padding: 16 }}>
         <h2>{t("StudentEdit.header")}</h2>
@@ -101,6 +99,6 @@ export default function StudentEdit() {
         )}
         {msg && <p>{msg}</p>}
       </main>
-    </>
+    </RequireRole>
   );
 }
