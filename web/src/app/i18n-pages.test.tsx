@@ -14,6 +14,10 @@ jest.mock('recharts', () => {
     Cell: Mock,
   };
 });
+jest.mock('next/navigation', () => ({
+  usePathname: () => '/',
+  useSearchParams: () => new URLSearchParams({ id: '1' }),
+}));
 jest.mock('@/lib/api');
 jest.mock('@/lib/auth', () => ({ getToken: () => 'token' }));
 jest.mock('@/lib/roles', () => ({ requireRole: () => true }));
@@ -43,6 +47,11 @@ import GroupEdit from './groups/edit/page';
 import AssignHomeroom from './groups/assign-homeroom/page';
 import AssignSpecialist from './groups/assign-specialist/page';
 import AssignVocal from './groups/assign-vocal/page';
+import UserList from './users/page';
+import UserCreate from './users/create/page';
+import StudentList from './students/page';
+import StudentCreate from './students/create/page';
+import StudentEdit from './students/edit/page';
 import {
   apiGet,
   getAnalytics,
@@ -198,6 +207,34 @@ describe('internationalized pages render', () => {
     expect(screen.getByRole('heading', { name: 'Editar grupo' })).toBeInTheDocument();
   });
 
+  it('renders UserList', async () => {
+    (apiGet as jest.Mock).mockResolvedValue({ results: [] });
+    render(<UserList />);
+    expect(await screen.findByRole('heading', { name: 'Gestión de usuarios' })).toBeInTheDocument();
+  });
+
+  it('renders UserCreate', () => {
+    render(<UserCreate />);
+    expect(screen.getByRole('heading', { name: 'Crear usuario' })).toBeInTheDocument();
+  });
+
+  it('renders StudentList', async () => {
+    (apiGet as jest.Mock).mockResolvedValue({ results: [] });
+    render(<StudentList />);
+    expect(await screen.findByRole('heading', { name: 'Gestión de alumnos' })).toBeInTheDocument();
+  });
+
+  it('renders StudentCreate', () => {
+    render(<StudentCreate />);
+    expect(screen.getByRole('heading', { name: 'Crear alumno' })).toBeInTheDocument();
+  });
+
+  it('renders StudentEdit', () => {
+    (apiGet as jest.Mock).mockResolvedValue({ first_name: 'Ana', last_name: 'Lopez', grade_level: 5, enrollment_code: 'E1' });
+    render(<StudentEdit />);
+    expect(screen.getByRole('heading', { name: 'Editar alumno' })).toBeInTheDocument();
+  });
+
   it('renders AssignHomeroom', () => {
     render(<AssignHomeroom />);
     expect(screen.getByRole('heading', { name: 'Asignar maestro titular' })).toBeInTheDocument();
@@ -213,4 +250,3 @@ describe('internationalized pages render', () => {
     expect(screen.getByRole('heading', { name: 'Asignar vocal' })).toBeInTheDocument();
   });
 });
-
