@@ -321,6 +321,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenRefresh'
           description: ''
+  /api/v1/auth/password-reset/:
+    post:
+      operationId: v1_auth_password_reset_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: ''
+  /api/v1/auth/password-reset/confirm/:
+    post:
+      operationId: v1_auth_password_reset_confirm_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+      responses:
+        '200':
+          description: ''
   /api/v1/chats/{group_id}/messages/:
     get:
       operationId: v1_chats_messages_list
@@ -1492,6 +1518,193 @@ paths:
               schema:
                 $ref: '#/components/schemas/VocalAssignment'
           description: ''
+  /api/v1/users/:
+    get:
+      operationId: v1_users_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: v1_users_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/users/{id}/role/:
+    patch:
+      operationId: v1_users_role_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/students/:
+    get:
+      operationId: v1_students_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+          description: ''
+    post:
+      operationId: v1_students_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentCreate'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+          description: ''
+  /api/v1/students/{id}/:
+    get:
+      operationId: v1_students_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+          description: ''
+    put:
+      operationId: v1_students_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+          description: ''
+  /api/v1/parent-students/:
+    get:
+      operationId: v1_parent_students_list
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParentStudent'
+          description: ''
+    post:
+      operationId: v1_parent_students_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParentStudent'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentStudent'
+          description: ''
+  /api/v1/parent-students/{id}/:
+    delete:
+      operationId: v1_parent_students_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     patch:
       operationId: v1_groups_vocal_assignments_deactivate_partial_update
       parameters:
@@ -3308,6 +3521,123 @@ components:
       - ics_token
       - id
       - role
+    UserCreate:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        username:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - role
+    UserRoleUpdate:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
+      required:
+      - role
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        grade_level:
+          type: integer
+        enrollment_code:
+          type: string
+          maxLength: 50
+      required:
+      - enrollment_code
+      - first_name
+      - grade_level
+      - id
+      - last_name
+    StudentCreate:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        grade_level:
+          type: integer
+        enrollment_code:
+          type: string
+          maxLength: 50
+        group_id:
+          type: integer
+        allow_multiple_groups:
+          type: boolean
+      required:
+      - enrollment_code
+      - first_name
+      - grade_level
+      - last_name
+    ParentStudent:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        parent:
+          type: integer
+        student:
+          type: integer
+        relationship:
+          type: string
+          maxLength: 20
+      required:
+      - id
+      - parent
+      - relationship
+      - student
+    PasswordResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    PasswordResetConfirm:
+      type: object
+      properties:
+        uid:
+          type: string
+        token:
+          type: string
+        new_password:
+          type: string
+          writeOnly: true
+      required:
+      - new_password
+      - token
+      - uid
     VocalAssignment:
       type: object
       properties:

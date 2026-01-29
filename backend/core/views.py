@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_datetime, parse_date
 from django.db.models import Q
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
@@ -13,6 +13,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 from notifications.tasks import push_to_users
+
+from audit.models import AuditLog
+from audit.serializers import AuditLogSerializer
+from core.pagination import DefaultPagination
 
 from .models import (
     Announcement,
@@ -44,6 +48,7 @@ from .permissions import (
     is_padre,
     is_vocal,
     IsDirector,
+    IsAdminTenant,
 )
 from .serializers import (
     SchoolSerializer,
@@ -66,7 +71,11 @@ from .serializers import (
     UserSerializer,
     UserDetailSerializer,
     UserUpdateSerializer,
+    UserCreateSerializer,
+    UserRoleUpdateSerializer,
     StudentSerializer,
+    StudentCreateSerializer,
+    ParentStudentSerializer,
 )
 from .throttles import ComplaintCreateThrottle, EventCreateThrottle
 from .utils import get_event_audience_user_ids
@@ -155,6 +164,220 @@ class RegenerateICSTokenView(APIView):
         )
 
 
+class AuditLogListView(generics.ListAPIView):
+    serializer_class = AuditLogSerializer
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+
+        qs = AuditLog.objects.filter(school_id=self.request.school_id)
+        actor = self.request.query_params.get("actor")
+        action = self.request.query_params.get("action")
+        entity_type = self.request.query_params.get("entity_type")
+        date_from = self.request.query_params.get("date_from")
+        date_to = self.request.query_params.get("date_to")
+
+        if actor:
+            actor_filter = Q(actor__username__icontains=actor) | Q(
+                actor__email__icontains=actor
+            )
+            try:
+                actor_id = int(actor)
+                actor_filter |= Q(actor__id=actor_id)
+            except (TypeError, ValueError):
+                pass
+            qs = qs.filter(actor_filter)
+
+        if action:
+            qs = qs.filter(action__icontains=action)
+
+        if entity_type:
+            qs = qs.filter(entity_type__icontains=entity_type)
+
+        if date_from:
+            start = parse_datetime(date_from) or parse_date(date_from)
+            if start:
+                qs = qs.filter(created_at__gte=start)
+
+        if date_to:
+            end = parse_datetime(date_to) or parse_date(date_to)
+            if end:
+                qs = qs.filter(created_at__lte=end)
+
+        return qs
+
+
+class UserListCreateView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        qs = User.objects.filter(school_id=self.request.school_id)
+        role = self.request.query_params.get("role")
+        if role:
+            qs = qs.filter(role=role)
+        return qs.order_by("last_name", "first_name")
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return UserCreateSerializer
+        return UserSerializer
+
+    def perform_create(self, serializer):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        user = serializer.save(school_id=self.request.school_id)
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="user",
+            entity_id=user.id,
+            metadata={"role": user.role},
+        )
+
+
+class UserRoleUpdateView(generics.UpdateAPIView):
+    serializer_class = UserRoleUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminTenant]
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        return User.objects.filter(school_id=self.request.school_id)
+
+    def perform_update(self, serializer):
+        user = self.get_object()
+        prev_role = user.role
+        prev_active = user.is_active
+        serializer.save()
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="role_update",
+            entity_type="user",
+            entity_id=user.id,
+            metadata={
+                "from_role": prev_role,
+                "to_role": serializer.instance.role,
+                "from_active": prev_active,
+                "to_active": serializer.instance.is_active,
+            },
+        )
+
+
+class StudentListCreateView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        return Student.objects.filter(school_id=self.request.school_id).order_by("last_name")
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return StudentCreateSerializer
+        return StudentSerializer
+
+    def perform_create(self, serializer):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        group_id = serializer.validated_data.pop("group_id", None)
+        allow_multiple = serializer.validated_data.pop("allow_multiple_groups", False)
+        student = serializer.save(school_id=self.request.school_id)
+        if group_id:
+            group = get_object_or_404(Group, pk=group_id, school_id=self.request.school_id)
+            if group.school_year_id:
+                existing = GroupMembership.objects.filter(
+                    student=student, group__school_year_id=group.school_year_id
+                ).exists()
+                if existing and not allow_multiple:
+                    raise PermissionDenied("Student already assigned to a group in this school year")
+            GroupMembership.objects.create(
+                school_id=self.request.school_id, student=student, group=group
+            )
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="student",
+            entity_id=student.id,
+        )
+
+
+class StudentDetailUpdateView(generics.RetrieveUpdateAPIView):
+    serializer_class = StudentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        return Student.objects.filter(school_id=self.request.school_id)
+
+    def perform_update(self, serializer):
+        student = serializer.save()
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="update",
+            entity_type="student",
+            entity_id=student.id,
+        )
+
+
+class ParentStudentListCreateView(generics.ListCreateAPIView):
+    serializer_class = ParentStudentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        return ParentStudent.objects.filter(school_id=self.request.school_id)
+
+    def perform_create(self, serializer):
+        parent = serializer.validated_data["parent"]
+        student = serializer.validated_data["student"]
+        if parent.school_id != self.request.school_id or student.school_id != self.request.school_id:
+            raise PermissionDenied("Parent or student mismatch for school")
+        relation = serializer.save(school_id=self.request.school_id)
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="assign_parent",
+            entity_type="student",
+            entity_id=relation.student_id,
+            metadata={"parent_id": relation.parent_id, "relationship": relation.relationship},
+        )
+
+
+class ParentStudentDeleteView(generics.DestroyAPIView):
+    serializer_class = ParentStudentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        return ParentStudent.objects.filter(school_id=self.request.school_id)
+
+    def perform_destroy(self, instance):
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="unassign_parent",
+            entity_type="student",
+            entity_id=instance.student_id,
+            metadata={"parent_id": instance.parent_id},
+        )
+        instance.delete()
+
+
 class CurrentSchoolView(generics.RetrieveAPIView):
     serializer_class = SchoolSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -188,6 +411,7 @@ class SchoolYearRolloverView(generics.GenericAPIView):
 class GroupListView(generics.ListAPIView):
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         return Group.objects.filter(
@@ -205,9 +429,17 @@ class GroupCreateView(generics.CreateAPIView):
         school_year = SchoolYear.objects.filter(
             school_id=self.request.school_id, is_current=True
         ).first()
-        serializer.save(
+        group = serializer.save(
             school_id=self.request.school_id,
             school_year=school_year,
+        )
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="group",
+            entity_id=group.id,
+            metadata={"school_year_id": school_year.id if school_year else None},
         )
 
 
@@ -221,7 +453,15 @@ class AssignHomeroomTeacherView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         if not is_director(self.request.user):
             raise PermissionDenied("Only directors can assign homeroom teachers")
-        serializer.save()
+        group = serializer.save()
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="assign_homeroom",
+            entity_type="group",
+            entity_id=group.id,
+            metadata={"homeroom_teacher_id": group.homeroom_teacher_id},
+        )
 
 
 class AssignSpecialistView(generics.CreateAPIView):
@@ -318,12 +558,16 @@ class ComplaintCreateView(generics.ListCreateAPIView):
     serializer_class = ComplaintSerializer
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [ComplaintCreateThrottle]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         if self.request.user.school_id != self.request.school_id:
             raise PermissionDenied("Invalid school")
         user = self.request.user
         qs = Complaint.objects.filter(school_id=self.request.school_id)
+        status_filter = self.request.query_params.get("status")
+        if status_filter:
+            qs = qs.filter(status=status_filter)
         if is_director(user) or is_admin_tenant(user):
             return qs.order_by("-created_at")
         return (
@@ -480,6 +724,7 @@ class EventListCreateView(generics.ListCreateAPIView):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [EventCreateThrottle]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -590,6 +835,7 @@ class EventCancelView(generics.UpdateAPIView):
 class EventAttachmentListCreateView(generics.ListCreateAPIView):
     serializer_class = EventAttachmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def _get_event(self):
         return get_object_or_404(
@@ -625,6 +871,7 @@ class EventAttachmentListCreateView(generics.ListCreateAPIView):
 class EventPhotoListCreateView(generics.ListCreateAPIView):
     serializer_class = EventPhotoSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def _get_event(self):
         return get_object_or_404(
@@ -689,6 +936,7 @@ class EventRSVPView(APIView):
 class ActivityPhotoListView(generics.ListAPIView):
     serializer_class = ActivityPhotoSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         group_id = self.kwargs["pk"]
@@ -768,6 +1016,7 @@ class EventUpdateView(generics.UpdateAPIView):
 class AnnouncementListCreateView(generics.ListCreateAPIView):
     serializer_class = AnnouncementSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         qs = Announcement.objects.filter(school_id=self.request.school_id)
@@ -818,6 +1067,7 @@ class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
 class HomeworkListCreateView(generics.ListCreateAPIView):
     serializer_class = HomeworkSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         group_ids = _visible_group_ids(self.request.user)

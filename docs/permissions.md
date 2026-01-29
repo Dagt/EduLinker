@@ -35,7 +35,12 @@ escuela (`school_id`) enviado mediante el encabezado `X-SCHOOL-ID`.
   usuario recibe un error de permiso.
 - Las sugerencias sólo pueden ser creadas por padres, vocals o maestros
   titulares; los directores quedan excluidos.
+- La administración de usuarios está reservada a **ADMIN_TENANT** (puede
+  cambiar roles y desactivar cuentas) y **DIRECTOR** (puede listar y crear
+  usuarios dentro de su escuela). Los directores no pueden modificar roles.
+- Los endpoints de usuarios, alumnos y relaciones padre-alumno siempre
+  filtran por `school_id` y validan que los registros pertenezcan a la misma
+  escuela, evitando fugas de información entre instituciones.
 
 Estas normas garantizan que cada usuario interactúe únicamente con la
 información de su propia institución y según las responsabilidades de su rol.
-

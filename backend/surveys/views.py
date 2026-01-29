@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from .models import Survey, SurveyVote
 from .serializers import SurveySerializer, SurveyVoteSerializer
 from core.throttles import SurveyThrottle
+from core.pagination import DefaultPagination
 from core.permissions import (
     is_director,
     is_maestro_titular,
@@ -19,6 +20,7 @@ class SurveyListCreateView(generics.ListCreateAPIView):
     serializer_class = SurveySerializer
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [SurveyThrottle]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         qs = Survey.objects.filter(school_id=self.request.school_id)

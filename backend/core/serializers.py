@@ -46,6 +46,50 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "first_name", "last_name", "email", "role"]
 
 
+class UserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
+    username = serializers.CharField(required=False, allow_blank=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "username",
+            "password",
+        ]
+        read_only_fields = ["id"]
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        school_id = getattr(request, "school_id", None)
+        email = attrs.get("email")
+        if school_id and email:
+            if User.objects.filter(school_id=school_id, email=email).exists():
+                raise serializers.ValidationError("Email already exists for this school")
+        return attrs
+
+    def create(self, validated_data):
+        password = validated_data.pop("password", None)
+        username = validated_data.pop("username", "") or validated_data.get("email", "")
+        user = User(**validated_data, username=username)
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+        user.save()
+        return user
+
+
+class UserRoleUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["role", "is_active"]
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
     calendar_subscription_url = serializers.SerializerMethodField()
 
@@ -88,10 +132,38 @@ class ChangePasswordSerializer(serializers.Serializer):
         return attrs
 
 
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True)
+
+
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ["id", "first_name", "last_name", "grade_level", "enrollment_code"]
+
+
+class StudentCreateSerializer(serializers.ModelSerializer):
+    group_id = serializers.IntegerField(required=False, write_only=True)
+    allow_multiple_groups = serializers.BooleanField(default=False, write_only=True)
+
+    class Meta:
+        model = Student
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "grade_level",
+            "enrollment_code",
+            "group_id",
+            "allow_multiple_groups",
+        ]
+        read_only_fields = ["id"]
 
 
 class ParentStudentSerializer(serializers.ModelSerializer):
