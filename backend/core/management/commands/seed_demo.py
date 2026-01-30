@@ -3,7 +3,6 @@ from datetime import timedelta, date, datetime, timezone as dt_tz
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
-from django.contrib.auth.hashers import make_password
 from django.db import transaction, connection
 
 from core.models import (
@@ -29,6 +28,12 @@ def utc(dt: datetime) -> datetime:
     if dt.tzinfo: return dt
     return dt.replace(tzinfo=dt_tz.utc)
 
+def safe_username(value: str | None, fallback: str) -> str:
+    if value is None:
+        return fallback
+    cleaned = value.strip()
+    return cleaned if cleaned else fallback
+
 class Command(BaseCommand):
     help = "Crea datos demo para EduLinker"
 
@@ -47,29 +52,55 @@ class Command(BaseCommand):
         })
 
         # Usuarios
-        director, _ = User.objects.get_or_create(
-            email="director@demo.com", school=school,
-            defaults=dict(first_name="Diana", last_name="Directora", role=Roles.DIRECTOR,
-                          password=make_password("demo123"), is_staff=True, is_superuser=True)
+        director_username = safe_username("director_demo", "director_demo")
+        director, _ = User.objects.update_or_create(
+            username=director_username,
+            defaults=dict(
+                email="director@demo.com",
+                school=school,
+                first_name="Diana",
+                last_name="Directora",
+                role=Roles.DIRECTOR,
+                is_staff=True,
+                is_superuser=True,
+            ),
         )
+        director.set_password("demo123")
+        director.save(update_fields=["password"])
         titulares = []
-        for grade, group_name in [(5,"5A"), (5,"5B"), (3,"3A"), (3,"3B")]:
+        for index, (grade, group_name) in enumerate([(5,"5A"), (5,"5B"), (3,"3A"), (3,"3B")], start=1):
             fn, ln = rname()
-            u, _ = User.objects.get_or_create(
-                email=f"{group_name.lower()}@demo.com", school=school,
-                defaults=dict(first_name=fn, last_name=ln, role=Roles.MAESTRO_TITULAR,
-                              password=make_password("demo123"))
+            username = safe_username(f"teacher_demo_{index}", f"teacher_demo_{index}")
+            u, _ = User.objects.update_or_create(
+                username=username,
+                defaults=dict(
+                    email=f"{group_name.lower()}@demo.com",
+                    school=school,
+                    first_name=fn,
+                    last_name=ln,
+                    role=Roles.MAESTRO_TITULAR,
+                ),
             )
+            u.set_password("demo123")
+            u.save(update_fields=["password"])
             titulares.append((group_name, grade, u))
 
         itinerantes = []
-        for subj in ["Inglés","Computación","EF"]:
+        for index, subj in enumerate(["Inglés","Computación","EF"], start=1):
             fn, ln = rname()
-            u, _ = User.objects.get_or_create(
-                email=f"{subj.lower()}@demo.com", school=school,
-                defaults=dict(first_name=fn, last_name=ln, role=Roles.MAESTRO_ITINERANTE,
-                              password=make_password("demo123"))
+            username = safe_username(f"itinerant_demo_{index}", f"itinerant_demo_{index}")
+            u, _ = User.objects.update_or_create(
+                username=username,
+                defaults=dict(
+                    email=f"{subj.lower()}@demo.com",
+                    school=school,
+                    first_name=fn,
+                    last_name=ln,
+                    role=Roles.MAESTRO_ITINERANTE,
+                ),
             )
+            u.set_password("demo123")
+            u.save(update_fields=["password"])
             itinerantes.append((subj, u))
 
         # Grupos
@@ -90,6 +121,7 @@ class Command(BaseCommand):
         # Alumnos y Padres (User con role=PADRE)
         parents = []
         group_parents = {g: [] for g in groups}
+        parent_counter = 1
         for g in groups:
             for _ in range(6):
                 fn, ln = rname()
@@ -99,16 +131,26 @@ class Command(BaseCommand):
                 )
                 GroupMembership.objects.create(school=school, group=g, student=student)
                 pf, pl = rname()
-                parent, _ = User.objects.get_or_create(
-                    email=f"{student.enrollment_code.lower()}@familia.com", school=school,
-                    defaults=dict(first_name=pf, last_name=pl, role=Roles.PADRE, password=make_password("demo123"))
+                username = safe_username(f"parent_demo_{parent_counter}", f"parent_demo_{parent_counter}")
+                parent, _ = User.objects.update_or_create(
+                    username=username,
+                    defaults=dict(
+                        email=f"{student.enrollment_code.lower()}@familia.com",
+                        school=school,
+                        first_name=pf,
+                        last_name=pl,
+                        role=Roles.PADRE,
+                    ),
                 )
+                parent.set_password("demo123")
+                parent.save(update_fields=["password"])
                 from core.models import ParentStudent
                 ParentStudent.objects.get_or_create(
                     school=school, parent=parent, student=student, defaults={"relationship": "tutor"}
                 )
                 parents.append(parent)
                 group_parents[g].append(parent)
+                parent_counter += 1
 
         # Asignar un Vocal por grupo, asegurando rol y relación
         for g in groups:
