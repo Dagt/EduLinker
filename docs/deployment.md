@@ -40,6 +40,30 @@
     docker compose up --build
     ```
 
+### Windows (Docker Desktop)
+
+Para evitar problemas de caché y asegurar que todo levante en Windows, usa la
+siguiente secuencia:
+
+```bash
+docker compose down
+docker compose build --no-cache api web celery celery-beat
+docker compose up
+```
+
+Luego ejecuta migraciones y carga de datos:
+
+```bash
+docker compose exec api python manage.py migrate
+docker compose exec api python manage.py seed_demo
+```
+
+URLs por defecto:
+
+- Web: http://localhost:3000
+- API: http://localhost:8000
+- MinIO console: http://localhost:9001
+
 4. Aplica migraciones y (opcionalmente) carga datos de ejemplo:
 
     ```bash

@@ -14,3 +14,6 @@ python-json-logger>=2.0
 django-tenants>=3.6
 requests>=2.31
 responses>=0.25
+celery>=5.3,<6
+django-celery-beat>=2.5,<3
+redis>=5,<6

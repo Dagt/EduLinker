@@ -30,7 +30,10 @@ services:
     depends_on: [minio]
     entrypoint: >
       /bin/sh -c "
-      mc alias set local http://minio:9000 minio minio123 &&
+      until (mc alias set local http://minio:9000 minio minio123); do
+        echo 'Waiting for MinIO...'
+        sleep 2
+      done &&
       mc mb -p local/edulinker || true &&
       mc anonymous set download local/edulinker || true
       "
@@ -66,7 +69,7 @@ services:
 
   celery:
     build: ./backend
-    command: celery -A edulinker worker -l info
+    command: python -m celery -A edulinker worker -l info
     environment:
       DJANGO_SETTINGS_MODULE: edulinker.settings
       CELERY_BROKER_URL: redis://redis:6379/0
@@ -76,7 +79,7 @@ services:
 
   celery-beat:
     build: ./backend
-    command: celery -A edulinker beat -l info
+    command: python -m celery -A edulinker beat -l info
     environment:
       DJANGO_SETTINGS_MODULE: edulinker.settings
       CELERY_BROKER_URL: redis://redis:6379/0
@@ -93,6 +96,8 @@ services:
     command: npm run dev
     volumes:
       - ./web:/app
+      - /app/node_modules
+      - /app/.next
     depends_on: [api]
 
 volumes:
