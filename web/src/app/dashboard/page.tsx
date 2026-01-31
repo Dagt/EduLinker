@@ -18,14 +18,24 @@ import {
 function DashboardContent() {
   const [me, setMe] = useState<any>();
   const [kpis, setKpis] = useState<any>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const { t } = useTranslation();
 
   const load = async () => {
-    const tk = getToken();
-    const m = await apiGet<any>("/me/", tk);
-    const k = await apiGet<any>("/analytics/overview", tk);
-    setMe(m);
-    setKpis(k);
+    setLoading(true);
+    setError("");
+    try {
+      const tk = getToken();
+      const m = await apiGet<any>("/me/", tk);
+      const k = await apiGet<any>("/analytics/overview", tk);
+      setMe(m);
+      setKpis(k);
+    } catch (err: any) {
+      setError(err?.message || "Error loading dashboard");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -47,12 +57,41 @@ function DashboardContent() {
     total: d.votes,
   })) ?? [];
 
+  const stats = [
+    { label: t("Dashboard.eventsUpcoming"), value: kpis?.events_upcoming ?? "—" },
+    { label: t("Dashboard.complaintsOpen"), value: kpis?.complaints_open ?? "—" },
+    { label: t("Dashboard.complaintsTotal"), value: kpis?.complaints_total ?? "—" },
+    { label: t("Dashboard.fundraisingTotal"), value: kpis?.fundraising_total ?? "—" },
+  ];
+
   return (
     <>
       <Nav />
       <main className="container">
-        <h2>{t("Dashboard.welcome", { name })}</h2>
-        <button onClick={load}>{t("Dashboard.refresh")}</button>
+        <div className="page-title">
+          <span className="pill">Overview</span>
+          <h2>{t("Dashboard.welcome", { name })}</h2>
+          <p className="subtle">
+            {t("Dashboard.subtitle", { defaultValue: "Visión general del estado operativo." })}
+          </p>
+          <div className="actions">
+            <button onClick={load} disabled={loading}>
+              {loading ? t("Dashboard.loading", { defaultValue: "Cargando..." }) : t("Dashboard.refresh")}
+            </button>
+          </div>
+        </div>
+
+        {error && <p className="error">{error}</p>}
+
+        <div className="stats">
+          {stats.map((s) => (
+            <div key={s.label} className="stat">
+              <span className="label">{s.label}</span>
+              <span className="value">{s.value}</span>
+            </div>
+          ))}
+        </div>
+
         {kpis && (
           <div className="grid">
             <Card>
@@ -62,7 +101,7 @@ function DashboardContent() {
                   <XAxis dataKey="group" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#8884d8" />
+                  <Bar dataKey="total" fill="#38bdf8" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -73,7 +112,7 @@ function DashboardContent() {
                   <XAxis dataKey="group" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#82ca9d" />
+                  <Bar dataKey="total" fill="#f59e0b" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -84,7 +123,7 @@ function DashboardContent() {
                   <XAxis dataKey="group" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#ffc658" />
+                  <Bar dataKey="total" fill="#a78bfa" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -92,13 +131,45 @@ function DashboardContent() {
         )}
       </main>
       <style jsx>{`
-        .container {
-          padding: 1rem;
-        }
         .grid {
           display: grid;
-          gap: 2rem;
-          margin-top: 1rem;
+          gap: 1.75rem;
+          margin-top: 1.5rem;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        .actions {
+          margin-top: 0.5rem;
+        }
+        .stats {
+          display: grid;
+          gap: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+        .stat {
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 14px;
+          padding: 1rem 1.25rem;
+          background: rgba(255, 255, 255, 0.06);
+        }
+        .label {
+          font-size: 0.85rem;
+          color: #cbd5f5;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+        .value {
+          display: block;
+          font-size: 1.6rem;
+          font-weight: 700;
+          margin-top: 0.4rem;
+        }
+        .error {
+          color: #fecaca;
+          background: rgba(248, 113, 113, 0.1);
+          border: 1px solid rgba(248, 113, 113, 0.4);
+          padding: 0.75rem 1rem;
+          border-radius: 12px;
+          margin-bottom: 1rem;
         }
       `}</style>
     </>

@@ -1,13 +1,16 @@
 import { getToken, refreshToken } from "./auth";
 
 export function schoolIdFromHost(host?: string): string {
+  const envId = process.env.NEXT_PUBLIC_SCHOOL_ID;
+  if (envId) return envId;
   if (!host) {
     if (typeof window === "undefined") return "1";
     host = window.location.host;
   }
   const withoutPort = host.split(":")[0];
   const subdomain = withoutPort.split(".")[0];
-  return subdomain || "1";
+  if (!subdomain || subdomain === "localhost" || subdomain === "127") return "1";
+  return subdomain;
 }
 
 export function authHeaders(token?: string) {
