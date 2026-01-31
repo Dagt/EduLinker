@@ -45,6 +45,8 @@ services:
         python manage.py migrate &&
         gunicorn edulinker.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
       "
+    env_file:
+      - ./backend/.env
     environment:
       DATABASE_URL: postgres://edulinker:edulinker@db:5432/edulinker
       REDIS_URL: redis://redis:6379/0
@@ -89,9 +91,8 @@ services:
 
   web:
     build: ./web
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
-      NEXT_PUBLIC_SCHOOL_ID: "1"
+    env_file:
+      - ./web/.env
     ports: ["3000:3000"]
     command: npm run dev
     volumes:

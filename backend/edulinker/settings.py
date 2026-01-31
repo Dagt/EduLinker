@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 from datetime import timedelta
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from pythonjsonlogger import jsonlogger
 import sentry_sdk
@@ -20,12 +21,23 @@ sentry_sdk.init(
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'change-me')
 DEBUG = os.getenv('DEBUG', '0') == '1'
-ALLOWED_HOSTS = ["*"]
-CORS_ALLOWED_ORIGINS = [
+
+def _split_env_list(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+_allowed_hosts_env = _split_env_list(os.getenv("ALLOWED_HOSTS"))
+ALLOWED_HOSTS = _allowed_hosts_env if _allowed_hosts_env else ["*"]
+
+_cors_env = _split_env_list(os.getenv("CORS_ALLOWED_ORIGINS"))
+CORS_ALLOWED_ORIGINS = _cors_env if _cors_env else [
     "http://localhost:3000",  # Next.js
     "http://localhost:19006", # Expo web (si aplica)
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = _split_env_list(os.getenv("CSRF_TRUSTED_ORIGINS"))
 
 
 SHARED_APPS = [
@@ -142,6 +154,21 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 
+def _database_from_url(database_url: str | None) -> dict | None:
+    if not database_url:
+        return None
+    parsed = urlparse(database_url)
+    if parsed.scheme not in ("postgres", "postgresql"):
+        return None
+    return {
+        "ENGINE": "django_tenants.postgresql_backend",
+        "NAME": (parsed.path or "").lstrip("/") or os.getenv("POSTGRES_DB", "edulinker"),
+        "USER": parsed.username or os.getenv("POSTGRES_USER", "edulinker"),
+        "PASSWORD": parsed.password or os.getenv("POSTGRES_PASSWORD", "edulinker"),
+        "HOST": parsed.hostname or os.getenv("POSTGRES_HOST", "db"),
+        "PORT": str(parsed.port) if parsed.port else os.getenv("POSTGRES_PORT", "5432"),
+    }
+
 if os.getenv('USE_SQLITE') == '1':
     DATABASES = {
         'default': {
@@ -151,7 +178,7 @@ if os.getenv('USE_SQLITE') == '1':
     }
 else:
     DATABASES = {
-        'default': {
+        'default': _database_from_url(os.getenv("DATABASE_URL")) or {
             'ENGINE': 'django_tenants.postgresql_backend',
             'NAME': os.getenv('POSTGRES_DB', 'edulinker'),
             'USER': os.getenv('POSTGRES_USER', 'edulinker'),
@@ -203,6 +230,8 @@ SPECTACULAR_SETTINGS = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'SIGNING_KEY': os.getenv("JWT_SECRET_KEY", SECRET_KEY),
+    'ALGORITHM': os.getenv("JWT_ALGORITHM", "HS256"),
 }
 
 LANGUAGE_CODE = 'es-mx'
@@ -213,6 +242,18 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@edulinker.local")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "1") == "1"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "0") == "1"
 
 
 class RequestContextFilter(logging.Filter):
