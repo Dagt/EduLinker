@@ -32,24 +32,40 @@ export default function AssignVocal() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("AssignVocal.header")}</h2>
-        <form onSubmit={submit}>
-          <input
-            placeholder={t("AssignVocal.groupId")}
-            value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("AssignVocal.parentId")}
-            value={parentId}
-            onChange={(e) => setParentId(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <button>{t("AssignVocal.assign")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("AssignVocal.pill", { defaultValue: "Grupos" })}</span>
+            <h2>{t("AssignVocal.header")}</h2>
+            <p className="subtle">
+              {t("AssignVocal.subtitle", { defaultValue: "Designa un vocal por grupo." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("AssignVocal.groupId")}
+              <input
+                placeholder={t("AssignVocal.groupId")}
+                value={groupId}
+                onChange={(e) => setGroupId(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("AssignVocal.parentId")}
+              <input
+                placeholder={t("AssignVocal.parentId")}
+                value={parentId}
+                onChange={(e) => setParentId(e.target.value)}
+              />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("AssignVocal.assign")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

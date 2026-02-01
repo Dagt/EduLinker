@@ -49,22 +49,44 @@ export default function FundraisingExpense(){
   return (
     <>
       <Nav/>
-      <main style={{padding:16, maxWidth:680}}>
-        <h2>{t("FundraisingExpense.header")}</h2>
-        <UploadButton onUploaded={(u)=>setFileUrl(u)} />
-        {fileUrl && <p>{t("FundraisingExpense.fileReady", { url: fileUrl })}</p>}
-        <form onSubmit={submit}>
-          <input placeholder={t("FundraisingExpense.ledgerId")} value={ledgerId} onChange={e=>setLedgerId(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-          <input placeholder={t("FundraisingExpense.groupId")} value={groupId} onChange={e=>setGroupId(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-          <input placeholder={t("FundraisingExpense.amount")} value={amount} onChange={e=>setAmount(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} required/>
-          <input placeholder={t("FundraisingExpense.concept")} value={concept} onChange={e=>setConcept(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} required/>
-          <button>{t("FundraisingExpense.save")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("FundraisingExpense.pill", { defaultValue: "Recaudacion" })}</span>
+            <h2>{t("FundraisingExpense.header")}</h2>
+            <p className="subtle">
+              {t("FundraisingExpense.subtitle", { defaultValue: "Carga evidencias de gastos realizados." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <div className="stack">
+            <UploadButton onUploaded={(u)=>setFileUrl(u)} />
+            {fileUrl && <p className="alert success">{t("FundraisingExpense.fileReady", { url: fileUrl })}</p>}
+          </div>
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("FundraisingExpense.ledgerId")}
+              <input placeholder={t("FundraisingExpense.ledgerId")} value={ledgerId} onChange={e=>setLedgerId(e.target.value)} />
+            </label>
+            <label>
+              {t("FundraisingExpense.groupId")}
+              <input placeholder={t("FundraisingExpense.groupId")} value={groupId} onChange={e=>setGroupId(e.target.value)} />
+            </label>
+            <label>
+              {t("FundraisingExpense.amount")}
+              <input placeholder={t("FundraisingExpense.amount")} value={amount} onChange={e=>setAmount(e.target.value)} required/>
+            </label>
+            <label>
+              {t("FundraisingExpense.concept")}
+              <input placeholder={t("FundraisingExpense.concept")} value={concept} onChange={e=>setConcept(e.target.value)} required/>
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("FundraisingExpense.save")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

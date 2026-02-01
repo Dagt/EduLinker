@@ -8,9 +8,9 @@ interface Props {
 
 export default function EventsChart({ data, title, colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"] }: Props) {
   return (
-    <section>
+    <section className="card">
       <h3>{title}</h3>
-      <div style={{ height: 300 }}>
+      <div className="chart">
         <ResponsiveContainer>
           <PieChart>
             <Pie data={data} dataKey="total" nameKey="scope" label>

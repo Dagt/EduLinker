@@ -53,6 +53,8 @@ from .permissions import (
 )
 from .serializers import (
     SchoolSerializer,
+    SchoolCreateSerializer,
+    SchoolYearSerializer,
     AnnouncementSerializer,
     HomeworkSerializer,
     ComplaintMessageSerializer,
@@ -479,6 +481,111 @@ class CurrentSchoolView(generics.RetrieveAPIView):
         return get_object_or_404(School, pk=self.request.school_id)
 
 
+class SchoolListView(generics.ListAPIView):
+    serializer_class = SchoolSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminTenant]
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        return School.objects.all().order_by("name")
+
+
+class SchoolCreateView(generics.CreateAPIView):
+    serializer_class = SchoolCreateSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminTenant]
+
+    def perform_create(self, serializer):
+        school = serializer.save(active=True)
+        # Ensure tenant schema is created + migrated
+        call_command(
+            "migrate_schemas",
+            schema_name=school.schema_name,
+            tenant=True,
+            interactive=False,
+            verbosity=0,
+        )
+
+        director_email = serializer.validated_data.get("director_email")
+        director_password = serializer.validated_data.get("director_password")
+        if director_email and director_password:
+            director_first = serializer.validated_data.get("director_first_name", "")
+            director_last = serializer.validated_data.get("director_last_name", "")
+            User.objects.create_user(
+                username=director_email,
+                email=director_email,
+                password=director_password,
+                role=User.Roles.DIRECTOR,
+                school=school,
+                first_name=director_first,
+                last_name=director_last,
+                is_active=True,
+            )
+
+
+class SchoolDetailUpdateView(generics.RetrieveUpdateAPIView):
+    serializer_class = SchoolSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminTenant]
+
+    def get_queryset(self):
+        return School.objects.all()
+
+
+class SchoolYearListView(generics.ListCreateAPIView):
+    serializer_class = SchoolYearSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        return SchoolYear.objects.filter(
+            school_id=self.request.school_id
+        ).order_by("-start_date")
+
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [permissions.IsAuthenticated(), IsDirector()]
+        return [permissions.IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        if self.request.user.school_id != self.request.school_id:
+            raise PermissionDenied("Invalid school")
+        school_id = self.request.school_id
+        is_current = serializer.validated_data.get("is_current", False)
+        if is_current:
+            SchoolYear.objects.filter(school_id=school_id, is_current=True).update(
+                is_current=False
+            )
+        year = serializer.save(school_id=school_id)
+        AuditLog.objects.create(
+            school_id=school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="school_year",
+            entity_id=year.id,
+            metadata={"is_current": year.is_current},
+        )
+
+
+class SchoolYearSetCurrentView(generics.GenericAPIView):
+    serializer_class = SchoolYearSerializer
+    permission_classes = [permissions.IsAuthenticated, IsDirector]
+
+    def post(self, request, *args, **kwargs):
+        school_id = request.school_id
+        if request.user.school_id != school_id:
+            raise PermissionDenied("Invalid school")
+        target = get_object_or_404(
+            SchoolYear, pk=self.kwargs["pk"], school_id=school_id
+        )
+        SchoolYear.objects.filter(school_id=school_id, is_current=True).update(
+            is_current=False
+        )
+        target.is_current = True
+        target.save(update_fields=["is_current"])
+        serializer = self.get_serializer(target)
+        return Response(serializer.data)
+
+
 class SchoolYearRolloverView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, IsDirector]
 
@@ -501,14 +608,43 @@ class SchoolYearRolloverView(generics.GenericAPIView):
         return Response({"detail": output.getvalue().strip()})
 
 
-class GroupListView(generics.ListAPIView):
-    serializer_class = GroupSerializer
+class GroupListView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = DefaultPagination
 
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return GroupCreateSerializer
+        return GroupSerializer
+
     def get_queryset(self):
-        return Group.objects.filter(
-            school_id=self.request.school_id, school_year__is_current=True
+        qs = Group.objects.filter(school_id=self.request.school_id)
+        school_year = self.request.query_params.get("school_year", "current")
+        if school_year == "current" or not school_year:
+            return qs.filter(school_year__is_current=True)
+        try:
+            school_year_id = int(school_year)
+        except (TypeError, ValueError):
+            return qs.none()
+        return qs.filter(school_year_id=school_year_id)
+
+    def perform_create(self, serializer):
+        if not is_director(self.request.user):
+            raise PermissionDenied("Only directors can create groups")
+        school_year = SchoolYear.objects.filter(
+            school_id=self.request.school_id, is_current=True
+        ).first()
+        group = serializer.save(
+            school_id=self.request.school_id,
+            school_year=school_year,
+        )
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="group",
+            entity_id=group.id,
+            metadata={"school_year_id": school_year.id if school_year else None},
         )
 
 
@@ -619,6 +755,30 @@ class VocalAssignmentDeactivateView(generics.UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class VocalAssignmentDeleteView(generics.GenericAPIView):
+    serializer_class = VocalAssignmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        assignment = get_object_or_404(
+            VocalAssignment,
+            pk=self.kwargs["pk"],
+            school_id=request.school_id,
+            active=True,
+        )
+        user = request.user
+        group = assignment.group
+        if not (is_director(user) or group.homeroom_teacher_id == user.id):
+            raise PermissionDenied(
+                "Only directors or homeroom teachers can deactivate vocal assignments"
+            )
+        assignment.active = False
+        assignment.end_at = timezone.now()
+        assignment.save()
+        serializer = self.get_serializer(assignment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class GroupMembersView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -667,31 +827,64 @@ class GroupMembersView(generics.GenericAPIView):
         )
 
 
-class GroupVocalsView(generics.ListAPIView):
+class GroupVocalsView(generics.GenericAPIView):
     serializer_class = VocalAssignmentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        group = get_object_or_404(
+    def _get_group(self):
+        return get_object_or_404(
             Group, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
+
+    def _ensure_can_view(self, group):
         user = self.request.user
-        allowed = False
         if is_director(user):
-            allowed = True
-        elif group.homeroom_teacher_id == user.id:
-            allowed = True
-        elif SpecialistAssignment.objects.filter(group=group, teacher=user).exists():
-            allowed = True
-        elif VocalAssignment.objects.filter(
+            return
+        if group.homeroom_teacher_id == user.id:
+            return
+        if SpecialistAssignment.objects.filter(group=group, teacher=user).exists():
+            return
+        if VocalAssignment.objects.filter(
             group=group, parent=user, active=True
         ).exists():
-            allowed = True
-        if not allowed:
-            raise PermissionDenied("Not allowed to view vocal assignments")
-        return VocalAssignment.objects.filter(
+            return
+        raise PermissionDenied("Not allowed to view vocal assignments")
+
+    def get(self, request, *args, **kwargs):
+        group = self._get_group()
+        self._ensure_can_view(group)
+        qs = VocalAssignment.objects.filter(
             school_id=self.request.school_id, group=group
         ).order_by("-start_at")
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        group = self._get_group()
+        user = request.user
+        if not (is_director(user) or group.homeroom_teacher_id == user.id):
+            raise PermissionDenied(
+                "Only directors or homeroom teachers can assign vocals"
+            )
+        parent_id = request.data.get("parent_user_id") or request.data.get("parent")
+        if not parent_id:
+            return Response(
+                {"detail": "parent_user_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        parent = get_object_or_404(
+            User, pk=parent_id, school_id=request.school_id
+        )
+        serializer = self.get_serializer(
+            data={"group": group.id, "parent": parent.id},
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        assignment = serializer.save(school_id=request.school_id, assigned_by=user)
+        return Response(
+            self.get_serializer(assignment).data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class ComplaintCreateView(generics.ListCreateAPIView):
@@ -726,32 +919,26 @@ class ComplaintCreateView(generics.ListCreateAPIView):
         if self.request.user.school_id != self.request.school_id:
             raise PermissionDenied("Invalid school")
         user = self.request.user
-        group = serializer.validated_data["group"]
-        target_teacher = serializer.validated_data["target_teacher"]
-
-        student_ids = ParentStudent.objects.filter(parent_id=user.id).values_list(
-            "student_id", flat=True
-        )
-        has_child = GroupMembership.objects.filter(
-            group=group, student_id__in=student_ids
-        ).exists()
-        if not has_child:
-            raise PermissionDenied("Parent must have a child in the group")
-
+        group = serializer.validated_data.get("group")
+        if not group:
+            raise PermissionDenied("Group is required")
         if not (
-            is_maestro_titular(target_teacher)
-            or is_maestro_itinerante(target_teacher)
+            is_director(user)
+            or is_admin_tenant(user)
+            or is_padre(user)
+            or is_vocal(user)
         ):
-            raise PermissionDenied(
-                "Target must be homeroom or itinerant teacher"
-            )
-        assigned = group.homeroom_teacher_id == target_teacher.id or SpecialistAssignment.objects.filter(
-            group=group, teacher=target_teacher
-        ).exists()
-        if not assigned:
-            raise PermissionDenied("Teacher not assigned to group")
+            raise PermissionDenied("Not allowed to create complaints")
 
-        serializer.save(created_by=user, school_id=self.request.school_id)
+        complaint = serializer.save(created_by=user, school_id=self.request.school_id)
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="create",
+            entity_type="complaint",
+            entity_id=complaint.id,
+            metadata={"group_id": group.id},
+        )
 
 
 class ComplaintDetailView(generics.RetrieveAPIView):
@@ -860,6 +1047,9 @@ class ComplaintStatusUpdateView(generics.UpdateAPIView):
             entity_id=complaint.id,
             metadata={"from": prev_status, "to": serializer.instance.status},
         )
+
+    def post(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
 
 class EventListCreateView(generics.ListCreateAPIView):
@@ -1186,7 +1376,17 @@ class AnnouncementListCreateView(generics.ListCreateAPIView):
         elif scope == Announcement.Scope.GRUPO:
             if not _can_manage_group(self.request.user, group):
                 raise PermissionDenied("Cannot create announcement for this group")
-        serializer.save(school_id=self.request.school_id, teacher=self.request.user)
+        announcement = serializer.save(
+            school_id=self.request.school_id, teacher=self.request.user
+        )
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="announcement",
+            entity_id=announcement.id,
+            metadata={"scope": announcement.scope, "group_id": announcement.group_id},
+        )
 
 
 class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -1205,7 +1405,30 @@ class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
         if announcement.scope == Announcement.Scope.GRUPO:
             if not _can_manage_group(self.request.user, announcement.group):
                 raise PermissionDenied("Cannot edit this announcement")
-        serializer.save()
+        changes = {}
+        for field, value in serializer.validated_data.items():
+            old_value = getattr(announcement, field)
+            if old_value != value:
+                changes[field] = {"from": str(old_value), "to": str(value)}
+        announcement = serializer.save()
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="update",
+            entity_type="announcement",
+            entity_id=announcement.id,
+            metadata={"changes": changes},
+        )
+
+    def perform_destroy(self, instance):
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="delete",
+            entity_type="announcement",
+            entity_id=instance.id,
+        )
+        instance.delete()
 
 
 class HomeworkListCreateView(generics.ListCreateAPIView):
@@ -1214,17 +1437,29 @@ class HomeworkListCreateView(generics.ListCreateAPIView):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
+        if is_director(self.request.user) or is_admin_tenant(self.request.user):
+            return Homework.objects.none()
         group_ids = _visible_group_ids(self.request.user)
         return Homework.objects.filter(
             school_id=self.request.school_id, group_id__in=group_ids
         )
 
     def perform_create(self, serializer):
+        if is_director(self.request.user) or is_admin_tenant(self.request.user):
+            raise PermissionDenied("Directors cannot create homework")
         group = serializer.validated_data.get("group")
         if not _can_manage_group(self.request.user, group):
             raise PermissionDenied("Cannot create homework for this group")
-        serializer.save(
+        homework = serializer.save(
             school_id=self.request.school_id, teacher=self.request.user
+        )
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="homework",
+            entity_id=homework.id,
+            metadata={"group_id": homework.group_id},
         )
 
 
@@ -1233,6 +1468,8 @@ class HomeworkDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        if is_director(self.request.user) or is_admin_tenant(self.request.user):
+            return Homework.objects.none()
         group_ids = _visible_group_ids(self.request.user)
         return Homework.objects.filter(
             school_id=self.request.school_id, group_id__in=group_ids
@@ -1242,11 +1479,35 @@ class HomeworkDetailView(generics.RetrieveUpdateDestroyAPIView):
         homework = self.get_object()
         if not _can_manage_group(self.request.user, homework.group):
             raise PermissionDenied("Cannot edit this homework")
-        serializer.save()
+        changes = {}
+        for field, value in serializer.validated_data.items():
+            old_value = getattr(homework, field)
+            if old_value != value:
+                changes[field] = {"from": str(old_value), "to": str(value)}
+        homework = serializer.save()
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="update",
+            entity_type="homework",
+            entity_id=homework.id,
+            metadata={"changes": changes},
+        )
+
+    def perform_destroy(self, instance):
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="delete",
+            entity_type="homework",
+            entity_id=instance.id,
+        )
+        instance.delete()
 
 
 class FeedView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get(self, request, *args, **kwargs):
         group_ids = _visible_group_ids(request.user)
@@ -1266,4 +1527,6 @@ class FeedView(generics.GenericAPIView):
             item["type"] = "homework"
         items = ann_data + hw_data
         items.sort(key=lambda x: x["created_at"], reverse=True)
-        return Response(items)
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(items, request, view=self)
+        return paginator.get_paginated_response(page)

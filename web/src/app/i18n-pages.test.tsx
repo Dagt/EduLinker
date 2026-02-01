@@ -102,13 +102,13 @@ describe('internationalized pages render', () => {
 
   it('renders ComplaintCreate', () => {
     render(<ComplaintCreate />);
-    expect(screen.getByRole('heading', { name: 'Crear queja privada' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Crear incidencia privada' })).toBeInTheDocument();
   });
 
   it('renders ComplaintThread', async () => {
     (apiGet as jest.Mock).mockResolvedValue({status:'open', description:'d', messages:[]});
     render(<ComplaintThread params={{id:'1'}} />);
-    expect(await screen.findByText('Queja #1')).toBeInTheDocument();
+    expect(await screen.findByText('Incidencia #1')).toBeInTheDocument();
   });
 
   it('renders CalendarCreate', () => {

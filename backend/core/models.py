@@ -281,13 +281,21 @@ class Complaint(models.Model):
 
 
 class ComplaintParticipant(models.Model):
+    class ThreadRole(models.TextChoices):
+        CREATOR = "CREATOR", "Creator"
+        TEACHER = "TEACHER", "Teacher"
+        DIRECTOR = "DIRECTOR", "Director"
+        OTHER_PARENT = "OTHER_PARENT", "Other Parent"
+
     complaint = models.ForeignKey(
         Complaint, on_delete=models.CASCADE, related_name="participants"
     )
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="complaint_participations"
     )
-    role_in_thread = models.CharField(max_length=20, choices=UserRoles.choices, null=True)
+    role_in_thread = models.CharField(
+        max_length=20, choices=ThreadRole.choices, null=True
+    )
     added_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

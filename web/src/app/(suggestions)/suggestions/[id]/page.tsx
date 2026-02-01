@@ -30,14 +30,34 @@ export default function SuggestionDetail({ params }:{ params:{ id:string } }){
   return (
     <>
       <Nav />
-      <main style={{ padding:16, maxWidth:560 }}>
-        <h2>{t("SuggestionDetail.header", { id: sug.id })}</h2>
-        <p><strong>{t("SuggestionDetail.title")}</strong> {sug.title}</p>
-        <p><strong>{t("SuggestionDetail.description")}</strong> {sug.description}</p>
-        {sug.status && <p><strong>{t("SuggestionDetail.status")}</strong> {sug.status}</p>}
-        <Link href={`/suggestions/${sug.id}/edit`}>{t("SuggestionDetail.edit")}</Link>
-        <br />
-        <Link href={`/suggestions/${sug.id}/delete`}>{t("SuggestionDetail.delete")}</Link>
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("SuggestionDetail.pill", { defaultValue: "Sugerencias" })}</span>
+            <h2>{t("SuggestionDetail.header", { id: sug.id })}</h2>
+            <p className="subtle">{t("SuggestionDetail.subtitle", { defaultValue: "Detalle completo de la sugerencia." })}</p>
+          </div>
+          <div className="actions">
+            <Link className="button secondary" href={`/suggestions/${sug.id}/edit`}>{t("SuggestionDetail.edit")}</Link>
+            <Link className="button" href={`/suggestions/${sug.id}/delete`}>{t("SuggestionDetail.delete")}</Link>
+          </div>
+        </header>
+        <section className="card stack">
+          <div>
+            <p className="meta">{t("SuggestionDetail.title")}</p>
+            <p className="card-title">{sug.title}</p>
+          </div>
+          <div>
+            <p className="meta">{t("SuggestionDetail.description")}</p>
+            <p className="subtle">{sug.description}</p>
+          </div>
+          {sug.status && (
+            <div>
+              <p className="meta">{t("SuggestionDetail.status")}</p>
+              <span className="chip">{sug.status}</span>
+            </div>
+          )}
+        </section>
       </main>
     </>
   );

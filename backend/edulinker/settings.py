@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from pythonjsonlogger import jsonlogger
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from corsheaders.defaults import default_headers
 
 load_dotenv()
 
@@ -36,6 +37,10 @@ CORS_ALLOWED_ORIGINS = _cors_env if _cors_env else [
     "http://localhost:19006", # Expo web (si aplica)
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-school-id",
+    "x-request-id",
+]
 
 CSRF_TRUSTED_ORIGINS = _split_env_list(os.getenv("CSRF_TRUSTED_ORIGINS"))
 
@@ -228,8 +233,8 @@ SPECTACULAR_SETTINGS = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
     'SIGNING_KEY': os.getenv("JWT_SECRET_KEY", SECRET_KEY),
     'ALGORITHM': os.getenv("JWT_ALGORITHM", "HS256"),
 }

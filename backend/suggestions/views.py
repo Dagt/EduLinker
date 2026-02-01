@@ -18,7 +18,9 @@ from core.permissions import (
     can_update_suggestion_status,
     is_director,
 )
+from core.models import User
 from core.pagination import DefaultPagination
+from audit.models import AuditLog
 
 class SuggestionListCreateView(generics.ListCreateAPIView):
     serializer_class = SuggestionSerializer
@@ -33,11 +35,7 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         qs = Suggestion.objects.filter(school_id=self.request.school_id)
         if not is_director(user):
-            qs = qs.filter(
-                Q(created_by=user)
-                | Q(target_teacher=user)
-                | Q(group__homeroom_teacher=user)
-            )
+            qs = qs.filter(created_by=user)
         group_id = self.request.query_params.get("group_id")
         if group_id:
             qs = qs.filter(group_id=group_id)
@@ -62,7 +60,23 @@ class SuggestionListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if not can_create_suggestion(user):
             raise PermissionDenied("Not allowed to create suggestions")
-        serializer.save(school_id=self.request.school_id, created_by=user)
+        director = User.objects.filter(
+            school_id=self.request.school_id, role=User.Roles.DIRECTOR, is_active=True
+        ).first()
+        if not director:
+            raise PermissionDenied("Director not available")
+        suggestion = serializer.save(
+            school_id=self.request.school_id,
+            created_by=user,
+            target_teacher=director,
+        )
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="create",
+            entity_type="suggestion",
+            entity_id=suggestion.id,
+        )
 
 class SuggestionRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     serializer_class = SuggestionSerializer
@@ -77,7 +91,20 @@ class SuggestionRetrieveUpdateView(generics.RetrieveUpdateAPIView):
         suggestion = self.get_object()
         if suggestion.created_by != self.request.user:
             raise PermissionDenied("Cannot update suggestion")
-        serializer.save()
+        changes = {}
+        for field, value in serializer.validated_data.items():
+            old_value = getattr(suggestion, field)
+            if old_value != value:
+                changes[field] = {"from": str(old_value), "to": str(value)}
+        suggestion = serializer.save()
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="update",
+            entity_type="suggestion",
+            entity_id=suggestion.id,
+            metadata={"changes": changes},
+        )
 
 class SuggestionMessageCreateView(generics.CreateAPIView):
     serializer_class = SuggestionMessageSerializer
@@ -90,7 +117,15 @@ class SuggestionMessageCreateView(generics.CreateAPIView):
             Suggestion, pk=self.kwargs["pk"], school_id=self.request.school_id
         )
         self.check_object_permissions(self.request, suggestion)
-        serializer.save(suggestion=suggestion, author=self.request.user)
+        message = serializer.save(suggestion=suggestion, author=self.request.user)
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="message_create",
+            entity_type="suggestion",
+            entity_id=suggestion.id,
+            metadata={"message_id": message.id},
+        )
 
 
 class SuggestionStatusUpdateView(generics.UpdateAPIView):

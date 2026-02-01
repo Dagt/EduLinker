@@ -46,10 +46,11 @@ class ComplaintFilter(filters.FilterSet):
     name = filters.CharFilter(method="filter_name")
     email = filters.CharFilter(field_name="created_by__email", lookup_expr="icontains")
     status = filters.CharFilter(field_name="status", lookup_expr="iexact")
+    group_id = filters.NumberFilter(field_name="group_id")
 
     class Meta:
         model = Complaint
-        fields = ["name", "email", "status"]
+        fields = ["name", "email", "status", "group_id"]
 
     def filter_name(self, queryset, name, value):
         return queryset.filter(

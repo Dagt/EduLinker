@@ -32,24 +32,40 @@ export default function GroupCreate() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("GroupCreate.header")}</h2>
-        <form onSubmit={submit}>
-          <input
-            placeholder={t("GroupCreate.name")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("GroupCreate.grade")}
-            value={grade}
-            onChange={(e) => setGrade(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <button>{t("GroupCreate.create")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("GroupCreate.pill", { defaultValue: "Grupos" })}</span>
+            <h2>{t("GroupCreate.header")}</h2>
+            <p className="subtle">
+              {t("GroupCreate.subtitle", { defaultValue: "Crea un grupo y asigna su grado." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("GroupCreate.name")}
+              <input
+                placeholder={t("GroupCreate.name")}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("GroupCreate.grade")}
+              <input
+                placeholder={t("GroupCreate.grade")}
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+              />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("GroupCreate.create")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

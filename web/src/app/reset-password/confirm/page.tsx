@@ -35,35 +35,45 @@ export default function ResetPasswordConfirmPage() {
   };
 
   return (
-    <main style={{ maxWidth: 420, margin: "48px auto", padding: 16 }}>
-      <h1>{t("ResetPasswordConfirm.header")}</h1>
-      <form onSubmit={submit} aria-labelledby="reset-confirm-title" style={{ display: "grid", gap: 12 }}>
-        <label style={{ display: "grid", gap: 4 }}>
-          <span>{t("ResetPasswordConfirm.password")}</span>
-          <input
-            aria-label={t("ResetPasswordConfirm.password")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            required
-            style={{ padding: 8 }}
-          />
-        </label>
-        <label style={{ display: "grid", gap: 4 }}>
-          <span>{t("ResetPasswordConfirm.confirm")}</span>
-          <input
-            aria-label={t("ResetPasswordConfirm.confirm")}
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            type="password"
-            required
-            style={{ padding: 8 }}
-          />
-        </label>
-        <button type="submit">{t("ResetPasswordConfirm.submit")}</button>
-        {message && <p role="status">{message}</p>}
-        {error && <p role="alert">{error}</p>}
-      </form>
+    <main className="page narrow">
+      <header className="page-header compact">
+        <div>
+          <span className="pill">{t("ResetPasswordConfirm.pill", { defaultValue: "Acceso" })}</span>
+          <h1>{t("ResetPasswordConfirm.header")}</h1>
+          <p className="subtle">
+            {t("ResetPasswordConfirm.subtitle", { defaultValue: "Define una nueva contrasena segura." })}
+          </p>
+        </div>
+      </header>
+      <section className="card">
+        <form className="form" onSubmit={submit} aria-labelledby="reset-confirm-title">
+          <label>
+            {t("ResetPasswordConfirm.password")}
+            <input
+              aria-label={t("ResetPasswordConfirm.password")}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              required
+            />
+          </label>
+          <label>
+            {t("ResetPasswordConfirm.confirm")}
+            <input
+              aria-label={t("ResetPasswordConfirm.confirm")}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              type="password"
+              required
+            />
+          </label>
+          <div className="form-actions">
+            <button className="button" type="submit">{t("ResetPasswordConfirm.submit")}</button>
+          </div>
+          {message && <p className="alert success" role="status">{message}</p>}
+          {error && <p className="alert error" role="alert">{error}</p>}
+        </form>
+      </section>
     </main>
   );
 }

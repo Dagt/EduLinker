@@ -23,9 +23,9 @@ interface Props {
 export default function AttendanceChart({ data, title }: Props) {
   const { t } = useTranslation();
   return (
-    <section>
+    <section className="card">
       <h3>{title}</h3>
-      <div style={{ height: 320 }}>
+      <div className="chart" style={{ height: 320 }}>
         <ResponsiveContainer>
           <BarChart data={data} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
             <XAxis dataKey="group_id" />

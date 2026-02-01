@@ -56,8 +56,14 @@ export default function AnalyticsPage() {
     return (
       <>
         <Nav />
-        <main style={{ padding: 16 }}>
-          <h2>{t("Analytics.header")}</h2>
+        <main className="page">
+          <header className="page-header compact">
+            <div>
+              <span className="pill">{t("Analytics.pill", { defaultValue: "Analitica" })}</span>
+              <h2>{t("Analytics.header")}</h2>
+              <p className="subtle">{t("Analytics.restricted", { defaultValue: "Solo disponible para direccion." })}</p>
+            </div>
+          </header>
         </main>
       </>
     );
@@ -105,12 +111,20 @@ export default function AnalyticsPage() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("Analytics.header")}</h2>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("Analytics.pill", { defaultValue: "Analitica" })}</span>
+            <h2>{t("Analytics.header")}</h2>
+            <p className="subtle">
+              {t("Analytics.subtitle", { defaultValue: "Indicadores clave para direccion escolar." })}
+            </p>
+          </div>
+        </header>
         {ready && (
           <>
             <KPICards items={kpis} />
-            <div style={{ display: "grid", gap: 32 }}>
+            <div className="grid-2">
               <ComplaintsChart
                 data={complaints.complaints_by_group}
                 title={t("Analytics.complaintsByGroup")}
@@ -132,9 +146,9 @@ export default function AnalyticsPage() {
                 data={attendance.attendance_by_group}
                 title={t("Analytics.attendanceByGroup")}
               />
-              <section style={{ border: "1px solid #e5e7eb", padding: 16, borderRadius: 8 }}>
+              <section className="card">
                 <h3>{t("Analytics.accessSettingsTitle")}</h3>
-                <p>{t("Analytics.accessSettingsDescription")}</p>
+                <p className="subtle">{t("Analytics.accessSettingsDescription")}</p>
               </section>
             </div>
           </>

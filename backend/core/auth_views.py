@@ -7,6 +7,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework import serializers
 
 from .serializers import (
     ChangePasswordSerializer,
@@ -22,8 +24,21 @@ from .throttles import (
 )
 
 
+class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+    email = serializers.EmailField(write_only=True, required=False)
+
+    def validate(self, attrs):
+        email = attrs.get("email") or attrs.get("username")
+        if email and "@" in email:
+            user = User.objects.filter(email__iexact=email, is_active=True).first()
+            if user:
+                attrs["username"] = user.username
+        return super().validate(attrs)
+
+
 class LoginView(TokenObtainPairView):
     throttle_classes = [LoginThrottle]
+    serializer_class = EmailTokenObtainPairSerializer
 
 
 class ChangePasswordView(APIView):

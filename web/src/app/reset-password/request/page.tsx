@@ -25,24 +25,35 @@ export default function ResetPasswordRequestPage() {
   };
 
   return (
-    <main style={{ maxWidth: 420, margin: "48px auto", padding: 16 }}>
-      <h1>{t("ResetPasswordRequest.header")}</h1>
-      <form onSubmit={submit} aria-labelledby="reset-request-title" style={{ display: "grid", gap: 12 }}>
-        <label style={{ display: "grid", gap: 4 }}>
-          <span>{t("ResetPasswordRequest.email")}</span>
-          <input
-            aria-label={t("ResetPasswordRequest.email")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            required
-            style={{ padding: 8 }}
-          />
-        </label>
-        <button type="submit">{t("ResetPasswordRequest.submit")}</button>
-        {message && <p role="status">{message}</p>}
-        {error && <p role="alert">{error}</p>}
-      </form>
+    <main className="page narrow">
+      <header className="page-header compact">
+        <div>
+          <span className="pill">{t("ResetPasswordRequest.pill", { defaultValue: "Acceso" })}</span>
+          <h1>{t("ResetPasswordRequest.header")}</h1>
+          <p className="subtle">
+            {t("ResetPasswordRequest.subtitle", { defaultValue: "Te enviaremos un enlace para restablecer la clave." })}
+          </p>
+        </div>
+      </header>
+      <section className="card">
+        <form className="form" onSubmit={submit} aria-labelledby="reset-request-title">
+          <label>
+            {t("ResetPasswordRequest.email")}
+            <input
+              aria-label={t("ResetPasswordRequest.email")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              required
+            />
+          </label>
+          <div className="form-actions">
+            <button className="button" type="submit">{t("ResetPasswordRequest.submit")}</button>
+          </div>
+          {message && <p className="alert success" role="status">{message}</p>}
+          {error && <p className="alert error" role="alert">{error}</p>}
+        </form>
+      </section>
     </main>
   );
 }

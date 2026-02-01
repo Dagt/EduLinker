@@ -28,24 +28,57 @@ export default function CreateEvent(){
 
   return (<>
     <Nav/>
-    <main style={{padding:16, maxWidth:680}}>
-      <h2>{t("CalendarCreate.header")}</h2>
-      <form onSubmit={submit}>
-        <select value={scope} onChange={e=>setScope(e.target.value as any)} style={{display:"block",margin:"8px 0",padding:8}}>
-          <option value="GROUP">{t("CalendarCreate.byGroup")}</option>
-          <option value="GLOBAL">{t("CalendarCreate.global")}</option>
-        </select>
-        <input placeholder={t("CalendarCreate.title")} value={title} onChange={e=>setTitle(e.target.value)} style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <input placeholder={t("CalendarCreate.location")} value={location} onChange={e=>setLocation(e.target.value)} style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <input placeholder={t("CalendarCreate.start")} value={startAt} onChange={e=>setStartAt(e.target.value)} style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <input placeholder={t("CalendarCreate.end")} value={endAt} onChange={e=>setEndAt(e.target.value)} style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        {scope==="GROUP" && (
-          <input placeholder={t("CalendarCreate.groupIds")} value={groupIds} onChange={e=>setGroupIds(e.target.value)} style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        )}
-        <textarea placeholder={t("CalendarCreate.description")} value={description} onChange={e=>setDescription(e.target.value)} style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}}/>
-        <button>{t("CalendarCreate.create")}</button>
-      </form>
-      {msg && <p>{msg}</p>}
+    <main className="page narrow">
+      <header className="page-header compact">
+        <div>
+          <span className="pill">{t("CalendarCreate.pill", { defaultValue: "Calendario" })}</span>
+          <h2>{t("CalendarCreate.header")}</h2>
+          <p className="subtle">
+            {t("CalendarCreate.subtitle", { defaultValue: "Programa eventos y actividades para la comunidad." })}
+          </p>
+        </div>
+      </header>
+      <section className="card">
+        <form className="form" onSubmit={submit}>
+          <label>
+            {t("CalendarCreate.scope", { defaultValue: "Alcance" })}
+            <select value={scope} onChange={e=>setScope(e.target.value as any)}>
+              <option value="GROUP">{t("CalendarCreate.byGroup")}</option>
+              <option value="GLOBAL">{t("CalendarCreate.global")}</option>
+            </select>
+          </label>
+          <label>
+            {t("CalendarCreate.title")}
+            <input placeholder={t("CalendarCreate.title")} value={title} onChange={e=>setTitle(e.target.value)} />
+          </label>
+          <label>
+            {t("CalendarCreate.location")}
+            <input placeholder={t("CalendarCreate.location")} value={location} onChange={e=>setLocation(e.target.value)} />
+          </label>
+          <label>
+            {t("CalendarCreate.start")}
+            <input placeholder={t("CalendarCreate.start")} value={startAt} onChange={e=>setStartAt(e.target.value)} />
+          </label>
+          <label>
+            {t("CalendarCreate.end")}
+            <input placeholder={t("CalendarCreate.end")} value={endAt} onChange={e=>setEndAt(e.target.value)} />
+          </label>
+          {scope==="GROUP" && (
+            <label>
+              {t("CalendarCreate.groupIds")}
+              <input placeholder={t("CalendarCreate.groupIds")} value={groupIds} onChange={e=>setGroupIds(e.target.value)} />
+            </label>
+          )}
+          <label>
+            {t("CalendarCreate.description")}
+            <textarea placeholder={t("CalendarCreate.description")} value={description} onChange={e=>setDescription(e.target.value)} />
+          </label>
+          <div className="form-actions">
+            <button className="button" type="submit">{t("CalendarCreate.create")}</button>
+          </div>
+        </form>
+      </section>
+      {msg && <p className="alert success">{msg}</p>}
     </main>
   </>);
 }

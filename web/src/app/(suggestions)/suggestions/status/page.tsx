@@ -32,16 +32,32 @@ function SuggestionStatusContent(){
 
   return (<>
     <Nav/>
-    <main style={{padding:16, maxWidth:560}}>
-      <h2>{t('SuggestionStatus.title')}</h2>
-      <form onSubmit={submit}>
-        <input placeholder={t('SuggestionStatus.id')} value={id} onChange={e=>setId(e.target.value)}
-               style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <input placeholder={t('SuggestionStatus.status')} value={status} onChange={e=>setStatus(e.target.value)}
-               style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <button>{t('SuggestionStatus.update')}</button>
-      </form>
-      {msg && <p>{msg}</p>}
+    <main className="page narrow">
+      <header className="page-header compact">
+        <div>
+          <span className="pill">{t("SuggestionStatus.pill", { defaultValue: "Sugerencias" })}</span>
+          <h2>{t('SuggestionStatus.title')}</h2>
+          <p className="subtle">
+            {t("SuggestionStatus.subtitle", { defaultValue: "Actualiza el estado de una sugerencia." })}
+          </p>
+        </div>
+      </header>
+      <section className="card">
+        <form className="form" onSubmit={submit}>
+          <label>
+            {t('SuggestionStatus.id')}
+            <input placeholder={t('SuggestionStatus.id')} value={id} onChange={e=>setId(e.target.value)} />
+          </label>
+          <label>
+            {t('SuggestionStatus.status')}
+            <input placeholder={t('SuggestionStatus.status')} value={status} onChange={e=>setStatus(e.target.value)} />
+          </label>
+          <div className="form-actions">
+            <button className="button" type="submit">{t('SuggestionStatus.update')}</button>
+          </div>
+        </form>
+      </section>
+      {msg && <p className="alert success">{msg}</p>}
     </main>
   </>);
 }

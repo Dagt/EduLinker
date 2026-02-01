@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.db.models import Count
+from django.db.models import Count, Q
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -7,14 +7,22 @@ from .models import Survey, SurveyVote
 from .serializers import SurveySerializer, SurveyVoteSerializer
 from core.throttles import SurveyThrottle
 from core.pagination import DefaultPagination
+from audit.models import AuditLog
 from core.permissions import (
+    is_admin_tenant,
     is_director,
     is_maestro_titular,
     is_maestro_itinerante,
     is_vocal,
     is_padre,
 )
-from core.models import GroupMembership, ParentStudent, SpecialistAssignment, VocalAssignment
+from core.models import (
+    Group,
+    GroupMembership,
+    ParentStudent,
+    SpecialistAssignment,
+    VocalAssignment,
+)
 
 class SurveyListCreateView(generics.ListCreateAPIView):
     serializer_class = SurveySerializer
@@ -23,7 +31,35 @@ class SurveyListCreateView(generics.ListCreateAPIView):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        qs = Survey.objects.filter(school_id=self.request.school_id)
+        school_id = self.request.school_id
+        user = self.request.user
+        qs = Survey.objects.filter(school_id=school_id)
+        if not (is_director(user) or is_admin_tenant(user)):
+            if is_maestro_titular(user):
+                group_ids = Group.objects.filter(
+                    school_id=school_id, homeroom_teacher_id=user.id
+                ).values_list("id", flat=True)
+            elif is_maestro_itinerante(user):
+                group_ids = SpecialistAssignment.objects.filter(
+                    teacher_id=user.id
+                ).values_list("group_id", flat=True)
+            elif is_vocal(user):
+                group_ids = VocalAssignment.objects.filter(
+                    parent_id=user.id, active=True
+                ).values_list("group_id", flat=True)
+            elif is_padre(user):
+                student_ids = ParentStudent.objects.filter(
+                    parent_id=user.id
+                ).values_list("student_id", flat=True)
+                group_ids = GroupMembership.objects.filter(
+                    student_id__in=student_ids
+                ).values_list("group_id", flat=True)
+            else:
+                group_ids = Group.objects.none().values_list("id", flat=True)
+
+            qs = qs.filter(
+                Q(scope=Survey.Scope.SCHOOL) | Q(group_id__in=group_ids)
+            )
         params = self.request.query_params
         if "status" in params:
             qs = qs.filter(status=params["status"])
@@ -50,6 +86,14 @@ class SurveyListCreateView(generics.ListCreateAPIView):
             school_id=self.request.school_id,
             created_by=user,
             status=Survey.Status.ACTIVE,
+        )
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="create",
+            entity_type="survey",
+            entity_id=serializer.instance.id,
+            metadata={"scope": serializer.instance.scope, "group_id": serializer.instance.group_id},
         )
 
 class SurveyDetailView(generics.RetrieveAPIView):
@@ -88,7 +132,15 @@ class SurveyVoteView(generics.CreateAPIView):
                 )
             ):
                 raise PermissionDenied("Not allowed to vote in this survey")
-        serializer.save(survey=survey, voter=user)
+        vote = serializer.save(survey=survey, voter=user)
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="vote",
+            entity_type="survey",
+            entity_id=survey.id,
+            metadata={"vote_id": vote.id, "option_index": vote.option_index},
+        )
 
 
 class SurveyResultsView(generics.GenericAPIView):
@@ -118,6 +170,13 @@ class SurveyResultsView(generics.GenericAPIView):
                 allowed = True
         if not allowed:
             raise PermissionDenied("Not allowed to view results")
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="read_results",
+            entity_type="survey",
+            entity_id=survey.id,
+        )
 
         agg = (
             SurveyVote.objects.filter(survey=survey)

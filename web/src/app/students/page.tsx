@@ -55,45 +55,49 @@ export default function StudentList() {
   return (
     <RequireRole allowed={["admin", "director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("StudentList.header")}</h2>
-        <p>
-          <Link href="/students/create">{t("StudentList.create")}</Link>
-        </p>
-        <form onSubmit={submitFilters} style={{ display: "grid", gap: 8, maxWidth: 480 }}>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("StudentList.pill", { defaultValue: "Alumnos" })}</span>
+            <h2>{t("StudentList.header")}</h2>
+            <p className="subtle">{t("StudentList.subtitle", { defaultValue: "Consulta y administra alumnos." })}</p>
+          </div>
+          <Link className="button secondary" href="/students/create">
+            {t("StudentList.create")}
+          </Link>
+        </header>
+        <form className="card form" onSubmit={submitFilters}>
           <input
             placeholder={t("StudentList.filterName")}
             value={filters.name}
             onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-            style={{ padding: 8 }}
           />
           <input
             placeholder={t("StudentList.filterGrade")}
             value={filters.grade_level}
             onChange={(e) => setFilters({ ...filters, grade_level: e.target.value })}
-            style={{ padding: 8 }}
           />
-          <button type="submit">{t("StudentList.applyFilters")}</button>
+          <button className="button" type="submit">{t("StudentList.applyFilters")}</button>
         </form>
-        {loading && <p>{t("StudentList.loading")}</p>}
-        {error && <p>{error}</p>}
-        <table style={{ width: "100%", marginTop: 16, borderCollapse: "collapse" }}>
+        {loading && <p className="subtle">{t("StudentList.loading")}</p>}
+        {error && <p className="alert error">{error}</p>}
+        <table>
           <thead>
             <tr>
-              <th style={{ textAlign: "left", padding: 8 }}>{t("StudentList.name")}</th>
-              <th style={{ textAlign: "left", padding: 8 }}>{t("StudentList.grade")}</th>
-              <th style={{ textAlign: "left", padding: 8 }}>{t("StudentList.enrollment")}</th>
-              <th style={{ padding: 8 }}>{t("StudentList.actions")}</th>
+              <th>{t("StudentList.name")}</th>
+              <th>{t("StudentList.grade")}</th>
+              <th>{t("StudentList.enrollment")}</th>
+              <th>{t("StudentList.actions")}</th>
             </tr>
           </thead>
           <tbody>
             {students.map((student) => (
-              <tr key={student.id} style={{ borderTop: "1px solid #e5e7eb" }}>
-                <td style={{ padding: 8 }}>{student.first_name} {student.last_name}</td>
-                <td style={{ padding: 8 }}>{student.grade_level}</td>
-                <td style={{ padding: 8 }}>{student.enrollment_code}</td>
-                <td style={{ padding: 8 }}>
-                  <Link href={`/students/edit?id=${student.id}`}>{t("StudentList.edit")}</Link>
+              <tr key={student.id}>
+                <td>{student.first_name} {student.last_name}</td>
+                <td>{student.grade_level}</td>
+                <td>{student.enrollment_code}</td>
+                <td>
+                  <Link className="link" href={`/students/edit?id=${student.id}`}>{t("StudentList.edit")}</Link>
                 </td>
               </tr>
             ))}

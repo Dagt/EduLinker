@@ -54,7 +54,8 @@ docker compose up
 Luego ejecuta migraciones y carga de datos:
 
 ```bash
-docker compose exec api python manage.py migrate
+docker compose exec api python manage.py migrate_schemas --shared
+docker compose exec api python manage.py migrate_schemas
 docker compose exec api python manage.py seed_demo
 ```
 
@@ -67,7 +68,8 @@ URLs por defecto:
 4. Aplica migraciones y (opcionalmente) carga datos de ejemplo:
 
     ```bash
-    docker compose exec api python manage.py migrate
+    docker compose exec api python manage.py migrate_schemas --shared
+    docker compose exec api python manage.py migrate_schemas
     docker compose exec api python manage.py seed_demo
     ```
 
@@ -123,7 +125,8 @@ exponiendo el mismo puerto HTTP (por defecto 8000).
 4. Ejecuta las migraciones y semillas:
 
     ```bash
-    kubectl exec deploy/edulinker-api -- python manage.py migrate
+    kubectl exec deploy/edulinker-api -- python manage.py migrate_schemas --shared
+    kubectl exec deploy/edulinker-api -- python manage.py migrate_schemas
     kubectl exec deploy/edulinker-api -- python manage.py seed_demo
     ```
 
@@ -141,7 +144,8 @@ exponiendo el mismo puerto HTTP (por defecto 8000).
 ### Backend
 ```bash
 pip install -r backend/requirements.txt
-python backend/manage.py migrate
+python backend/manage.py migrate_schemas --shared
+python backend/manage.py migrate_schemas
 python backend/manage.py seed_demo
 python backend/manage.py runserver
 ```

@@ -42,19 +42,41 @@ export default function Calendar(){
   return (
     <>
       <Nav/>
-      <main style={{padding:16}}>
-        <h2>{t("Calendar.header")}</h2>
-        <button onClick={downloadIcs}>{t("Calendar.downloadICS")}</button>
-        <UploadButton onUploaded={(u)=>setLastUrl(u)} />
-        {lastUrl && <p>{t("Calendar.uploaded", {url:lastUrl})}</p>}
-        <ul>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("Calendar.pill", { defaultValue: "Calendario" })}</span>
+            <h2>{t("Calendar.header")}</h2>
+            <p className="subtle">
+              {t("Calendar.subtitle", { defaultValue: "Administra eventos y exporta el calendario." })}
+            </p>
+          </div>
+          <div className="actions">
+            <button className="button" onClick={downloadIcs}>{t("Calendar.downloadICS")}</button>
+            <UploadButton onUploaded={(u)=>setLastUrl(u)} />
+          </div>
+        </header>
+        {lastUrl && <p className="alert success">{t("Calendar.uploaded", {url:lastUrl})}</p>}
+        <section className="grid cards">
           {events.map(e=>(
-            <li key={e.id}>
-              {e.title} — {new Date(e.start_at).toLocaleString()} {" "}
-              {lastUrl && <button onClick={()=>attachToEvent(e.id,lastUrl)}>{t("Calendar.attachLast")}</button>}
-            </li>
+            <article key={e.id} className="card">
+              <div className="card-header">
+                <span className="chip">{e.status ?? "ACTIVE"}</span>
+                <span className="meta">#{e.id}</span>
+              </div>
+              <p className="card-title">{e.title}</p>
+              <p className="subtle">{new Date(e.start_at).toLocaleString()}</p>
+              <div className="card-footer">
+                <span className="meta">{e.location ?? ""}</span>
+                {lastUrl && (
+                  <button className="button secondary" onClick={()=>attachToEvent(e.id,lastUrl)}>
+                    {t("Calendar.attachLast")}
+                  </button>
+                )}
+              </div>
+            </article>
           ))}
-        </ul>
+        </section>
       </main>
     </>
   );

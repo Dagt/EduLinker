@@ -41,20 +41,38 @@ export default function FundraisingEdit({ params }:{ params:{ id:string } }){
   return (
     <>
       <Nav />
-      <main style={{ padding:16, maxWidth:680 }}>
-        <h2>{t('FundraisingEdit.header')}</h2>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <input placeholder={t('FundraisingEdit.name')} {...register('name', {required:true})}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          {errors.name && <p>{t('Validation.required')}</p>}
-          <input placeholder={t('FundraisingEdit.date')} {...register('date', {required:true})}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          {errors.date && <p>{t('Validation.required')}</p>}
-          <textarea placeholder={t('FundraisingEdit.description')} {...register('description')}
-                    style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
-          <button>{t('FundraisingEdit.update')}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("FundraisingEdit.pill", { defaultValue: "Recaudacion" })}</span>
+            <h2>{t('FundraisingEdit.header')}</h2>
+            <p className="subtle">
+              {t("FundraisingEdit.subtitle", { defaultValue: "Actualiza los datos del evento." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={handleSubmit(onSubmit)}>
+            <label>
+              {t('FundraisingEdit.name')}
+              <input placeholder={t('FundraisingEdit.name')} {...register('name', {required:true})} />
+              {errors.name && <span className="meta">{t('Validation.required')}</span>}
+            </label>
+            <label>
+              {t('FundraisingEdit.date')}
+              <input placeholder={t('FundraisingEdit.date')} {...register('date', {required:true})} />
+              {errors.date && <span className="meta">{t('Validation.required')}</span>}
+            </label>
+            <label>
+              {t('FundraisingEdit.description')}
+              <textarea placeholder={t('FundraisingEdit.description')} {...register('description')} />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t('FundraisingEdit.update')}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

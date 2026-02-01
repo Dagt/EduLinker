@@ -30,14 +30,32 @@ export default function FundraisingDetail({ params }:{ params:{ id:string } }){
   return (
     <>
       <Nav />
-      <main style={{ padding:16, maxWidth:680 }}>
-        <h2>{t("FundraisingDetail.header", { id: ev.id })}</h2>
-        <p><strong>{t("FundraisingDetail.name")}</strong> {ev.name}</p>
-        <p><strong>{t("FundraisingDetail.date")}</strong> {ev.date}</p>
-        <p><strong>{t("FundraisingDetail.description")}</strong> {ev.description}</p>
-        <Link href={`/fundraising/${ev.id}/edit`}>{t("FundraisingDetail.edit")}</Link>
-        <br />
-        <Link href={`/fundraising/${ev.id}/delete`}>{t("FundraisingDetail.delete")}</Link>
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("FundraisingDetail.pill", { defaultValue: "Recaudacion" })}</span>
+            <h2>{t("FundraisingDetail.header", { id: ev.id })}</h2>
+            <p className="subtle">{t("FundraisingDetail.subtitle", { defaultValue: "Detalle del evento." })}</p>
+          </div>
+          <div className="actions">
+            <Link className="button secondary" href={`/fundraising/${ev.id}/edit`}>{t("FundraisingDetail.edit")}</Link>
+            <Link className="button" href={`/fundraising/${ev.id}/delete`}>{t("FundraisingDetail.delete")}</Link>
+          </div>
+        </header>
+        <section className="card stack">
+          <div>
+            <p className="meta">{t("FundraisingDetail.name")}</p>
+            <p className="card-title">{ev.name}</p>
+          </div>
+          <div>
+            <p className="meta">{t("FundraisingDetail.date")}</p>
+            <p className="subtle">{ev.date}</p>
+          </div>
+          <div>
+            <p className="meta">{t("FundraisingDetail.description")}</p>
+            <p className="subtle">{ev.description}</p>
+          </div>
+        </section>
       </main>
     </>
   );

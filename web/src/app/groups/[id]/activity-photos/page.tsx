@@ -44,26 +44,30 @@ export default function ActivityPhotosPage({ params }: { params: { id: string } 
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("ActivityPhotos.title")}</h2>
-        {error && <p>{error}</p>}
-        {requireRole(["teacher", "vocal"]) && (
-          <div style={{ marginBottom: 16 }}>
-            <span>{t("ActivityPhotos.upload")}: </span>
-            <UploadButton onUploaded={handleUploaded} />
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("ActivityPhotos.pill", { defaultValue: "Galeria" })}</span>
+            <h2>{t("ActivityPhotos.title")}</h2>
+            <p className="subtle">{t("ActivityPhotos.subtitle", { defaultValue: "Evidencias fotograficas del grupo." })}</p>
           </div>
+        </header>
+        {error && <p className="alert error">{error}</p>}
+        {requireRole(["teacher", "vocal"]) && (
+          <section className="card">
+            <div className="stack">
+              <span>{t("ActivityPhotos.upload")}</span>
+              <UploadButton onUploaded={handleUploaded} />
+            </div>
+          </section>
         )}
         {items.length === 0 ? (
-          <p>{t("ActivityPhotos.empty")}</p>
+          <p className="empty">{t("ActivityPhotos.empty")}</p>
         ) : (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <div className="media-grid">
             {items.map((p) => (
-              <a key={p.id} href={p.photo_url} download>
-                <img
-                  src={p.photo_url}
-                  alt=""
-                  style={{ width: 200, height: 200, objectFit: "cover" }}
-                />
+              <a key={p.id} href={p.photo_url} download className="media-card">
+                <img src={p.photo_url} alt="" />
               </a>
             ))}
           </div>

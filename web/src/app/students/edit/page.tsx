@@ -64,40 +64,60 @@ export default function StudentEdit() {
   return (
     <RequireRole allowed={["admin", "director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("StudentEdit.header")}</h2>
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("StudentEdit.pill", { defaultValue: "Estudiantes" })}</span>
+            <h2>{t("StudentEdit.header")}</h2>
+            <p className="subtle">
+              {t("StudentEdit.subtitle", { defaultValue: "Actualiza la ficha del estudiante." })}
+            </p>
+          </div>
+        </header>
         {!id ? (
-          <p>{t("StudentEdit.missingId")}</p>
+          <p className="alert error">{t("StudentEdit.missingId")}</p>
         ) : (
-          <form onSubmit={submit} style={{ maxWidth: 480 }}>
-            <input
-              placeholder={t("StudentEdit.firstName")}
-              value={form.first_name}
-              onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-              style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-            />
-            <input
-              placeholder={t("StudentEdit.lastName")}
-              value={form.last_name}
-              onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-              style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-            />
-            <input
-              placeholder={t("StudentEdit.grade")}
-              value={form.grade_level}
-              onChange={(e) => setForm({ ...form, grade_level: e.target.value })}
-              style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-            />
-            <input
-              placeholder={t("StudentEdit.enrollment")}
-              value={form.enrollment_code}
-              onChange={(e) => setForm({ ...form, enrollment_code: e.target.value })}
-              style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-            />
-            <button>{t("StudentEdit.update")}</button>
-          </form>
+          <section className="card">
+            <form className="form" onSubmit={submit}>
+              <label>
+                {t("StudentEdit.firstName")}
+                <input
+                  placeholder={t("StudentEdit.firstName")}
+                  value={form.first_name}
+                  onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+                />
+              </label>
+              <label>
+                {t("StudentEdit.lastName")}
+                <input
+                  placeholder={t("StudentEdit.lastName")}
+                  value={form.last_name}
+                  onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+                />
+              </label>
+              <label>
+                {t("StudentEdit.grade")}
+                <input
+                  placeholder={t("StudentEdit.grade")}
+                  value={form.grade_level}
+                  onChange={(e) => setForm({ ...form, grade_level: e.target.value })}
+                />
+              </label>
+              <label>
+                {t("StudentEdit.enrollment")}
+                <input
+                  placeholder={t("StudentEdit.enrollment")}
+                  value={form.enrollment_code}
+                  onChange={(e) => setForm({ ...form, enrollment_code: e.target.value })}
+                />
+              </label>
+              <div className="form-actions">
+                <button className="button" type="submit">{t("StudentEdit.update")}</button>
+              </div>
+            </form>
+          </section>
         )}
-        {msg && <p>{msg}</p>}
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </RequireRole>
   );

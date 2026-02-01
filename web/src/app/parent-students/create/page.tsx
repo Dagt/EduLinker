@@ -73,81 +73,88 @@ export default function ParentStudentCreatePage() {
   return (
     <RequireRole allowed={["admin", "director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("ParentStudentsCreate.header")}</h2>
-        <form
-          aria-labelledby="parent-student-create"
-          onSubmit={submit}
-          style={{ display: "grid", gap: 12, maxWidth: 520 }}
-        >
-          <h3 id="parent-student-create">{t("ParentStudentsCreate.formTitle")}</h3>
-          <label style={{ display: "grid", gap: 4 }}>
-            <span>{t("ParentStudentsCreate.parentSearch")}</span>
-            <input
-              aria-label={t("ParentStudentsCreate.parentSearch")}
-              value={parentQuery}
-              onChange={(e) => setParentQuery(e.target.value)}
-              style={{ padding: 8 }}
-            />
-          </label>
-          <label style={{ display: "grid", gap: 4 }}>
-            <span>{t("ParentStudentsCreate.parentSelect")}</span>
-            <select
-              aria-label={t("ParentStudentsCreate.parentSelect")}
-              value={parentId}
-              onChange={(e) => setParentId(e.target.value)}
-              style={{ padding: 8 }}
-              required
-            >
-              <option value="">{t("ParentStudentsCreate.selectPlaceholder")}</option>
-              {parents.map((parent) => (
-                <option key={parent.id} value={parent.id}>
-                  {parent.first_name} {parent.last_name} ({parent.email})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label style={{ display: "grid", gap: 4 }}>
-            <span>{t("ParentStudentsCreate.studentSearch")}</span>
-            <input
-              aria-label={t("ParentStudentsCreate.studentSearch")}
-              value={studentQuery}
-              onChange={(e) => setStudentQuery(e.target.value)}
-              style={{ padding: 8 }}
-            />
-          </label>
-          <label style={{ display: "grid", gap: 4 }}>
-            <span>{t("ParentStudentsCreate.studentSelect")}</span>
-            <select
-              aria-label={t("ParentStudentsCreate.studentSelect")}
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              style={{ padding: 8 }}
-              required
-            >
-              <option value="">{t("ParentStudentsCreate.selectPlaceholder")}</option>
-              {students.map((student) => (
-                <option key={student.id} value={student.id}>
-                  {student.first_name} {student.last_name} • {student.enrollment_code} • {student.grade_level}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label style={{ display: "grid", gap: 4 }}>
-            <span>{t("ParentStudentsCreate.relationship")}</span>
-            <input
-              aria-label={t("ParentStudentsCreate.relationship")}
-              value={relationship}
-              onChange={(e) => setRelationship(e.target.value)}
-              style={{ padding: 8 }}
-              required
-            />
-          </label>
-          <button type="submit" disabled={loading}>
-            {loading ? t("ParentStudentsCreate.saving") : t("ParentStudentsCreate.save")}
-          </button>
-          {error && <p role="alert">{error}</p>}
-        </form>
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("ParentStudentsCreate.pill", { defaultValue: "Vinculos" })}</span>
+            <h2>{t("ParentStudentsCreate.header")}</h2>
+            <p className="subtle">
+              {t("ParentStudentsCreate.subtitle", { defaultValue: "Relaciona padres con estudiantes." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form
+            aria-labelledby="parent-student-create"
+            onSubmit={submit}
+            className="form"
+          >
+            <h3 id="parent-student-create">{t("ParentStudentsCreate.formTitle")}</h3>
+            <label>
+              {t("ParentStudentsCreate.parentSearch")}
+              <input
+                aria-label={t("ParentStudentsCreate.parentSearch")}
+                value={parentQuery}
+                onChange={(e) => setParentQuery(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("ParentStudentsCreate.parentSelect")}
+              <select
+                aria-label={t("ParentStudentsCreate.parentSelect")}
+                value={parentId}
+                onChange={(e) => setParentId(e.target.value)}
+                required
+              >
+                <option value="">{t("ParentStudentsCreate.selectPlaceholder")}</option>
+                {parents.map((parent) => (
+                  <option key={parent.id} value={parent.id}>
+                    {parent.first_name} {parent.last_name} ({parent.email})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {t("ParentStudentsCreate.studentSearch")}
+              <input
+                aria-label={t("ParentStudentsCreate.studentSearch")}
+                value={studentQuery}
+                onChange={(e) => setStudentQuery(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("ParentStudentsCreate.studentSelect")}
+              <select
+                aria-label={t("ParentStudentsCreate.studentSelect")}
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
+                required
+              >
+                <option value="">{t("ParentStudentsCreate.selectPlaceholder")}</option>
+                {students.map((student) => (
+                  <option key={student.id} value={student.id}>
+                    {student.first_name} {student.last_name} - {student.enrollment_code} - {student.grade_level}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {t("ParentStudentsCreate.relationship")}
+              <input
+                aria-label={t("ParentStudentsCreate.relationship")}
+                value={relationship}
+                onChange={(e) => setRelationship(e.target.value)}
+                required
+              />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit" disabled={loading}>
+                {loading ? t("ParentStudentsCreate.saving") : t("ParentStudentsCreate.save")}
+              </button>
+            </div>
+            {error && <p className="alert error" role="alert">{error}</p>}
+          </form>
+        </section>
       </main>
     </RequireRole>
   );

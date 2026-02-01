@@ -32,24 +32,40 @@ export default function AssignHomeroom() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("AssignHomeroom.header")}</h2>
-        <form onSubmit={submit}>
-          <input
-            placeholder={t("AssignHomeroom.groupId")}
-            value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("AssignHomeroom.teacherId")}
-            value={teacherId}
-            onChange={(e) => setTeacherId(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <button>{t("AssignHomeroom.assign")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("AssignHomeroom.pill", { defaultValue: "Grupos" })}</span>
+            <h2>{t("AssignHomeroom.header")}</h2>
+            <p className="subtle">
+              {t("AssignHomeroom.subtitle", { defaultValue: "Asigna el docente titular del grupo." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("AssignHomeroom.groupId")}
+              <input
+                placeholder={t("AssignHomeroom.groupId")}
+                value={groupId}
+                onChange={(e) => setGroupId(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("AssignHomeroom.teacherId")}
+              <input
+                placeholder={t("AssignHomeroom.teacherId")}
+                value={teacherId}
+                onChange={(e) => setTeacherId(e.target.value)}
+              />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("AssignHomeroom.assign")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

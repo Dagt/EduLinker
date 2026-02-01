@@ -7,9 +7,9 @@ interface Props {
 
 export default function SurveysChart({ data, title }: Props) {
   return (
-    <section>
+    <section className="card">
       <h3>{title}</h3>
-      <div style={{ height: 300 }}>
+      <div className="chart">
         <ResponsiveContainer>
           <BarChart data={data}>
             <XAxis dataKey="group_id" />

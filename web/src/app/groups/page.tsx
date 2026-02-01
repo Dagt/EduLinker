@@ -18,8 +18,9 @@ export default function GroupList() {
     async function load() {
       try {
         const tk = getToken();
-        const data = await apiGet<any[]>("/groups/", tk);
-        setGroups(data);
+        const data = await apiGet<any>("/groups/", tk);
+        const list = Array.isArray(data) ? data : data?.results || [];
+        setGroups(list);
       } catch (err: any) {
         setError(err.message || t("GroupList.error"));
       }
@@ -34,25 +35,39 @@ export default function GroupList() {
   return (
     <RequireRole allowed={["admin", "director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("GroupList.header")}</h2>
-        <p>
-          <Link href="/groups/create">{t("GroupList.create")}</Link>
-        </p>
-        <input
-          placeholder={t("GroupList.filterPlaceholder")}
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-        />
-        {error && <p>{error}</p>}
-        <ul>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("GroupList.pill", { defaultValue: "Grupos" })}</span>
+            <h2>{t("GroupList.header")}</h2>
+            <p className="subtle">{t("GroupList.subtitle", { defaultValue: "Administra grupos y asignaciones." })}</p>
+          </div>
+          <Link className="button secondary" href="/groups/create">
+            {t("GroupList.create")}
+          </Link>
+        </header>
+        <section className="card form">
+          <input
+            placeholder={t("GroupList.filterPlaceholder")}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </section>
+        {error && <p className="alert error">{error}</p>}
+        <section className="grid cards">
           {visibleGroups.map((g) => (
-            <li key={g.id}>
-              <Link href={`/groups/${g.id}`}>{g.name}</Link>
-            </li>
+            <article key={g.id} className="card">
+              <div className="card-header">
+                <span className="chip">#{g.id}</span>
+              </div>
+              <p className="card-title">{g.name}</p>
+              <div className="card-footer">
+                <span className="meta">{t("GroupList.grade", { defaultValue: "Grado" })}: {g.grade_level}</span>
+                <Link className="link" href={`/groups/${g.id}`}>{t("GroupList.view", { defaultValue: "Ver detalle" })}</Link>
+              </div>
+            </article>
           ))}
-        </ul>
+        </section>
       </main>
     </RequireRole>
   );

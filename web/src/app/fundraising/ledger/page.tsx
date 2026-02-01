@@ -44,20 +44,40 @@ export default function FundraisingLedger(){
   return (
     <>
       <Nav/>
-      <main style={{padding:16, maxWidth:680}}>
-        <h2>{t("FundraisingLedger.header")}</h2>
-        <form onSubmit={submit}>
-          <input placeholder={t("FundraisingLedger.eventId")} value={eventId} onChange={e=>setEventId(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} required/>
-          <input placeholder={t("FundraisingLedger.groupId")} value={groupId} onChange={e=>setGroupId(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} required/>
-          <input placeholder={t("FundraisingLedger.amount")} value={amount} onChange={e=>setAmount(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} required/>
-          <textarea placeholder={t("FundraisingLedger.notes")} value={notes} onChange={e=>setNotes(e.target.value)}
-                    style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:100}}/>
-          <button>{t("FundraisingLedger.save")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("FundraisingLedger.pill", { defaultValue: "Recaudacion" })}</span>
+            <h2>{t("FundraisingLedger.header")}</h2>
+            <p className="subtle">
+              {t("FundraisingLedger.subtitle", { defaultValue: "Registra el dinero recolectado por grupo." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("FundraisingLedger.eventId")}
+              <input placeholder={t("FundraisingLedger.eventId")} value={eventId} onChange={e=>setEventId(e.target.value)} required/>
+            </label>
+            <label>
+              {t("FundraisingLedger.groupId")}
+              <input placeholder={t("FundraisingLedger.groupId")} value={groupId} onChange={e=>setGroupId(e.target.value)} required/>
+            </label>
+            <label>
+              {t("FundraisingLedger.amount")}
+              <input placeholder={t("FundraisingLedger.amount")} value={amount} onChange={e=>setAmount(e.target.value)} required/>
+            </label>
+            <label>
+              {t("FundraisingLedger.notes")}
+              <textarea placeholder={t("FundraisingLedger.notes")} value={notes} onChange={e=>setNotes(e.target.value)} />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("FundraisingLedger.save")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

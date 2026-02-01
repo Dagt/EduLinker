@@ -49,10 +49,11 @@ prefieres instalación manual necesitarás:
    docker compose up --build
    ```
 
-4. En otra terminal aplica migraciones y carga datos de demostración:
+4. En otra terminal aplica migraciones (multi-tenant) y carga datos de demostración:
 
    ```bash
-   docker compose exec api python manage.py migrate
+   docker compose exec api python manage.py migrate_schemas --shared
+   docker compose exec api python manage.py migrate_schemas
    docker compose exec api python manage.py seed_demo
    ```
 
@@ -128,6 +129,7 @@ EduLinker/
 
 ## Más documentación
 
+- Guía rápida de pruebas y accesos: `docs/GUIA_PRUEBAS.md`.
 - La especificación de la API está en `http://localhost:8000/api/docs` y en
   `docs/openapi.json`.
 - La carpeta `docs/` contiene guías de despliegue, detalles de permisos y casos

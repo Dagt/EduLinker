@@ -37,37 +37,43 @@ export default function Login(){
   return (
     <main className="login-shell">
       <section className="login-card">
-        <span className="pill">EduLinker</span>
-        <h1>{t("Login.title")}</h1>
-        <p className="subtle">
-          {t("Login.subtitle", { defaultValue: "Acceso para dirección, docentes y familias." })}
-        </p>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="brand">
+          <span className="brand-mark">EL</span>
+          <div>
+            <h1>{t("Login.title")}</h1>
+            <p className="subtle">
+              {t("Login.subtitle", { defaultValue: "Acceso para dirección, docentes y familias." })}
+            </p>
+          </div>
+        </div>
+        <form className="form" onSubmit={handleSubmit(onSubmit)}>
           <label>
             {t("Login.email")}
             <input
               placeholder={t("Login.email")}
               {...register("email", {
-                required: t('Validation.required'),
-                pattern: { value: /\S+@\S+\.\S+/, message: t('Validation.invalidEmail') }
+                required: t("Validation.required"),
+                pattern: { value: /\S+@\S+\.\S+/, message: t("Validation.invalidEmail") },
               })}
             />
           </label>
-          {errors.email && <p className="error">{errors.email.message as string}</p>}
+          {errors.email && <p className="alert error">{errors.email.message as string}</p>}
           <label>
             {t("Login.password")}
             <input
               placeholder={t("Login.password")}
               type="password"
-              {...register("password", { required: t('Validation.required') })}
+              {...register("password", { required: t("Validation.required") })}
             />
           </label>
-          {errors.password && <p className="error">{errors.password.message as string}</p>}
-          <button className="primary" type="submit">{t("Login.login")}</button>
+          {errors.password && <p className="alert error">{errors.password.message as string}</p>}
+          <button className="button primary" type="submit">
+            {t("Login.login")}
+          </button>
           <p className="reset">
             <Link href="/reset-password/request">{t("Login.resetPassword")}</Link>
           </p>
-          {error && <p className="error">{error}</p>}
+          {error && <p className="alert error">{error}</p>}
         </form>
       </section>
       <style jsx>{`
@@ -78,49 +84,39 @@ export default function Login(){
           padding: 2rem;
         }
         .login-card {
-          width: min(420px, 92vw);
-          background: rgba(15, 23, 42, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 18px;
-          padding: 2rem;
-          box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+          width: min(520px, 92vw);
+          background: var(--panel-strong);
+          border: 1px solid var(--border);
+          border-radius: 22px;
+          padding: 2.25rem;
+          box-shadow: var(--shadow);
           backdrop-filter: blur(14px);
         }
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+        .brand-mark {
+          display: grid;
+          place-items: center;
+          width: 48px;
+          height: 48px;
+          border-radius: 14px;
+          font-weight: 800;
+          background: linear-gradient(135deg, var(--accent), var(--accent-2));
+          color: #fefdfb;
+        }
         h1 {
-          margin: 0.75rem 0 0.25rem;
-        }
-        form {
-          display: grid;
-          gap: 0.9rem;
-          margin-top: 1.25rem;
-        }
-        label {
-          display: grid;
-          gap: 0.4rem;
-          font-size: 0.9rem;
-          color: #e2e8f0;
-        }
-        .primary {
-          background: linear-gradient(135deg, #38bdf8, #f59e0b);
-          border: none;
-          color: #0b1020;
-          font-weight: 700;
+          margin: 0 0 0.35rem;
         }
         .reset {
           margin: 0.25rem 0 0;
-          color: #cbd5f5;
+          color: var(--ink-soft);
         }
         .reset :global(a) {
-          color: #fef3c7;
+          color: var(--accent);
           text-decoration: underline;
-        }
-        .error {
-          color: #fecaca;
-          background: rgba(248, 113, 113, 0.1);
-          border: 1px solid rgba(248, 113, 113, 0.35);
-          border-radius: 12px;
-          padding: 0.5rem 0.75rem;
-          font-size: 0.85rem;
         }
       `}</style>
     </main>

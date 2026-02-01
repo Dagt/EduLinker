@@ -85,28 +85,31 @@ export default function UserList() {
   return (
     <RequireRole allowed={["admin", "director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("UserList.header")}</h2>
-        <p>
-          <Link href="/users/create">{t("UserList.create")}</Link>
-        </p>
-        <form onSubmit={submitFilters} style={{ display: "grid", gap: 8, maxWidth: 600 }}>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("UserList.pill", { defaultValue: "Usuarios" })}</span>
+            <h2>{t("UserList.header")}</h2>
+            <p className="subtle">{t("UserList.subtitle", { defaultValue: "Gestiona roles y acceso." })}</p>
+          </div>
+          <Link className="button secondary" href="/users/create">
+            {t("UserList.create")}
+          </Link>
+        </header>
+        <form className="card form" onSubmit={submitFilters}>
           <input
             placeholder={t("UserList.filterName")}
             value={filters.name}
             onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-            style={{ padding: 8 }}
           />
           <input
             placeholder={t("UserList.filterEmail")}
             value={filters.email}
             onChange={(e) => setFilters({ ...filters, email: e.target.value })}
-            style={{ padding: 8 }}
           />
           <select
             value={filters.role}
             onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-            style={{ padding: 8 }}
           >
             <option value="">{t("UserList.filterRole")}</option>
             <option value="DIRECTOR">{t("UserList.roleDirector")}</option>
@@ -118,32 +121,31 @@ export default function UserList() {
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            style={{ padding: 8 }}
           >
             <option value="">{t("UserList.filterStatus")}</option>
             <option value="active">{t("UserList.statusActive")}</option>
             <option value="inactive">{t("UserList.statusInactive")}</option>
           </select>
-          <button type="submit">{t("UserList.applyFilters")}</button>
+          <button className="button" type="submit">{t("UserList.applyFilters")}</button>
         </form>
-        {loading && <p>{t("UserList.loading")}</p>}
-        {error && <p>{error}</p>}
-        <table style={{ width: "100%", marginTop: 16, borderCollapse: "collapse" }}>
+        {loading && <p className="subtle">{t("UserList.loading")}</p>}
+        {error && <p className="alert error">{error}</p>}
+        <table>
           <thead>
             <tr>
-              <th style={{ textAlign: "left", padding: 8 }}>{t("UserList.name")}</th>
-              <th style={{ textAlign: "left", padding: 8 }}>{t("UserList.email")}</th>
-              <th style={{ textAlign: "left", padding: 8 }}>{t("UserList.role")}</th>
-              <th style={{ textAlign: "left", padding: 8 }}>{t("UserList.status")}</th>
-              <th style={{ padding: 8 }}>{t("UserList.actions")}</th>
+              <th>{t("UserList.name")}</th>
+              <th>{t("UserList.email")}</th>
+              <th>{t("UserList.role")}</th>
+              <th>{t("UserList.status")}</th>
+              <th>{t("UserList.actions")}</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id} style={{ borderTop: "1px solid #e5e7eb" }}>
-                <td style={{ padding: 8 }}>{user.first_name} {user.last_name}</td>
-                <td style={{ padding: 8 }}>{user.email}</td>
-                <td style={{ padding: 8 }}>
+              <tr key={user.id}>
+                <td>{user.first_name} {user.last_name}</td>
+                <td>{user.email}</td>
+                <td>
                   <select
                     value={updates[user.id]?.role || user.role}
                     onChange={(e) =>
@@ -155,7 +157,6 @@ export default function UserList() {
                         },
                       })
                     }
-                    style={{ padding: 4 }}
                   >
                     <option value="DIRECTOR">{t("UserList.roleDirector")}</option>
                     <option value="MAESTRO_TITULAR">{t("UserList.roleHomeroom")}</option>
@@ -164,7 +165,7 @@ export default function UserList() {
                     <option value="VOCAL">{t("UserList.roleVocal")}</option>
                   </select>
                 </td>
-                <td style={{ padding: 8 }}>
+                <td>
                   <select
                     value={(updates[user.id]?.is_active ?? user.is_active ?? true) ? "active" : "inactive"}
                     onChange={(e) =>
@@ -176,14 +177,13 @@ export default function UserList() {
                         },
                       })
                     }
-                    style={{ padding: 4 }}
                   >
                     <option value="active">{t("UserList.statusActive")}</option>
                     <option value="inactive">{t("UserList.statusInactive")}</option>
                   </select>
                 </td>
-                <td style={{ padding: 8 }}>
-                  <button onClick={() => saveRow(user.id)} disabled={savingId === user.id}>
+                <td>
+                  <button className="button secondary" onClick={() => saveRow(user.id)} disabled={savingId === user.id}>
                     {savingId === user.id ? t("UserList.saving") : t("UserList.save")}
                   </button>
                 </td>

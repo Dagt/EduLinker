@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import Card from "@/components/Card";
-import { getToken } from "@/lib/auth";
+import { getToken, clearToken, clearRefreshToken } from "@/lib/auth";
 import { apiGet } from "@/lib/api";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
@@ -21,18 +22,38 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { t } = useTranslation();
+  const router = useRouter();
 
   const load = async () => {
     setLoading(true);
     setError("");
     try {
       const tk = getToken();
+      if (!tk) {
+        router.replace("/login");
+        return;
+      }
       const m = await apiGet<any>("/me/", tk);
       const k = await apiGet<any>("/analytics/overview", tk);
       setMe(m);
       setKpis(k);
     } catch (err: any) {
-      setError(err?.message || "Error loading dashboard");
+      if (String(err?.message || "").includes("401")) {
+        clearToken();
+        clearRefreshToken();
+        router.replace("/login");
+        return;
+      }
+      const msg = String(err?.message || "");
+      if (msg.includes("500")) {
+        setError(
+          t("Dashboard.serverError", {
+            defaultValue: "El servidor no pudo cargar las métricas. Intenta más tarde.",
+          }),
+        );
+      } else {
+        setError(msg || t("Dashboard.loadError", { defaultValue: "Error al cargar el dashboard." }));
+      }
     } finally {
       setLoading(false);
     }
@@ -59,8 +80,11 @@ function DashboardContent() {
 
   const stats = [
     { label: t("Dashboard.eventsUpcoming"), value: kpis?.events_upcoming ?? "—" },
+    { label: t("Dashboard.eventsTotal", { defaultValue: "Eventos totales" }), value: kpis?.events_total ?? "—" },
+    { label: t("Dashboard.eventsCancelled", { defaultValue: "Eventos cancelados" }), value: kpis?.events_cancelled ?? "—" },
     { label: t("Dashboard.complaintsOpen"), value: kpis?.complaints_open ?? "—" },
     { label: t("Dashboard.complaintsTotal"), value: kpis?.complaints_total ?? "—" },
+    { label: t("Dashboard.suggestionsTotal", { defaultValue: "Sugerencias" }), value: kpis?.suggestions_total ?? "—" },
     { label: t("Dashboard.fundraisingTotal"), value: kpis?.fundraising_total ?? "—" },
   ];
 
@@ -69,7 +93,7 @@ function DashboardContent() {
       <Nav />
       <main className="container">
         <div className="page-title">
-          <span className="pill">Overview</span>
+          <span className="pill">{t("Dashboard.pill", { defaultValue: "Resumen" })}</span>
           <h2>{t("Dashboard.welcome", { name })}</h2>
           <p className="subtle">
             {t("Dashboard.subtitle", { defaultValue: "Visión general del estado operativo." })}
@@ -101,7 +125,7 @@ function DashboardContent() {
                   <XAxis dataKey="group" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#38bdf8" />
+                  <Bar dataKey="total" fill="#2f6f9f" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -112,7 +136,7 @@ function DashboardContent() {
                   <XAxis dataKey="group" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#f59e0b" />
+                  <Bar dataKey="total" fill="#d39a2f" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -123,7 +147,7 @@ function DashboardContent() {
                   <XAxis dataKey="group" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="total" fill="#a78bfa" />
+                  <Bar dataKey="total" fill="#4c7f5d" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -146,14 +170,15 @@ function DashboardContent() {
           grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         }
         .stat {
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 14px;
+          border: 1px solid rgba(31, 42, 55, 0.12);
+          border-radius: 16px;
           padding: 1rem 1.25rem;
-          background: rgba(255, 255, 255, 0.06);
+          background: rgba(255, 255, 255, 0.7);
+          box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
         }
         .label {
           font-size: 0.85rem;
-          color: #cbd5f5;
+          color: #6b7280;
           text-transform: uppercase;
           letter-spacing: 0.1em;
         }
@@ -164,9 +189,9 @@ function DashboardContent() {
           margin-top: 0.4rem;
         }
         .error {
-          color: #fecaca;
-          background: rgba(248, 113, 113, 0.1);
-          border: 1px solid rgba(248, 113, 113, 0.4);
+          color: #7a1e16;
+          background: rgba(186, 59, 46, 0.08);
+          border: 1px solid rgba(186, 59, 46, 0.35);
           padding: 0.75rem 1rem;
           border-radius: 12px;
           margin-bottom: 1rem;

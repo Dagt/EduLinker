@@ -56,55 +56,62 @@ export default function AuditPage() {
   return (
     <RequireRole allowed={["director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("AuditLogs.header")}</h2>
-        {error && <p>{error}</p>}
-        <div style={{ marginBottom: 16 }}>
-          <input
-            placeholder={t("AuditLogs.actor")}
-            value={actor}
-            onChange={(e) => {
-              setActor(e.target.value);
-              setPage(1);
-            }}
-            style={{ marginRight: 8 }}
-          />
-          <input
-            placeholder={t("AuditLogs.action")}
-            value={actionFilter}
-            onChange={(e) => {
-              setActionFilter(e.target.value);
-              setPage(1);
-            }}
-            style={{ marginRight: 8 }}
-          />
-          <input
-            placeholder={t("AuditLogs.entityType")}
-            value={entityType}
-            onChange={(e) => {
-              setEntityType(e.target.value);
-              setPage(1);
-            }}
-            style={{ marginRight: 8 }}
-          />
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => {
-              setDateFrom(e.target.value);
-              setPage(1);
-            }}
-            style={{ marginRight: 8 }}
-          />
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => {
-              setDateTo(e.target.value);
-              setPage(1);
-            }}
-            style={{ marginRight: 8 }}
-          />
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("AuditLogs.pill", { defaultValue: "Auditoria" })}</span>
+            <h2>{t("AuditLogs.header")}</h2>
+            <p className="subtle">
+              {t("AuditLogs.subtitle", { defaultValue: "Bitacora de acciones criticas del sistema." })}
+            </p>
+          </div>
+        </header>
+        {error && <p className="alert error">{error}</p>}
+        <div className="card form">
+          <div className="form">
+            <input
+              placeholder={t("AuditLogs.actor")}
+              value={actor}
+              onChange={(e) => {
+                setActor(e.target.value);
+                setPage(1);
+              }}
+            />
+            <input
+              placeholder={t("AuditLogs.action")}
+              value={actionFilter}
+              onChange={(e) => {
+                setActionFilter(e.target.value);
+                setPage(1);
+              }}
+            />
+            <input
+              placeholder={t("AuditLogs.entityType")}
+              value={entityType}
+              onChange={(e) => {
+                setEntityType(e.target.value);
+                setPage(1);
+              }}
+            />
+            <div className="actions">
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => {
+                  setDateFrom(e.target.value);
+                  setPage(1);
+                }}
+              />
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => {
+                  setDateTo(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+          </div>
         </div>
         <table>
           <thead>
@@ -126,11 +133,11 @@ export default function AuditPage() {
             ))}
           </tbody>
         </table>
-        <div style={{ marginTop: 16 }}>
+        <div className="actions pager">
           <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
             Prev
           </button>
-          <span style={{ margin: "0 8px" }}>
+          <span className="meta">
             {page} / {totalPages}
           </span>
           <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
@@ -141,3 +148,4 @@ export default function AuditPage() {
     </RequireRole>
   );
 }
+

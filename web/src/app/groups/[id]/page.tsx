@@ -150,79 +150,107 @@ export default function GroupDetailPage() {
   return (
     <RequireRole allowed={["admin", "director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("GroupDetail.header")}</h2>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("GroupDetail.pill", { defaultValue: "Grupos" })}</span>
+            <h2>{t("GroupDetail.header")}</h2>
+            <p className="subtle">
+              {t("GroupDetail.subtitle", { defaultValue: "Gestiona miembros y asignaciones del grupo." })}
+            </p>
+          </div>
+        </header>
         {group && (
-          <section aria-labelledby="group-info" style={{ marginBottom: 16 }}>
+          <section aria-labelledby="group-info" className="card stack">
             <h3 id="group-info">{t("GroupDetail.infoTitle")}</h3>
-            <p>{t("GroupDetail.groupName", { name: group.name })}</p>
-            <p>{t("GroupDetail.groupGrade", { grade: group.grade_level })}</p>
-            <p>
+            <p className="card-title">{t("GroupDetail.groupName", { name: group.name })}</p>
+            <p className="meta">{t("GroupDetail.groupGrade", { grade: group.grade_level })}</p>
+            <p className="meta">
               {t("GroupDetail.homeroomLabel")} {group.homeroom_teacher || t("GroupDetail.none")}
             </p>
           </section>
         )}
-        <div role="tablist" aria-label={t("GroupDetail.tabs")}
-          style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          <button type="button" onClick={() => setTab("members")} aria-selected={tab === "members"}>
+        <div role="tablist" aria-label={t("GroupDetail.tabs")} className="toolbar">
+          <button
+            type="button"
+            className={tab === "members" ? "button" : "button secondary"}
+            onClick={() => setTab("members")}
+            aria-selected={tab === "members"}
+          >
             {t("GroupDetail.membersTab")}
           </button>
-          <button type="button" onClick={() => setTab("vocals")} aria-selected={tab === "vocals"}>
+          <button
+            type="button"
+            className={tab === "vocals" ? "button" : "button secondary"}
+            onClick={() => setTab("vocals")}
+            aria-selected={tab === "vocals"}
+          >
             {t("GroupDetail.vocalsTab")}
           </button>
-          <button type="button" onClick={() => setTab("assignments")} aria-selected={tab === "assignments"}>
+          <button
+            type="button"
+            className={tab === "assignments" ? "button" : "button secondary"}
+            onClick={() => setTab("assignments")}
+            aria-selected={tab === "assignments"}
+          >
             {t("GroupDetail.assignmentsTab")}
           </button>
         </div>
-        {error && <p role="alert">{error}</p>}
-        {message && <p role="status">{message}</p>}
+        {error && <p role="alert" className="alert error">{error}</p>}
+        {message && <p role="status" className="alert success">{message}</p>}
 
         {tab === "members" && members && (
-          <section aria-labelledby="members-section">
-            <h3 id="members-section">{t("GroupDetail.membersTitle")}</h3>
-            <h4>{t("GroupDetail.students")}</h4>
-            <ul>
-              {members.students.map((student) => (
-                <li key={student.id}>{student.first_name} {student.last_name}</li>
-              ))}
-            </ul>
-            <h4>{t("GroupDetail.parents")}</h4>
-            <ul>
-              {members.parents.map((parent) => (
-                <li key={parent.id}>{parent.first_name} {parent.last_name}</li>
-              ))}
-            </ul>
-            <h4>{t("GroupDetail.teachers")}</h4>
-            <ul>
-              {members.teachers?.homeroom && (
-                <li>{t("GroupDetail.homeroomTeacher", { name: `${members.teachers.homeroom.first_name} ${members.teachers.homeroom.last_name}` })}</li>
-              )}
-              {members.teachers?.specialists.map((teacher) => (
-                <li key={teacher.id}>{t("GroupDetail.specialistTeacher", { name: `${teacher.first_name} ${teacher.last_name}` })}</li>
-              ))}
-            </ul>
+          <section aria-labelledby="members-section" className="grid-3">
+            <article className="card">
+              <h3 id="members-section">{t("GroupDetail.membersTitle")}</h3>
+              <h4>{t("GroupDetail.students")}</h4>
+              <ul className="stack">
+                {members.students.map((student) => (
+                  <li key={student.id}>{student.first_name} {student.last_name}</li>
+                ))}
+              </ul>
+            </article>
+            <article className="card">
+              <h4>{t("GroupDetail.parents")}</h4>
+              <ul className="stack">
+                {members.parents.map((parent) => (
+                  <li key={parent.id}>{parent.first_name} {parent.last_name}</li>
+                ))}
+              </ul>
+            </article>
+            <article className="card">
+              <h4>{t("GroupDetail.teachers")}</h4>
+              <ul className="stack">
+                {members.teachers?.homeroom && (
+                  <li>{t("GroupDetail.homeroomTeacher", { name: `${members.teachers.homeroom.first_name} ${members.teachers.homeroom.last_name}` })}</li>
+                )}
+                {members.teachers?.specialists.map((teacher) => (
+                  <li key={teacher.id}>{t("GroupDetail.specialistTeacher", { name: `${teacher.first_name} ${teacher.last_name}` })}</li>
+                ))}
+              </ul>
+            </article>
           </section>
         )}
 
         {tab === "vocals" && (
-          <section aria-labelledby="vocals-section">
+          <section aria-labelledby="vocals-section" className="section">
             <h3 id="vocals-section">{t("GroupDetail.vocalsTitle")}</h3>
-            <table aria-label={t("GroupDetail.vocalsTableAria")} style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table aria-label={t("GroupDetail.vocalsTableAria")}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: "left", padding: 8 }}>{t("GroupDetail.parent")}</th>
-                  <th style={{ textAlign: "left", padding: 8 }}>{t("GroupDetail.status")}</th>
-                  <th style={{ padding: 8 }}>{t("GroupDetail.actions")}</th>
+                  <th>{t("GroupDetail.parent")}</th>
+                  <th>{t("GroupDetail.status")}</th>
+                  <th>{t("GroupDetail.actions")}</th>
                 </tr>
               </thead>
               <tbody>
                 {vocals.map((vocal) => {
                   const parent = parentMap.get(vocal.parent);
                   return (
-                    <tr key={vocal.id} style={{ borderTop: "1px solid #e5e7eb" }}>
-                      <td style={{ padding: 8 }}>{parent ? `${parent.first_name} ${parent.last_name}` : vocal.parent}</td>
-                      <td style={{ padding: 8 }}>{vocal.active ? t("GroupDetail.active") : t("GroupDetail.inactive")}</td>
-                      <td style={{ padding: 8 }}>
+                    <tr key={vocal.id}>
+                      <td>{parent ? `${parent.first_name} ${parent.last_name}` : vocal.parent}</td>
+                      <td>{vocal.active ? t("GroupDetail.active") : t("GroupDetail.inactive")}</td>
+                      <td>
                         {vocal.active && (
                           <button type="button" onClick={() => handleDeactivateVocal(vocal.id)}>
                             {t("GroupDetail.deactivate")}
@@ -238,12 +266,12 @@ export default function GroupDetailPage() {
         )}
 
         {tab === "assignments" && (
-          <section aria-labelledby="assignments-section" style={{ display: "grid", gap: 16 }}>
+          <section aria-labelledby="assignments-section" className="section">
             <h3 id="assignments-section">{t("GroupDetail.assignmentsTitle")}</h3>
-            <form onSubmit={handleAssignHomeroom} aria-label={t("GroupDetail.assignHomeroom")}
-              style={{ display: "grid", gap: 8, maxWidth: 480 }}>
-              <label style={{ display: "grid", gap: 4 }}>
-                <span>{t("GroupDetail.selectHomeroom")}</span>
+            <div className="grid-2">
+              <form className="card form" onSubmit={handleAssignHomeroom} aria-label={t("GroupDetail.assignHomeroom")}>
+              <label>
+                {t("GroupDetail.selectHomeroom")}
                 <select value={homeroomId} onChange={(e) => setHomeroomId(e.target.value)} required>
                   <option value="">{t("GroupDetail.selectPlaceholder")}</option>
                   {teachers.map((teacher) => (
@@ -253,13 +281,14 @@ export default function GroupDetailPage() {
                   ))}
                 </select>
               </label>
-              <button type="submit">{t("GroupDetail.assignHomeroomButton")}</button>
-            </form>
+              <div className="form-actions">
+                <button className="button" type="submit">{t("GroupDetail.assignHomeroomButton")}</button>
+              </div>
+              </form>
 
-            <form onSubmit={handleAssignSpecialist} aria-label={t("GroupDetail.assignSpecialist")}
-              style={{ display: "grid", gap: 8, maxWidth: 480 }}>
-              <label style={{ display: "grid", gap: 4 }}>
-                <span>{t("GroupDetail.selectSpecialist")}</span>
+              <form className="card form" onSubmit={handleAssignSpecialist} aria-label={t("GroupDetail.assignSpecialist")}>
+              <label>
+                {t("GroupDetail.selectSpecialist")}
                 <select value={specialistId} onChange={(e) => setSpecialistId(e.target.value)} required>
                   <option value="">{t("GroupDetail.selectPlaceholder")}</option>
                   {teachers.map((teacher) => (
@@ -269,21 +298,22 @@ export default function GroupDetailPage() {
                   ))}
                 </select>
               </label>
-              <label style={{ display: "grid", gap: 4 }}>
-                <span>{t("GroupDetail.subject")}</span>
+              <label>
+                {t("GroupDetail.subject")}
                 <input
                   value={specialistSubject}
                   onChange={(e) => setSpecialistSubject(e.target.value)}
                   required
                 />
               </label>
-              <button type="submit">{t("GroupDetail.assignSpecialistButton")}</button>
-            </form>
+              <div className="form-actions">
+                <button className="button" type="submit">{t("GroupDetail.assignSpecialistButton")}</button>
+              </div>
+              </form>
 
-            <form onSubmit={handleAssignVocal} aria-label={t("GroupDetail.assignVocal")}
-              style={{ display: "grid", gap: 8, maxWidth: 480 }}>
-              <label style={{ display: "grid", gap: 4 }}>
-                <span>{t("GroupDetail.selectVocal")}</span>
+              <form className="card form" onSubmit={handleAssignVocal} aria-label={t("GroupDetail.assignVocal")}>
+              <label>
+                {t("GroupDetail.selectVocal")}
                 <select value={vocalParentId} onChange={(e) => setVocalParentId(e.target.value)} required>
                   <option value="">{t("GroupDetail.selectPlaceholder")}</option>
                   {parents.map((parent) => (
@@ -293,8 +323,11 @@ export default function GroupDetailPage() {
                   ))}
                 </select>
               </label>
-              <button type="submit">{t("GroupDetail.assignVocalButton")}</button>
-            </form>
+              <div className="form-actions">
+                <button className="button" type="submit">{t("GroupDetail.assignVocalButton")}</button>
+              </div>
+              </form>
+            </div>
           </section>
         )}
       </main>

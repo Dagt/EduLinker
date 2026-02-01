@@ -17,7 +17,7 @@ export default function FundraisingPage(){
   const { t } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
-  const allowed = requireRole(["admin"]);
+  const allowed = requireRole(["admin", "director"]);
 
   useEffect(() => {
     if (!allowed) return;
@@ -25,7 +25,8 @@ export default function FundraisingPage(){
       try {
         const tk = getToken();
         const data = await listFundraisingEvents(tk);
-        setEvents(data);
+        const list = Array.isArray(data) ? data : data.results || [];
+        setEvents(list);
       } catch (e) {
         console.error(e);
       }
@@ -48,32 +49,64 @@ export default function FundraisingPage(){
   return (
     <>
       <Nav />
-      <main style={{ padding:16, maxWidth:680 }}>
-        <h2>{t("Fundraising.header")}</h2>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <input placeholder={t("Fundraising.name")} {...register("name", {required:true})}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          {errors.name && <p>{t('Validation.required')}</p>}
-          <input placeholder={t("Fundraising.date")} {...register("date", {required:true})}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          {errors.date && <p>{t('Validation.required')}</p>}
-          <textarea placeholder={t("Fundraising.description")} {...register("description")}
-                    style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
-          <button>{t("Fundraising.create")}</button>
-        </form>
-        <ul>
-          {events.map(ev => (
-            <li key={ev.id}>
-              <Link href={`/fundraising/${ev.id}`}>
-                <Trans
-                  i18nKey="Fundraising.eventItem"
-                  values={{ name: ev.name, date: ev.date }}
-                  components={{ b: <strong /> }}
-                />
-              </Link>
-            </li>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("Fundraising.pill", { defaultValue: "Recaudación" })}</span>
+            <h2>{t("Fundraising.header")}</h2>
+            <p className="subtle">
+              {t("Fundraising.subtitle", { defaultValue: "Organiza eventos y controla ingresos y gastos." })}
+            </p>
+          </div>
+          <div className="actions">
+            <Link className="button secondary" href="/fundraising/ledger">
+              {t("Fundraising.ledger", { defaultValue: "Registrar ingresos" })}
+            </Link>
+            <Link className="button secondary" href="/fundraising/expense">
+              {t("Fundraising.expense", { defaultValue: "Subir evidencia" })}
+            </Link>
+          </div>
+        </header>
+        <section className="card form">
+          <h3>{t("Fundraising.create", { defaultValue: "Crear evento" })}</h3>
+          <form className="form" onSubmit={handleSubmit(onSubmit)}>
+            <input
+              placeholder={t("Fundraising.name")}
+              {...register("name", { required: true })}
+            />
+            {errors.name && <p className="alert error">{t("Validation.required")}</p>}
+            <input
+              placeholder={t("Fundraising.date")}
+              {...register("date", { required: true })}
+            />
+            {errors.date && <p className="alert error">{t("Validation.required")}</p>}
+            <textarea
+              placeholder={t("Fundraising.description")}
+              {...register("description")}
+            />
+            <button className="button" type="submit">
+              {t("Fundraising.create")}
+            </button>
+          </form>
+        </section>
+        <section className="grid cards">
+          {events.map((ev) => (
+            <article key={ev.id} className="card">
+              <div className="card-header">
+                <span className="chip">EVENTO</span>
+                <span className="meta">#{ev.id}</span>
+              </div>
+              <p className="card-title">{ev.name}</p>
+              <p className="subtle">{ev.date}</p>
+              <div className="card-footer">
+                <span className="meta">{ev.description || "—"}</span>
+                <Link className="link" href={`/fundraising/${ev.id}`}>
+                  {t("Fundraising.view", { defaultValue: "Ver detalle" })}
+                </Link>
+              </div>
+            </article>
           ))}
-        </ul>
+        </section>
       </main>
     </>
   );

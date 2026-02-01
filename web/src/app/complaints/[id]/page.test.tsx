@@ -25,7 +25,7 @@ describe('ComplaintThread', () => {
       messages: [],
     });
     render(<ComplaintThread params={{ id: '5' }} />);
-    await screen.findByText('Queja #5');
+    await screen.findByText('Incidencia #5');
     fireEvent.change(screen.getByPlaceholderText('Escribe una respuesta'), { target: { value: 'hi' } });
     fireEvent.click(screen.getByText('Enviar'));
     await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/complaints/5/messages/', {

@@ -42,18 +42,34 @@ export default function SuggestionEdit({ params }:{ params:{ id:string } }){
   return (
     <>
       <Nav />
-      <main style={{ padding:16, maxWidth:560 }}>
-        <h2>{t('SuggestionEdit.header')}</h2>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <input placeholder={t('SuggestionEdit.title')} {...register('title', {required:true})}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          {errors.title && <p>{t('Validation.required')}</p>}
-          <textarea placeholder={t('SuggestionEdit.description')} {...register('description', {required:true})}
-                    style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
-          {errors.description && <p>{t('Validation.required')}</p>}
-          <button>{t('SuggestionEdit.update')}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("SuggestionEdit.pill", { defaultValue: "Sugerencias" })}</span>
+            <h2>{t('SuggestionEdit.header')}</h2>
+            <p className="subtle">
+              {t("SuggestionEdit.subtitle", { defaultValue: "Edita el contenido antes de publicarlo." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={handleSubmit(onSubmit)}>
+            <label>
+              {t('SuggestionEdit.title')}
+              <input placeholder={t('SuggestionEdit.title')} {...register('title', {required:true})} />
+              {errors.title && <span className="meta">{t('Validation.required')}</span>}
+            </label>
+            <label>
+              {t('SuggestionEdit.description')}
+              <textarea placeholder={t('SuggestionEdit.description')} {...register('description', {required:true})} />
+              {errors.description && <span className="meta">{t('Validation.required')}</span>}
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t('SuggestionEdit.update')}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

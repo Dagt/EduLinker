@@ -21,7 +21,7 @@ exports[`AnalyticsDashboard matches snapshot 1`] = `
       class=""
       href="/complaints"
     >
-      Quejas
+      Incidencias
     </a>
     <a
       class=""
@@ -102,7 +102,7 @@ exports[`AnalyticsDashboard matches snapshot 1`] = `
     >
       <section>
         <h3>
-          Quejas por grupo
+          Incidencias por grupo
         </h3>
         <div
           style="height: 300px;"

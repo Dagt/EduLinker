@@ -54,7 +54,7 @@ describe('DashboardPage', () => {
     (getFundraisingAnalytics as jest.Mock).mockResolvedValue(fundraising);
     (getEngagementAnalytics as jest.Mock).mockResolvedValue(engagement);
     render(<DashboardPage />);
-    await screen.findByText('Quejas por grupo', { selector: 'h3' });
+    await screen.findByText('Incidencias por grupo', { selector: 'h3' });
     expect(screen.getByText('Recaudación por grupo', { selector: 'h3' })).toBeInTheDocument();
     expect(screen.getByText('Eventos por alcance', { selector: 'h3' })).toBeInTheDocument();
     expect(screen.getByText('Participación en encuestas', { selector: 'h3' })).toBeInTheDocument();

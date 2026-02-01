@@ -44,50 +44,61 @@ export default function CreateSurvey(){
   return (
     <>
       <Nav/>
-      <main style={{padding:16, maxWidth:680}}>
-        <h2>{t("SurveyCreate.header")}</h2>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <select {...register("scope")} style={{display:"block",margin:"8px 0",padding:8}}>
-            <option value="GROUP">{t("SurveyCreate.byGroup")}</option>
-            <option value="SCHOOL">{t("SurveyCreate.wholeSchool")}</option>
-          </select>
-          {scope === "GROUP" && (
-            <>
-              <input
-                placeholder={t("SurveyCreate.groupId")}
-                {...register("groupId", { required: scope === "GROUP" })}
-                style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
-              />
-              {errors.groupId && <p style={{color:"red"}}>Required</p>}
-            </>
-          )}
-          <input
-            placeholder={t("SurveyCreate.title")}
-            {...register("title", { required: true })}
-            style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
-          />
-          {errors.title && <p style={{color:"red"}}>Required</p>}
-          <input
-            placeholder={t("SurveyCreate.start")}
-            {...register("startAt", { required: true })}
-            style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
-          />
-          {errors.startAt && <p style={{color:"red"}}>Required</p>}
-          <input
-            placeholder={t("SurveyCreate.end")}
-            {...register("endAt", { required: true })}
-            style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
-          />
-          {errors.endAt && <p style={{color:"red"}}>Required</p>}
-          <input
-            placeholder={t("SurveyCreate.options")}
-            {...register("options", { required: true })}
-            style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}
-          />
-          {errors.options && <p style={{color:"red"}}>Required</p>}
-          <button>{t("SurveyCreate.create")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("SurveyCreate.pill", { defaultValue: "Encuestas" })}</span>
+            <h2>{t("SurveyCreate.header")}</h2>
+            <p className="subtle">
+              {t("SurveyCreate.subtitle", { defaultValue: "Define el alcance y el periodo de participacion." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={handleSubmit(onSubmit)}>
+            <label>
+              {t("SurveyCreate.scope", { defaultValue: "Alcance" })}
+              <select {...register("scope")}>
+                <option value="GROUP">{t("SurveyCreate.byGroup")}</option>
+                <option value="SCHOOL">{t("SurveyCreate.wholeSchool")}</option>
+              </select>
+            </label>
+            {scope === "GROUP" && (
+              <label>
+                {t("SurveyCreate.groupId")}
+                <input
+                  placeholder={t("SurveyCreate.groupId")}
+                  {...register("groupId", { required: scope === "GROUP" })}
+                />
+                {errors.groupId && <span className="meta">{t("Form.required", { defaultValue: "Requerido" })}</span>}
+              </label>
+            )}
+            <label>
+              {t("SurveyCreate.title")}
+              <input placeholder={t("SurveyCreate.title")} {...register("title", { required: true })} />
+              {errors.title && <span className="meta">{t("Form.required", { defaultValue: "Requerido" })}</span>}
+            </label>
+            <label>
+              {t("SurveyCreate.start")}
+              <input placeholder={t("SurveyCreate.start")} {...register("startAt", { required: true })} />
+              {errors.startAt && <span className="meta">{t("Form.required", { defaultValue: "Requerido" })}</span>}
+            </label>
+            <label>
+              {t("SurveyCreate.end")}
+              <input placeholder={t("SurveyCreate.end")} {...register("endAt", { required: true })} />
+              {errors.endAt && <span className="meta">{t("Form.required", { defaultValue: "Requerido" })}</span>}
+            </label>
+            <label>
+              {t("SurveyCreate.options")}
+              <input placeholder={t("SurveyCreate.options")} {...register("options", { required: true })} />
+              {errors.options && <span className="meta">{t("Form.required", { defaultValue: "Requerido" })}</span>}
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("SurveyCreate.create")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

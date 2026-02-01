@@ -9,20 +9,11 @@ interface Props {
 
 export default function KPICards({ items }: Props) {
   return (
-    <div style={{ display: "flex", gap: 16 }}>
+    <div className="kpi-grid">
       {items.map((kpi) => (
-        <div
-          key={kpi.label}
-          style={{
-            flex: 1,
-            textAlign: "center",
-            border: "1px solid #ccc",
-            borderRadius: 4,
-            padding: 8,
-          }}
-        >
+        <div key={kpi.label} className="kpi-card">
           <strong>{kpi.value}</strong>
-          <p>{kpi.label}</p>
+          <span className="meta">{kpi.label}</span>
         </div>
       ))}
     </div>

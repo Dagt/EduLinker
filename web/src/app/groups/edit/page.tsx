@@ -34,30 +34,48 @@ export default function GroupEdit() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("GroupEdit.header")}</h2>
-        <form onSubmit={submit}>
-          <input
-            placeholder={t("GroupEdit.groupId")}
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("GroupEdit.name")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("GroupEdit.grade")}
-            value={grade}
-            onChange={(e) => setGrade(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <button>{t("GroupEdit.update")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("GroupEdit.pill", { defaultValue: "Grupos" })}</span>
+            <h2>{t("GroupEdit.header")}</h2>
+            <p className="subtle">
+              {t("GroupEdit.subtitle", { defaultValue: "Actualiza la informacion del grupo." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("GroupEdit.groupId")}
+              <input
+                placeholder={t("GroupEdit.groupId")}
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("GroupEdit.name")}
+              <input
+                placeholder={t("GroupEdit.name")}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("GroupEdit.grade")}
+              <input
+                placeholder={t("GroupEdit.grade")}
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+              />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("GroupEdit.update")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

@@ -34,18 +34,36 @@ export default function CreateSuggestion(){
 
   return (<>
     <Nav/>
-    <main style={{padding:16, maxWidth:560}}>
-      <h2>{t('SuggestionCreate.header')}</h2>
-      <form onSubmit={submit}>
-        <input placeholder={t('SuggestionCreate.groupId')} value={groupId} onChange={e=>setGroupId(e.target.value)}
-               style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <input placeholder={t('SuggestionCreate.title')} value={title} onChange={e=>setTitle(e.target.value)}
-               style={{display:"block",margin:"8px 0",padding:8,width:"100%"}}/>
-        <textarea placeholder={t('SuggestionCreate.description')} value={description} onChange={e=>setDescription(e.target.value)}
-                  style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}}/>
-        <button>{t('SuggestionCreate.create')}</button>
-      </form>
-      {msg && <p>{msg}</p>}
+    <main className="page narrow">
+      <header className="page-header compact">
+        <div>
+          <span className="pill">{t("SuggestionCreate.pill", { defaultValue: "Sugerencias" })}</span>
+          <h2>{t('SuggestionCreate.header')}</h2>
+          <p className="subtle">
+            {t("SuggestionCreate.subtitle", { defaultValue: "Comparte mejoras y comentarios del servicio." })}
+          </p>
+        </div>
+      </header>
+      <section className="card">
+        <form className="form" onSubmit={submit}>
+          <label>
+            {t('SuggestionCreate.groupId')}
+            <input placeholder={t('SuggestionCreate.groupId')} value={groupId} onChange={e=>setGroupId(e.target.value)} />
+          </label>
+          <label>
+            {t('SuggestionCreate.title')}
+            <input placeholder={t('SuggestionCreate.title')} value={title} onChange={e=>setTitle(e.target.value)} />
+          </label>
+          <label>
+            {t('SuggestionCreate.description')}
+            <textarea placeholder={t('SuggestionCreate.description')} value={description} onChange={e=>setDescription(e.target.value)} />
+          </label>
+          <div className="form-actions">
+            <button className="button" type="submit">{t('SuggestionCreate.create')}</button>
+          </div>
+        </form>
+      </section>
+      {msg && <p className="alert success">{msg}</p>}
     </main>
   </>);
 }

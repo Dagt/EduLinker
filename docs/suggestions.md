@@ -4,9 +4,9 @@ Gestión de sugerencias y mensajes asociados para mejorar la comunidad escolar.
 
 ## Roles permitidos
 
-- **PADRE**, **VOCAL**, **MAESTRO_TITULAR**: pueden crear sugerencias.
+- **MAESTRO_TITULAR** y **MAESTRO_ITINERANTE**: pueden crear sugerencias dirigidas a Dirección.
 - **DIRECTOR**: puede ver todas las sugerencias y actualizar su estado.
-- El creador, el docente destinatario y el maestro titular del grupo pueden añadir mensajes.
+- El creador y Dirección pueden añadir mensajes.
 
 ## Endpoints
 

@@ -44,18 +44,26 @@ export default function NotifSettings(){
   return (
     <>
       <Nav/>
-      <main style={{padding:16, maxWidth:680}}>
-        <h2>{t("NotificationSettings.header")}</h2>
-        <ul>
-          {kinds.map(k=>(
-            <li key={k.key} style={{marginBottom:8}}>
-              <label style={{display:"flex", gap:8, alignItems:"center"}}>
-                <input type="checkbox" checked={isEnabled(k.key)} onChange={()=>toggle(k.key)} />
-                {k.label}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("NotificationSettings.pill", { defaultValue: "Preferencias" })}</span>
+            <h2>{t("NotificationSettings.header")}</h2>
+            <p className="subtle">
+              {t("NotificationSettings.subtitle", { defaultValue: "Gestiona las notificaciones que recibes." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <div className="stack">
+            {kinds.map((k) => (
+              <label key={k.key} className="option">
+                <input type="checkbox" checked={isEnabled(k.key)} onChange={() => toggle(k.key)} />
+                <span>{k.label}</span>
               </label>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        </section>
       </main>
     </>
   );

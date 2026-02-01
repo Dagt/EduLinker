@@ -29,7 +29,7 @@ describe('Dashboard', () => {
       .mockResolvedValueOnce({ first_name: 'Juan', last_name: 'Pérez' })
       .mockResolvedValueOnce(kpis);
     render(<Dashboard />);
-    expect(await screen.findByText('Quejas por grupo')).toBeInTheDocument();
+    expect(await screen.findByText('Incidencias por grupo')).toBeInTheDocument();
   });
 
   it('refreshes data', async () => {
@@ -39,7 +39,7 @@ describe('Dashboard', () => {
       .mockResolvedValueOnce({ first_name: 'Juan', last_name: 'Pérez' })
       .mockResolvedValueOnce(kpis);
     render(<Dashboard />);
-    await screen.findByText('Quejas por grupo');
+    await screen.findByText('Incidencias por grupo');
     fireEvent.click(screen.getByText('Actualizar'));
     await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(4));
     expect(apiGet).toHaveBeenNthCalledWith(2, '/analytics/overview', 'token');

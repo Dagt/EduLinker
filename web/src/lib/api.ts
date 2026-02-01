@@ -13,10 +13,16 @@ export function schoolIdFromHost(host?: string): string {
   return subdomain;
 }
 
+export function selectedSchoolId(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("school_id");
+}
+
 export function authHeaders(token?: string) {
+  const selected = selectedSchoolId();
   const h: Record<string, string> = {
     "Content-Type": "application/json",
-    "X-School-ID": schoolIdFromHost(),
+    "X-School-ID": selected || schoolIdFromHost(),
   };
   if (token) h["Authorization"] = `Bearer ${token}`;
   return h;
@@ -35,18 +41,27 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json();
 }
 
+function normalizePath(path: string): string {
+  if (!path) return "/";
+  const [base, query = ""] = path.split("?");
+  if (base.endsWith("/")) return path;
+  const normalized = `${base}/`;
+  return query ? `${normalized}?${query}` : normalized;
+}
+
 async function request<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
   const base = process.env.NEXT_PUBLIC_API_URL!;
   const tk = token ?? getToken();
-  const res = await fetch(`${base}${path}`, {
+  const url = `${base}${normalizePath(path)}`;
+  const res = await fetch(url, {
     ...options,
     headers: { ...authHeaders(tk), ...(options.headers || {}) },
   });
-  if(res.status === 401 && !token){
+  if (res.status === 401) {
     const ok = await refreshToken();
-    if(ok){
+    if (ok) {
       const newTk = getToken();
-      const retry = await fetch(`${base}${path}`, {
+      const retry = await fetch(url, {
         ...options,
         headers: { ...authHeaders(newTk), ...(options.headers || {}) },
       });
@@ -78,7 +93,7 @@ export function apiDelete<T>(path: string, token?: string): Promise<T> {
 
 // Suggestion status update
 export async function updateSuggestionStatus(id: number, status: string, token?: string) {
-  return apiPost(`/suggestions/${id}/status`, { status }, token);
+  return apiPatch(`/suggestions/${id}/status`, { status }, token);
 }
 
 // Fundraising endpoints
@@ -164,6 +179,57 @@ export async function getEventAttendanceAnalytics(
 
 export async function getMe(token?: string) {
   return apiGet(`/me/`, token);
+}
+
+export async function listSchools(token?: string) {
+  return apiGet(`/schools/`, token);
+}
+
+export async function createSchool(body: {
+  name: string;
+  slug: string;
+  subdomain: string;
+  logo_url?: string;
+  director_email?: string;
+  director_password?: string;
+  director_first_name?: string;
+  director_last_name?: string;
+}, token?: string) {
+  return apiPost(`/schools/create/`, body, token);
+}
+
+export async function updateSchool(id: number, body: {
+  name?: string;
+  slug?: string;
+  subdomain?: string;
+  logo_url?: string;
+  active?: boolean;
+}, token?: string) {
+  return apiPatch(`/schools/${id}/`, body, token);
+}
+
+export async function listSchoolYears(token?: string) {
+  return apiGet(`/school-years/`, token);
+}
+
+export async function createSchoolYear(body: {
+  name: string;
+  start_date: string;
+  end_date: string;
+  is_current?: boolean;
+}, token?: string) {
+  return apiPost(`/school-years/`, body, token);
+}
+
+export async function rolloverSchoolYear(
+  body: { from_year: number; to_year: number; dry_run?: boolean },
+  token?: string,
+) {
+  return apiPost(`/school-years/rollover/`, body, token);
+}
+
+export async function setCurrentSchoolYear(id: number, token?: string) {
+  return apiPost(`/school-years/${id}/set-current/`, {}, token);
 }
 
 export async function updateMe(body: {
@@ -261,8 +327,58 @@ export async function createParentStudent(body: {
   return apiPost(`/parent-students/`, body, token);
 }
 
+export async function listAnnouncements(token?: string) {
+  return apiGet(`/announcements/`, token);
+}
+
+export async function createAnnouncement(body: {
+  scope: "GLOBAL" | "GRUPO";
+  group?: number | null;
+  title: string;
+  message: string;
+}) {
+  return apiPost(`/announcements/`, body);
+}
+
+export async function listHomeworks(token?: string) {
+  return apiGet(`/homeworks/`, token);
+}
+
+export async function createHomework(body: {
+  group: number;
+  subject: string;
+  title: string;
+  description: string;
+  due_date: string;
+}) {
+  return apiPost(`/homeworks/`, body);
+}
+
+export async function listFeed(token?: string) {
+  const data: any = await apiGet(`/feed/`, token);
+  if (Array.isArray(data)) return data;
+  if (data?.results) return data.results;
+  return [];
+}
+
 export async function deleteParentStudent(id: number, token?: string) {
   return apiDelete(`/parent-students/${id}/`, token);
+}
+
+export async function updateComplaintStatus(
+  id: number,
+  status: string,
+  token?: string,
+) {
+  return apiPatch(`/complaints/${id}/status/`, { status }, token);
+}
+
+export async function addComplaintParticipant(
+  id: number,
+  body: { user: number; role_in_thread: string },
+  token?: string,
+) {
+  return apiPost(`/complaints/${id}/participants/`, body, token);
 }
 
 export async function getGroup(id: number, token?: string) {
@@ -329,5 +445,5 @@ export function getChatWebSocketUrl(groupId: number, token: string) {
 
 // Survey voting
 export async function voteSurvey(id: number, choiceId: number, token?: string) {
-  return apiPost(`/surveys/${id}/vote`, { choiceId }, token);
+  return apiPost(`/surveys/${id}/vote`, { option_index: choiceId }, token);
 }

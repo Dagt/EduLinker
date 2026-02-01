@@ -104,34 +104,42 @@ export default function AnalyticsDashboard() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("AnalyticsDashboard.header")}</h2>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("AnalyticsDashboard.pill", { defaultValue: "Analitica" })}</span>
+            <h2>{t("AnalyticsDashboard.header")}</h2>
+            <p className="subtle">
+              {t("AnalyticsDashboard.subtitle", { defaultValue: "Resumen operativo para el equipo administrativo." })}
+            </p>
+          </div>
+        </header>
         {ready && (
-          <div style={{ display: "grid", gap: 32 }}>
-            <section>
+          <div className="grid-2">
+            <section className="card">
               <h3>{t("AnalyticsDashboard.complaintsByGroup")}</h3>
-              <div style={{ height: 300 }}>
+              <div className="chart">
                 <Bar data={complaintsChart} options={commonBarOptions} />
               </div>
             </section>
-            <section>
+            <section className="card">
               <h3>{t("AnalyticsDashboard.fundraisingByGroup")}</h3>
-              <div style={{ height: 300 }}>
+              <div className="chart">
                 <Bar data={fundraisingChart} options={commonBarOptions} />
               </div>
             </section>
-            <section>
+            <section className="card">
               <h3>{t("AnalyticsDashboard.eventsByScope")}</h3>
-              <div style={{ height: 300 }}>
+              <div className="chart">
                 <Pie
                   data={eventsChart}
                   options={{ responsive: true, maintainAspectRatio: false }}
                 />
               </div>
             </section>
-            <section>
+            <section className="card">
               <h3>{t("AnalyticsDashboard.surveysParticipation")}</h3>
-              <div style={{ height: 300 }}>
+              <div className="chart">
                 <Bar data={surveysChart} options={commonBarOptions} />
               </div>
             </section>

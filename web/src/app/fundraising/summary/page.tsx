@@ -62,62 +62,80 @@ export default function FundraisingSummary() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("FundraisingSummary.header")}</h2>
-        <form onSubmit={load}>
-          <input
-            placeholder={t("FundraisingSummary.eventId")}
-            value={eventId}
-            onChange={(e) => setEventId(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-            required
-          />
-          <button>{t("FundraisingSummary.load")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("FundraisingSummary.pill", { defaultValue: "Recaudacion" })}</span>
+            <h2>{t("FundraisingSummary.header")}</h2>
+            <p className="subtle">
+              {t("FundraisingSummary.subtitle", { defaultValue: "Consulta el resumen financiero por evento." })}
+            </p>
+          </div>
+        </header>
+        <section className="card form">
+          <form className="form-inline" onSubmit={load}>
+            <input
+              placeholder={t("FundraisingSummary.eventId")}
+              value={eventId}
+              onChange={(e) => setEventId(e.target.value)}
+              required
+            />
+            <button className="button" type="submit">{t("FundraisingSummary.load")}</button>
+          </form>
+        </section>
+        {msg && <p className="alert error">{msg}</p>}
         {summary && (
           <>
-            <p>
-              {t("FundraisingSummary.totalCollected")}: {summary.total_collected}
-            </p>
-            <p>
-              {t("FundraisingSummary.totalExpenses")}: {totalExpenses.toFixed(2)}
-            </p>
-            <p>
-              {t("FundraisingSummary.balance")}: {balance.toFixed(2)}
-            </p>
-            <table>
-              <thead>
-                <tr>
-                  <th>{t("FundraisingSummary.concept")}</th>
-                  <th>{t("FundraisingSummary.amount")}</th>
-                  <th>{t("FundraisingSummary.file")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.expenses?.map((exp: any) => (
-                  <tr key={exp.id}>
-                    <td>{exp.concept}</td>
-                    <td>{exp.amount}</td>
-                    <td>
-                      <a
-                        href={exp.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {t("FundraisingSummary.file")}
-                      </a>
-                    </td>
+            <section className="grid-3">
+              <div className="card">
+                <p className="meta">{t("FundraisingSummary.totalCollected")}</p>
+                <p className="card-title">{summary.total_collected}</p>
+              </div>
+              <div className="card">
+                <p className="meta">{t("FundraisingSummary.totalExpenses")}</p>
+                <p className="card-title">{totalExpenses.toFixed(2)}</p>
+              </div>
+              <div className="card">
+                <p className="meta">{t("FundraisingSummary.balance")}</p>
+                <p className="card-title">{balance.toFixed(2)}</p>
+              </div>
+            </section>
+            <section className="section">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{t("FundraisingSummary.concept")}</th>
+                    <th>{t("FundraisingSummary.amount")}</th>
+                    <th>{t("FundraisingSummary.file")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <button onClick={() => download("csv")} style={{ marginRight: 8 }}>
-              {t("FundraisingSummary.downloadCsv")}
-            </button>
-            <button onClick={() => download("pdf")}> 
-              {t("FundraisingSummary.downloadPdf")}
-            </button>
+                </thead>
+                <tbody>
+                  {summary.expenses?.map((exp: any) => (
+                    <tr key={exp.id}>
+                      <td>{exp.concept}</td>
+                      <td>{exp.amount}</td>
+                      <td>
+                        <a
+                          href={exp.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {t("FundraisingSummary.file")}
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="actions">
+                <button className="button secondary" onClick={() => download("csv")}>
+                  {t("FundraisingSummary.downloadCsv")}
+                </button>
+                <button className="button" onClick={() => download("pdf")}>
+                  {t("FundraisingSummary.downloadPdf")}
+                </button>
+              </div>
+            </section>
           </>
         )}
       </main>

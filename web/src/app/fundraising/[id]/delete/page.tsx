@@ -24,10 +24,22 @@ export default function FundraisingDelete({ params }:{ params:{ id:string } }){
   return (
     <>
       <Nav />
-      <main style={{ padding:16, maxWidth:680 }}>
-        <h2>{t('FundraisingDelete.header')}</h2>
-        <button onClick={onDelete}>{t('FundraisingDelete.delete')}</button>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("FundraisingDelete.pill", { defaultValue: "Recaudacion" })}</span>
+            <h2>{t('FundraisingDelete.header')}</h2>
+            <p className="subtle">
+              {t("FundraisingDelete.subtitle", { defaultValue: "Confirma antes de eliminar este evento." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <div className="stack">
+            <button className="button" onClick={onDelete}>{t('FundraisingDelete.delete')}</button>
+            {msg && <p className="alert success">{msg}</p>}
+          </div>
+        </section>
       </main>
     </>
   );

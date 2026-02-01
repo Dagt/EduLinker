@@ -21,12 +21,13 @@ export default function SuggestionsPage(){
     (async () => {
       try {
         const tk = getToken();
-        const data = await apiGet<Suggestion[]>("/suggestions/", tk);
-        setItems(data);
-      } catch (e) {
-        console.error(e);
-      }
-    })();
+      const data = await apiGet<Suggestion[]>("/suggestions/", tk);
+      const list = Array.isArray(data) ? data : (data as any).results || [];
+      setItems(list);
+    } catch (e) {
+      console.error(e);
+    }
+  })();
   }, []);
 
   async function onSubmit(data: FormData){
@@ -54,26 +55,45 @@ export default function SuggestionsPage(){
   return (
     <>
       <Nav />
-      <main style={{ padding:16, maxWidth:560 }}>
-        <h2>{t("Suggestions.header")}</h2>
-        <p><Link href="/suggestions/create">{t("Suggestions.createLink")}</Link></p>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <input placeholder={t("Suggestions.title")} {...register("title", {required:true})}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          {errors.title && <p>{t('Validation.required')}</p>}
-          <textarea placeholder={t("Suggestions.description")} {...register("description", {required:true})}
-                    style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}} />
-          {errors.description && <p>{t('Validation.required')}</p>}
-          <button>{t("Suggestions.send")}</button>
-        </form>
-        <ul>
+      <main className="page">
+        <header className="page-header">
+          <div>
+            <span className="pill">{t("Suggestions.pill", { defaultValue: "Sugerencias" })}</span>
+            <h2>{t("Suggestions.header")}</h2>
+            <p className="subtle">{t("Suggestions.subtitle", { defaultValue: "Mejoras y propuestas de la comunidad." })}</p>
+          </div>
+          <Link className="button secondary" href="/suggestions/create">
+            {t("Suggestions.createLink")}
+          </Link>
+        </header>
+        <section className="card form">
+          <h3>{t("Suggestions.send")}</h3>
+          <form className="form" onSubmit={handleSubmit(onSubmit)}>
+            <input placeholder={t("Suggestions.title")} {...register("title", {required:true})} />
+            {errors.title && <p className="alert error">{t('Validation.required')}</p>}
+            <textarea placeholder={t("Suggestions.description")} {...register("description", {required:true})} />
+            {errors.description && <p className="alert error">{t('Validation.required')}</p>}
+            <button className="button" type="submit">{t("Suggestions.send")}</button>
+          </form>
+        </section>
+        <section className="grid cards">
           {items.map(s => (
-            <li key={s.id}>
-              <Link href={`/suggestions/${s.id}`}>{s.title}</Link>: {s.description}
-              <button onClick={() => handleDelete(s.id)} style={{marginLeft:8}}>{t('Suggestions.delete')}</button>
-            </li>
+            <article key={s.id} className="card">
+              <div className="card-header">
+                <span className="chip">#{s.id}</span>
+              </div>
+              <p className="card-title">
+                <Link className="link" href={`/suggestions/${s.id}`}>{s.title}</Link>
+              </p>
+              <p className="subtle">{s.description}</p>
+              <div className="card-footer">
+                <button className="button secondary" onClick={() => handleDelete(s.id)}>
+                  {t('Suggestions.delete')}
+                </button>
+              </div>
+            </article>
           ))}
-        </ul>
+        </section>
       </main>
     </>
   );

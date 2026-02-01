@@ -184,12 +184,12 @@ def can_post_chat(user: User, group: Group) -> bool:
 
 def can_create_suggestion(user: User) -> bool:
     """Return True if user can create a suggestion."""
-    return is_padre(user) or is_vocal(user) or is_maestro_titular(user)
+    return is_maestro_titular(user) or is_maestro_itinerante(user)
 
 
 def can_update_suggestion_status(user: User, suggestion: Suggestion) -> bool:
     """Return True if user may update the suggestion's status."""
-    return is_admin_tenant(user) or is_director(user) or user == suggestion.target_teacher
+    return is_admin_tenant(user) or is_director(user)
 
 
 def can_record_fundraising_ledger(user: User, group: Group) -> bool:
@@ -255,13 +255,7 @@ class CanAccessSuggestion(BasePermission):
             return True
         if user.school_id != obj.school_id:
             return False
-        if is_director(user) or user == obj.created_by or user == obj.target_teacher:
-            return True
-        if (
-            obj.group
-            and is_maestro_titular(user)
-            and obj.group.homeroom_teacher_id == user.id
-        ):
+        if is_director(user) or user == obj.created_by:
             return True
         return False
 

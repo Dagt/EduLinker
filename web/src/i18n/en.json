@@ -2,7 +2,7 @@
   "Nav": {
     "dashboard": "Dashboard",
     "calendar": "Calendar",
-    "complaints": "Complaints",
+    "complaints": "Incidents",
     "suggestions": "Suggestions",
     "surveys": "Surveys",
     "fundraising": "Fundraising",
@@ -11,7 +11,20 @@
     "students": "Students",
     "groups": "Groups",
     "parentStudents": "Parent-student links",
-    "profile": "Profile"
+    "schoolYears": "School years",
+    "profile": "Profile",
+    "logout": "Logout",
+    "unknownUser": "User",
+    "unknownRole": "Role",
+    "feed": "Feed",
+    "announcements": "Announcements",
+    "homeworks": "Homeworks",
+    "communication": "Communication",
+    "transparency": "Transparency",
+    "administration": "Administration",
+    "account": "Account",
+    "audit": "Audit",
+    "tagline": "School communication and follow-up"
   },
   "Auth": {
     "loading": "Checking access...",
@@ -55,14 +68,27 @@
     "confirmPassword": "Confirm new password",
     "updatePassword": "Update password",
     "passwordSuccess": "Password updated",
-    "passwordError": "Unable to update password"
+    "passwordError": "Unable to update password",
+    "subtitle": "Account information and preferences."
   },
   "Dashboard": {
     "welcome": "Welcome, {{name}}",
     "refresh": "Refresh",
-    "complaintsByGroup": "Complaints by group",
+    "complaintsByGroup": "Incidents by group",
     "fundraisingByGroup": "Fundraising by group",
-    "surveysParticipation": "Survey participation"
+    "surveysParticipation": "Survey participation",
+    "subtitle": "Overview for day-to-day school operations.",
+    "loading": "Loading...",
+    "eventsUpcoming": "Upcoming events",
+    "complaintsOpen": "Open incidents",
+    "complaintsTotal": "Total incidents",
+    "fundraisingTotal": "Total fundraising",
+    "serverError": "The server could not load the metrics. Please try again later.",
+    "loadError": "Failed to load dashboard.",
+    "pill": "Overview",
+    "eventsTotal": "Total events",
+    "eventsCancelled": "Cancelled events",
+    "suggestionsTotal": "Suggestions"
   },
   "SuggestionStatus": {
     "unauthorized": "Unauthorized",
@@ -124,7 +150,12 @@
     "description": "Description",
     "create": "Create",
     "eventItem": "<b>{{name}}</b> - {{date}}",
-    "unauthorized": "Unauthorized"
+    "unauthorized": "Unauthorized",
+    "pill": "Fundraising",
+    "subtitle": "Manage events and track income and expenses.",
+    "ledger": "Log income",
+    "expense": "Upload evidence",
+    "view": "View detail"
   },
   "FundraisingLedger": {
     "header": "Record collection by group",
@@ -134,7 +165,7 @@
     "notes": "Notes",
     "save": "Save",
     "success": "Record added #{{id}}",
-    "error": "Error while saving",
+    "error": "Failed to register.",
     "unauthorized": "Unauthorized"
   },
   "FundraisingExpense": {
@@ -147,7 +178,7 @@
     "uploadFirst": "Upload the file first",
     "fileReady": "File ready: {{url}}",
     "success": "Evidence recorded #{{id}}",
-    "error": "Error while registering evidence",
+    "error": "Failed to register evidence.",
     "unauthorized": "Unauthorized"
   },
   "FundraisingSummary": {
@@ -178,14 +209,14 @@
     "description": "Description",
     "update": "Update",
     "updated": "Event updated",
-    "error": "Error",
+    "error": "Unable to update event.",
     "confirm": "Are you sure you want to update this event?"
   },
   "FundraisingDelete": {
     "header": "Delete fundraising event",
     "delete": "Delete",
     "deleted": "Event deleted",
-    "error": "Error",
+    "error": "Unable to delete event.",
     "confirm": "Are you sure you want to delete this event?"
   },
   "Suggestions": {
@@ -196,28 +227,46 @@
     "createLink": "Create suggestion",
     "delete": "Delete",
     "deleteConfirm": "Delete this suggestion?",
-    "deleteAria": "Delete suggestion {{title}}"
+    "deleteAria": "Delete suggestion {{title}}",
+    "pill": "Suggestions",
+    "subtitle": "Community improvements and proposals."
   },
   "ComplaintCreate": {
-    "header": "Create private complaint",
+    "header": "Create private incident",
     "groupId": "Group ID",
     "teacherId": "Target Teacher ID",
     "studentId": "About Student ID (optional)",
     "description": "Description",
-    "create": "Create complaint",
-    "created": "Complaint created #{{id}}",
-    "error": "Error creating complaint"
+    "create": "Create incident",
+    "created": "Incident created #{{id}}",
+    "error": "Unable to create incident.",
+    "subtitle": "Log a incident and assign a responsible teacher.",
+    "pill": "New case",
+    "back": "Back to list"
   },
   "ComplaintThread": {
-    "header": "Complaint #{{id}}",
+    "header": "Incident #{{id}}",
     "status": "Status:",
     "description": "Description:",
     "messages": "Messages",
     "reply": "Write a reply",
     "send": "Send",
     "loading": "Loading…",
-    "loadError": "Could not load complaint",
-    "sendError": "Could not send"
+    "loadError": "Could not load incident",
+    "sendError": "Could not send",
+    "subtitle": "Case timeline and follow up.",
+    "pill": "Incident",
+    "back": "Back",
+    "updateStatus": "Update status",
+    "statusUpdated": "Status updated.",
+    "statusError": "Unable to update status.",
+    "participants": "Participants",
+    "participantId": "User ID",
+    "addParticipant": "Add participant",
+    "participantAdded": "Participant added.",
+    "participantError": "Unable to add participant.",
+    "group": "Group",
+    "teacher": "Teacher"
   },
   "CalendarCreate": {
     "header": "Create event",
@@ -237,7 +286,9 @@
     "uploaded": "Uploaded: {{url}}",
     "attachLast": "Attach last file",
     "attached": "Attachment added",
-    "downloadICS": "Download ICS"
+    "downloadICS": "Download ICS",
+    "pill": "Calendar",
+    "subtitle": "Manage events and export the calendar."
   },
   "EventDetail": {
     "attachments": "Attachments",
@@ -247,8 +298,8 @@
     "header": "Notifications",
     "event": "Events",
     "survey": "Surveys",
-    "complaint": "Complaints",
-    "complaint_message": "Complaint messages",
+    "complaint": "Incidents",
+    "complaint_message": "Incident messages",
     "register": "Register",
     "push": "Push"
   },
@@ -271,7 +322,10 @@
     "header": "Vote survey",
     "surveyId": "Survey ID",
     "optionId": "Option ID",
-    "vote": "Vote"
+    "vote": "Vote",
+    "subtitle": "Select an option and submit your vote.",
+    "pill": "Voting",
+    "missing": "Select an option."
   },
   "FundraisingCreateEvent": {
     "header": "Create fundraising event",
@@ -280,12 +334,12 @@
     "description": "Description",
     "create": "Create event",
     "created": "Event created #{{id}}",
-    "error": "Error creating event"
+    "error": "Unable to create event."
   },
   "Analytics": {
     "unauthorized": "Unauthorized",
     "header": "Analytics",
-    "complaintsByGroup": "Complaints by group",
+    "complaintsByGroup": "Incidents by group",
     "fundraisingByGroup": "Fundraising by group",
     "eventsByScope": "Events by scope",
     "surveysParticipation": "Survey participation",
@@ -299,7 +353,7 @@
   "AnalyticsDashboard": {
     "unauthorized": "Unauthorized",
     "header": "Analytics Dashboard",
-    "complaintsByGroup": "Complaints by group",
+    "complaintsByGroup": "Incidents by group",
     "fundraisingByGroup": "Fundraising by group",
     "eventsByScope": "Events by scope",
     "surveysParticipation": "Survey participation"
@@ -307,13 +361,17 @@
   "GroupList": {
     "header": "Group list",
     "unauthorized": "Unauthorized",
-    "error": "Error loading groups",
+    "error": "Failed to load groups.",
     "create": "Create group",
-    "filterPlaceholder": "Filter by name"
+    "filterPlaceholder": "Filter by name",
+    "pill": "Groups",
+    "subtitle": "Manage groups and assignments.",
+    "grade": "Grade",
+    "view": "View detail"
   },
   "GroupDetail": {
     "header": "Group detail",
-    "error": "Error loading group detail",
+    "error": "Failed to load group.",
     "infoTitle": "Group info",
     "groupName": "Name: {{name}}",
     "groupGrade": "Grade: {{grade}}",
@@ -361,7 +419,7 @@
     "filterStudent": "Filter by student",
     "filterRelationship": "Filter by relationship",
     "loading": "Loading links...",
-    "error": "Error loading links",
+    "error": "Failed to load links.",
     "create": "Create link",
     "parent": "Parent",
     "student": "Student",
@@ -369,7 +427,9 @@
     "actions": "Actions",
     "delete": "Unlink",
     "confirmDelete": "Remove this parent-student link?",
-    "tableAria": "Parent-student table"
+    "tableAria": "Parent-student table",
+    "pill": "Links",
+    "subtitle": "Link parents with students."
   },
   "ParentStudentsCreate": {
     "header": "Create parent-student link",
@@ -382,14 +442,14 @@
     "selectPlaceholder": "Select...",
     "save": "Save link",
     "saving": "Saving...",
-    "error": "Error creating link"
+    "error": "Failed to create link."
   },
   "ResetPasswordRequest": {
     "header": "Reset password",
     "email": "Email",
     "submit": "Send reset email",
     "success": "If the account exists, a reset email was sent.",
-    "error": "Unable to request reset"
+    "error": "Could not request reset."
   },
   "ResetPasswordConfirm": {
     "header": "Set new password",
@@ -397,13 +457,13 @@
     "confirm": "Confirm password",
     "submit": "Update password",
     "success": "Password updated",
-    "error": "Unable to reset password",
+    "error": "Could not reset password.",
     "mismatch": "Passwords do not match"
   },
   "UserList": {
     "header": "User management",
     "unauthorized": "Unauthorized",
-    "error": "Error loading users",
+    "error": "Failed to load users.",
     "loading": "Loading users...",
     "filterName": "Filter by name",
     "filterEmail": "Filter by email",
@@ -424,7 +484,9 @@
     "roleSpecialist": "Specialist teacher",
     "roleParent": "Parent",
     "roleVocal": "Vocal",
-    "create": "Create user"
+    "create": "Create user",
+    "pill": "Users",
+    "subtitle": "Manage roles and access."
   },
   "UserCreate": {
     "unauthorized": "Unauthorized",
@@ -445,7 +507,7 @@
   "StudentList": {
     "header": "Student management",
     "unauthorized": "Unauthorized",
-    "error": "Error loading students",
+    "error": "Failed to load students.",
     "loading": "Loading students...",
     "filterName": "Filter by name",
     "filterGrade": "Filter by grade",
@@ -455,7 +517,9 @@
     "enrollment": "Enrollment code",
     "actions": "Actions",
     "edit": "Edit",
-    "create": "Create student"
+    "create": "Create student",
+    "pill": "Students",
+    "subtitle": "Browse and manage students."
   },
   "StudentCreate": {
     "unauthorized": "Unauthorized",
@@ -550,5 +614,73 @@
   "LanguageSwitcher": {
     "english": "English",
     "spanish": "Spanish"
+  },
+  "Complaints": {
+    "title": "Incidents",
+    "subtitle": "Track cases and keep communication with teachers.",
+    "create": "New incident",
+    "pill": "Confidential",
+    "view": "View detail",
+    "emptyTitle": "No incidents yet",
+    "emptyBody": "Create the first one to start tracking.",
+    "noDescription": "No description.",
+    "noGroup": "No group assigned",
+    "error": "Failed to load incidents."
+  },
+  "Surveys": {
+    "title": "Surveys",
+    "subtitle": "Create, share, and vote in active surveys.",
+    "create": "New survey",
+    "vote": "Vote",
+    "pill": "Participation",
+    "group": "Group",
+    "school": "Whole school",
+    "votes": "Votes",
+    "voteNow": "Vote now",
+    "emptyTitle": "No surveys",
+    "emptyBody": "Create one to start participation.",
+    "error": "Failed to load surveys."
+  },
+  "AuditLogs": {
+    "pill": "Audit",
+    "subtitle": "Log of critical system actions."
+  },
+  "Announcements": {
+    "header": "Announcements",
+    "subtitle": "Publish updates for the school or specific groups.",
+    "pill": "Updates",
+    "create": "Create announcement",
+    "scopeGroup": "By group",
+    "scopeGlobal": "Global",
+    "groupId": "Group ID",
+    "title": "Title",
+    "message": "Message",
+    "publish": "Publish",
+    "group": "Group",
+    "global": "Global",
+    "error": "Failed to load announcements."
+  },
+  "Homeworks": {
+    "header": "Homeworks",
+    "subtitle": "Publish homework and due dates per group.",
+    "pill": "Homeworks",
+    "create": "Create homework",
+    "groupId": "Group ID",
+    "subject": "Subject",
+    "title": "Title",
+    "description": "Description",
+    "publish": "Publish",
+    "group": "Group",
+    "due": "Due",
+    "error": "Failed to load homeworks."
+  },
+  "Feed": {
+    "header": "Feed",
+    "subtitle": "Recent announcements and homeworks from your groups.",
+    "pill": "Updates",
+    "announcement": "Announcement",
+    "homework": "Homework",
+    "group": "Group",
+    "error": "Failed to load feed."
   }
 }

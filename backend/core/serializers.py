@@ -34,6 +34,44 @@ class SchoolSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "slug", "subdomain", "logo_url"]
 
 
+class SchoolCreateSerializer(serializers.ModelSerializer):
+    director_email = serializers.EmailField(write_only=True, required=False)
+    director_password = serializers.CharField(write_only=True, required=False)
+    director_first_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    director_last_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = School
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "subdomain",
+            "logo_url",
+            "director_email",
+            "director_password",
+            "director_first_name",
+            "director_last_name",
+        ]
+        read_only_fields = ["id"]
+
+    def validate(self, attrs):
+        name = (attrs.get("name") or "").strip()
+        slug = (attrs.get("slug") or "").strip()
+        subdomain = (attrs.get("subdomain") or "").strip()
+        if not name:
+            raise serializers.ValidationError("Name is required")
+        if not slug:
+            raise serializers.ValidationError("Slug is required")
+        if not subdomain:
+            raise serializers.ValidationError("Subdomain is required")
+        if School.objects.filter(slug=slug).exists():
+            raise serializers.ValidationError("Slug already exists")
+        if School.objects.filter(subdomain=subdomain).exists():
+            raise serializers.ValidationError("Subdomain already exists")
+        return attrs
+
+
 class SchoolYearSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchoolYear
@@ -92,6 +130,7 @@ class UserRoleUpdateSerializer(serializers.ModelSerializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
     calendar_subscription_url = serializers.SerializerMethodField()
+    school = SchoolSerializer(read_only=True)
 
     class Meta:
         model = User
@@ -101,6 +140,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "role",
+            "school",
             "preferred_language",
             "ics_token",
             "calendar_subscription_url",
@@ -269,19 +309,10 @@ class ComplaintParticipantSerializer(serializers.ModelSerializer):
         user = attrs.get("user")
         role_in_thread = attrs.get("role_in_thread")
 
-        allowed_roles = {
-            UserRoles.DIRECTOR,
-            UserRoles.MAESTRO_TITULAR,
-            UserRoles.MAESTRO_ITINERANTE,
-            UserRoles.VOCAL,
-            UserRoles.PADRE,
-        }
+        allowed_roles = set(ComplaintParticipant.ThreadRole.values)
 
         if role_in_thread not in allowed_roles:
             raise serializers.ValidationError("Invalid role for participant")
-
-        if user.role != role_in_thread:
-            raise serializers.ValidationError("User role mismatch")
 
         if school_id is not None and user.school_id != school_id:
             raise serializers.ValidationError("User mismatch for school")
@@ -291,6 +322,7 @@ class ComplaintParticipantSerializer(serializers.ModelSerializer):
 
 class ComplaintSerializer(serializers.ModelSerializer):
     messages = ComplaintMessageSerializer(many=True, read_only=True)
+    participants = ComplaintParticipantSerializer(many=True, read_only=True)
 
     class Meta:
         model = Complaint
@@ -305,12 +337,14 @@ class ComplaintSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "messages",
+            "participants",
         ]
         read_only_fields = ["created_by", "status"]
 
     def validate(self, attrs):
         request = self.context.get("request")
         school_id = getattr(request, "school_id", None)
+        user = getattr(request, "user", None)
         group = attrs.get("group")
         target_teacher = attrs.get("target_teacher")
         about_student = attrs.get("about_student")
@@ -322,6 +356,45 @@ class ComplaintSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Teacher mismatch for school")
             if about_student and about_student.school_id != school_id:
                 raise serializers.ValidationError("Student mismatch for school")
+            if about_student:
+                belongs = GroupMembership.objects.filter(
+                    group=group, student=about_student
+                ).exists()
+                if not belongs:
+                    raise serializers.ValidationError(
+                        "Student is not a member of this group"
+                    )
+            # Ensure target teacher is assigned to the group (homeroom or specialist)
+            if (
+                group.homeroom_teacher_id != target_teacher.id
+                and not SpecialistAssignment.objects.filter(
+                    group=group, teacher=target_teacher
+                ).exists()
+            ):
+                raise serializers.ValidationError(
+                    "Target teacher is not assigned to this group"
+                )
+
+        if user and group:
+            # Parents can only create complaints for groups where they have children.
+            if user.role == UserRoles.PADRE:
+                student_ids = ParentStudent.objects.filter(parent=user).values_list(
+                    "student_id", flat=True
+                )
+                if not GroupMembership.objects.filter(
+                    group=group, student_id__in=student_ids
+                ).exists():
+                    raise serializers.ValidationError(
+                        "Parent has no students in this group"
+                    )
+            # Vocales can only create complaints for their assigned group.
+            if user.role == UserRoles.VOCAL:
+                if not VocalAssignment.objects.filter(
+                    group=group, parent=user, active=True
+                ).exists():
+                    raise serializers.ValidationError(
+                        "Vocal is not assigned to this group"
+                    )
         return attrs
 
 
@@ -367,6 +440,12 @@ class EventSerializer(serializers.ModelSerializer):
             "photos",
         ]
         read_only_fields = ["created_by", "status", "computed_status"]
+
+    def get_attachments(self, obj):
+        return EventAttachmentSerializer(obj.attachments.all(), many=True).data
+
+    def get_photos(self, obj):
+        return EventPhotoSerializer(obj.photos.all(), many=True).data
 
 
 class EventRSVPStatusSerializer(serializers.Serializer):
@@ -428,12 +507,6 @@ class EventRSVPStatusSerializer(serializers.Serializer):
                 "group_ids not allowed for global scope"
             )
         return attrs
-
-    def get_attachments(self, obj):
-        return EventAttachmentSerializer(obj.attachments.all(), many=True).data
-
-    def get_photos(self, obj):
-        return EventPhotoSerializer(obj.photos.all(), many=True).data
 
 
 class EventAttachmentSerializer(serializers.ModelSerializer):

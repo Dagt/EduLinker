@@ -29,18 +29,36 @@ export default function FundraisingCreateEvent(){
   return (
     <>
       <Nav/>
-      <main style={{padding:16, maxWidth:680}}>
-        <h2>{t("FundraisingCreateEvent.header")}</h2>
-        <form onSubmit={submit}>
-          <input placeholder={t("FundraisingCreateEvent.name")} value={name} onChange={e=>setName(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <input placeholder={t("FundraisingCreateEvent.date")} value={date} onChange={e=>setDate(e.target.value)}
-                 style={{display:"block",margin:"8px 0",padding:8,width:"100%"}} />
-          <textarea placeholder={t("FundraisingCreateEvent.description")} value={description} onChange={e=>setDescription(e.target.value)}
-                    style={{display:"block",margin:"8px 0",padding:8,width:"100%",minHeight:120}}/>
-          <button>{t("FundraisingCreateEvent.create")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("FundraisingCreateEvent.pill", { defaultValue: "Recaudacion" })}</span>
+            <h2>{t("FundraisingCreateEvent.header")}</h2>
+            <p className="subtle">
+              {t("FundraisingCreateEvent.subtitle", { defaultValue: "Crea eventos para recaudar fondos." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("FundraisingCreateEvent.name")}
+              <input placeholder={t("FundraisingCreateEvent.name")} value={name} onChange={e=>setName(e.target.value)} />
+            </label>
+            <label>
+              {t("FundraisingCreateEvent.date")}
+              <input placeholder={t("FundraisingCreateEvent.date")} value={date} onChange={e=>setDate(e.target.value)} />
+            </label>
+            <label>
+              {t("FundraisingCreateEvent.description")}
+              <textarea placeholder={t("FundraisingCreateEvent.description")} value={description} onChange={e=>setDescription(e.target.value)} />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("FundraisingCreateEvent.create")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

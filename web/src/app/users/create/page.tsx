@@ -34,32 +34,33 @@ export default function UserCreate() {
   return (
     <RequireRole allowed={["admin", "director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("UserCreate.header")}</h2>
-        <form onSubmit={submit} style={{ maxWidth: 480 }}>
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("UserCreate.header")}</span>
+            <h2>{t("UserCreate.header")}</h2>
+          </div>
+        </header>
+        <form className="card form" onSubmit={submit}>
           <input
             placeholder={t("UserCreate.firstName")}
             value={form.first_name}
             onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
           />
           <input
             placeholder={t("UserCreate.lastName")}
             value={form.last_name}
             onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
           />
           <input
             placeholder={t("UserCreate.email")}
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
           />
           <select
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
           >
             <option value="DIRECTOR">{t("UserCreate.roleDirector")}</option>
             <option value="MAESTRO_TITULAR">{t("UserCreate.roleHomeroom")}</option>
@@ -72,11 +73,10 @@ export default function UserCreate() {
             type="password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
           />
-          <button>{t("UserCreate.create")}</button>
+          <button className="button">{t("UserCreate.create")}</button>
         </form>
-        {msg && <p>{msg}</p>}
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </RequireRole>
   );

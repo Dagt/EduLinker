@@ -4,6 +4,8 @@ from celery import shared_task
 from .models import DeviceToken, ExpoTicket, FailedExpoTicket, NotificationPreference
 from .providers import expo
 from .providers.expo import ExpoProvider
+from .providers.email import EmailProvider
+from core.models import User
 
 
 def _active_tokens_for_users(user_ids, school_id):
@@ -11,6 +13,14 @@ def _active_tokens_for_users(user_ids, school_id):
         DeviceToken.objects.filter(
             active=True, school_id=school_id, user_id__in=user_ids
         ).values_list("token", flat=True)
+    )
+
+
+def _emails_for_users(user_ids, school_id):
+    return list(
+        User.objects.filter(
+            school_id=school_id, id__in=user_ids, is_active=True
+        ).values_list("email", flat=True)
     )
 
 
@@ -64,6 +74,13 @@ def send_notification(
             "tickets": len(token_ticket_pairs),
             "invalid": len(invalid_tokens),
         }
+
+    if provider == "email":
+        emails = _emails_for_users(user_ids, school_id)
+        if not emails:
+            return {"sent": 0}
+        provider_obj = EmailProvider()
+        return provider_obj.send(emails, title=title, body=body, data=data or {})
 
     else:
         raise ValueError("Unknown provider")

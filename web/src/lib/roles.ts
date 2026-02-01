@@ -44,6 +44,9 @@ export const protectedRoutes: Record<string, string[]> = {
   "/students/edit": ["admin", "director"],
   "/audit": ["director"],
   "/parent-students": ["admin", "director"],
+  "/schools": ["admin"],
+  "/suggestions": ["admin", "director", "teacher"],
+  "/sugerencias": ["admin", "director", "teacher"],
 };
 
 export function canAccessRoute(path: string, role?: string): boolean {

@@ -16,7 +16,7 @@ class SuggestionSerializer(serializers.ModelSerializer):
             "id", "group", "created_by", "target_teacher",
             "title", "description", "status", "created_at", "updated_at", "messages",
         ]
-        read_only_fields = ["created_by", "status"]
+        read_only_fields = ["created_by", "status", "target_teacher"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

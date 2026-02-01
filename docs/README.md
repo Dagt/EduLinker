@@ -2,6 +2,7 @@
 
 Guías y referencias para los distintos módulos de EduLinker.
 
+- [Guía rápida de pruebas y accesos](GUIA_PRUEBAS.md)
 - [Analytics Overview](analytics.md)
 - [Chat API](chat.md)
 - [Complaints API](complaints.md)

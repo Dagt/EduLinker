@@ -34,30 +34,48 @@ export default function AssignSpecialist() {
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("AssignSpecialist.header")}</h2>
-        <form onSubmit={submit}>
-          <input
-            placeholder={t("AssignSpecialist.groupId")}
-            value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("AssignSpecialist.teacherId")}
-            value={teacherId}
-            onChange={(e) => setTeacherId(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("AssignSpecialist.subject")}
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <button>{t("AssignSpecialist.assign")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("AssignSpecialist.pill", { defaultValue: "Grupos" })}</span>
+            <h2>{t("AssignSpecialist.header")}</h2>
+            <p className="subtle">
+              {t("AssignSpecialist.subtitle", { defaultValue: "Asigna docentes por materia." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("AssignSpecialist.groupId")}
+              <input
+                placeholder={t("AssignSpecialist.groupId")}
+                value={groupId}
+                onChange={(e) => setGroupId(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("AssignSpecialist.teacherId")}
+              <input
+                placeholder={t("AssignSpecialist.teacherId")}
+                value={teacherId}
+                onChange={(e) => setTeacherId(e.target.value)}
+              />
+            </label>
+            <label>
+              {t("AssignSpecialist.subject")}
+              <input
+                placeholder={t("AssignSpecialist.subject")}
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("AssignSpecialist.assign")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </>
   );

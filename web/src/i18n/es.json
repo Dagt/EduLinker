@@ -2,7 +2,7 @@
   "Nav": {
     "dashboard": "Dashboard",
     "calendar": "Calendario",
-    "complaints": "Quejas",
+    "complaints": "Incidencias",
     "suggestions": "Sugerencias",
     "surveys": "Encuestas",
     "fundraising": "Recaudación",
@@ -11,7 +11,20 @@
     "students": "Alumnos",
     "groups": "Grupos",
     "parentStudents": "Vínculos padre-alumno",
-    "profile": "Perfil"
+    "schoolYears": "Ciclos",
+    "profile": "Perfil",
+    "logout": "Salir",
+    "unknownUser": "Usuario",
+    "unknownRole": "Rol",
+    "feed": "Feed",
+    "announcements": "Avisos",
+    "homeworks": "Tareas",
+    "communication": "Comunicacion",
+    "transparency": "Transparencia",
+    "administration": "Administracion",
+    "account": "Cuenta",
+    "audit": "Auditoria",
+    "tagline": "Comunicacion y seguimiento escolar"
   },
   "Auth": {
     "loading": "Verificando acceso...",
@@ -55,14 +68,27 @@
     "confirmPassword": "Confirmar nueva contraseña",
     "updatePassword": "Actualizar contraseña",
     "passwordSuccess": "Contraseña actualizada",
-    "passwordError": "No se pudo actualizar la contraseña"
+    "passwordError": "No se pudo actualizar la contraseña",
+    "subtitle": "Informaci?n y preferencias de tu cuenta."
   },
   "Dashboard": {
     "welcome": "Bienvenido, {{name}}",
     "refresh": "Actualizar",
-    "complaintsByGroup": "Quejas por grupo",
+    "complaintsByGroup": "Incidencias por grupo",
     "fundraisingByGroup": "Recaudaciones por grupo",
-    "surveysParticipation": "Participación en encuestas"
+    "surveysParticipation": "Participación en encuestas",
+    "subtitle": "Panel general para monitorear actividad escolar.",
+    "loading": "Cargando...",
+    "eventsUpcoming": "Eventos pr?ximos",
+    "complaintsOpen": "Incidencias abiertas",
+    "complaintsTotal": "Incidencias totales",
+    "fundraisingTotal": "Recaudaci?n total",
+    "serverError": "El servidor no pudo cargar las m?tricas. Intenta m?s tarde.",
+    "loadError": "Error al cargar el dashboard.",
+    "pill": "Resumen",
+    "eventsTotal": "Eventos totales",
+    "eventsCancelled": "Eventos cancelados",
+    "suggestionsTotal": "Sugerencias"
   },
   "SuggestionStatus": {
     "unauthorized": "No autorizado",
@@ -124,7 +150,12 @@
     "description": "Descripción",
     "create": "Crear",
     "eventItem": "<b>{{name}}</b> - {{date}}",
-    "unauthorized": "No autorizado"
+    "unauthorized": "No autorizado",
+    "pill": "Recaudaci?n",
+    "subtitle": "Organiza eventos y controla ingresos y gastos.",
+    "ledger": "Registrar ingresos",
+    "expense": "Subir evidencia",
+    "view": "Ver detalle"
   },
   "FundraisingLedger": {
     "header": "Registrar recaudación por grupo",
@@ -134,7 +165,7 @@
     "notes": "Notas",
     "save": "Guardar",
     "success": "Registro agregado #{{id}}",
-    "error": "Error al registrar",
+    "error": "Error al registrar.",
     "unauthorized": "No autorizado"
   },
   "FundraisingExpense": {
@@ -147,7 +178,7 @@
     "uploadFirst": "Sube el archivo primero",
     "fileReady": "Archivo listo: {{url}}",
     "success": "Evidencia registrada #{{id}}",
-    "error": "Error al registrar evidencia",
+    "error": "Error al registrar evidencia.",
     "unauthorized": "No autorizado"
   },
   "FundraisingSummary": {
@@ -178,14 +209,14 @@
     "description": "Descripción",
     "update": "Actualizar",
     "updated": "Evento actualizado",
-    "error": "Error",
+    "error": "No se pudo actualizar el evento.",
     "confirm": "¿Está seguro de actualizar este evento?"
   },
   "FundraisingDelete": {
     "header": "Eliminar evento de recaudación",
     "delete": "Eliminar",
     "deleted": "Evento eliminado",
-    "error": "Error",
+    "error": "No se pudo eliminar el evento.",
     "confirm": "¿Está seguro de eliminar este evento?"
   },
   "Suggestions": {
@@ -196,28 +227,46 @@
     "createLink": "Crear sugerencia",
     "delete": "Eliminar",
     "deleteConfirm": "¿Eliminar esta sugerencia?",
-    "deleteAria": "Eliminar sugerencia {{title}}"
+    "deleteAria": "Eliminar sugerencia {{title}}",
+    "pill": "Sugerencias",
+    "subtitle": "Mejoras y propuestas de la comunidad."
   },
   "ComplaintCreate": {
-    "header": "Crear queja privada",
+    "header": "Crear incidencia privada",
     "groupId": "ID de grupo",
     "teacherId": "ID de maestro",
     "studentId": "ID de estudiante (opcional)",
     "description": "Descripción",
-    "create": "Crear queja",
-    "created": "Queja creada #{{id}}",
-    "error": "Error al crear queja"
+    "create": "Crear incidencia",
+    "created": "Incidencia creada #{{id}}",
+    "error": "Error al crear incidencia.",
+    "subtitle": "Registra una incidencia y asigna a un docente responsable.",
+    "pill": "Nuevo caso",
+    "back": "Volver a la lista"
   },
   "ComplaintThread": {
-    "header": "Queja #{{id}}",
+    "header": "Incidencia #{{id}}",
     "status": "Estado:",
     "description": "Descripción:",
     "messages": "Mensajes",
     "reply": "Escribe una respuesta",
     "send": "Enviar",
     "loading": "Cargando…",
-    "loadError": "No se pudo cargar la queja",
-    "sendError": "No se pudo enviar"
+    "loadError": "No se pudo cargar la incidencia",
+    "sendError": "No se pudo enviar",
+    "subtitle": "Historial y seguimiento del caso.",
+    "pill": "Incidencia",
+    "back": "Volver",
+    "updateStatus": "Actualizar estado",
+    "statusUpdated": "Estado actualizado.",
+    "statusError": "No se pudo actualizar el estado.",
+    "participants": "Participantes",
+    "participantId": "ID de usuario",
+    "addParticipant": "Agregar participante",
+    "participantAdded": "Participante agregado.",
+    "participantError": "No se pudo agregar participante.",
+    "group": "Grupo",
+    "teacher": "Maestro"
   },
   "CalendarCreate": {
     "header": "Crear evento",
@@ -237,7 +286,9 @@
     "uploaded": "Subido: {{url}}",
     "attachLast": "Adjuntar último archivo",
     "attached": "Adjunto agregado",
-    "downloadICS": "Descargar ICS"
+    "downloadICS": "Descargar ICS",
+    "pill": "Calendario",
+    "subtitle": "Administra eventos y exporta el calendario."
   },
   "EventDetail": {
     "attachments": "Adjuntos",
@@ -247,8 +298,8 @@
     "header": "Notificaciones",
     "event": "Eventos",
     "survey": "Encuestas",
-    "complaint": "Quejas",
-    "complaint_message": "Mensajes de queja",
+    "complaint": "Incidencias",
+    "complaint_message": "Mensajes de incidencia",
     "register": "Registrar",
     "push": "Push"
   },
@@ -271,7 +322,10 @@
     "header": "Votar encuesta",
     "surveyId": "ID de encuesta",
     "optionId": "ID de opción",
-    "vote": "Votar"
+    "vote": "Votar",
+    "subtitle": "Selecciona una opci?n y registra tu voto.",
+    "pill": "Votaci?n",
+    "missing": "Selecciona una opci?n."
   },
   "FundraisingCreateEvent": {
     "header": "Crear evento de recaudación",
@@ -280,12 +334,12 @@
     "description": "Descripción",
     "create": "Crear evento",
     "created": "Evento creado #{{id}}",
-    "error": "Error al crear evento"
+    "error": "Error al crear evento."
   },
   "Analytics": {
     "unauthorized": "No autorizado",
     "header": "Analíticas",
-    "complaintsByGroup": "Quejas por grupo",
+    "complaintsByGroup": "Incidencias por grupo",
     "fundraisingByGroup": "Recaudación por grupo",
     "eventsByScope": "Eventos por alcance",
     "surveysParticipation": "Participación en encuestas",
@@ -299,7 +353,7 @@
   "AnalyticsDashboard": {
     "unauthorized": "No autorizado",
     "header": "Dashboard Analítico",
-    "complaintsByGroup": "Quejas por grupo",
+    "complaintsByGroup": "Incidencias por grupo",
     "fundraisingByGroup": "Recaudación por grupo",
     "eventsByScope": "Eventos por alcance",
     "surveysParticipation": "Participación en encuestas"
@@ -307,13 +361,17 @@
   "GroupList": {
     "header": "Lista de grupos",
     "unauthorized": "No autorizado",
-    "error": "Error al cargar grupos",
+    "error": "Error al cargar grupos.",
     "create": "Crear grupo",
-    "filterPlaceholder": "Filtrar por nombre"
+    "filterPlaceholder": "Filtrar por nombre",
+    "pill": "Grupos",
+    "subtitle": "Administra grupos y asignaciones.",
+    "grade": "Grado",
+    "view": "Ver detalle"
   },
   "GroupDetail": {
     "header": "Detalle del grupo",
-    "error": "Error al cargar el grupo",
+    "error": "Error al cargar el grupo.",
     "infoTitle": "Información del grupo",
     "groupName": "Nombre: {{name}}",
     "groupGrade": "Grado: {{grade}}",
@@ -361,7 +419,7 @@
     "filterStudent": "Filtrar por alumno",
     "filterRelationship": "Filtrar por parentesco",
     "loading": "Cargando vínculos...",
-    "error": "Error al cargar vínculos",
+    "error": "Error al cargar v?nculos.",
     "create": "Crear vínculo",
     "parent": "Padre",
     "student": "Alumno",
@@ -369,7 +427,9 @@
     "actions": "Acciones",
     "delete": "Desvincular",
     "confirmDelete": "¿Eliminar este vínculo padre-alumno?",
-    "tableAria": "Tabla de vínculos padre-alumno"
+    "tableAria": "Tabla de vínculos padre-alumno",
+    "pill": "V?nculos",
+    "subtitle": "Relaciona padres con alumnos."
   },
   "ParentStudentsCreate": {
     "header": "Crear vínculo padre-alumno",
@@ -382,14 +442,14 @@
     "selectPlaceholder": "Seleccionar...",
     "save": "Guardar vínculo",
     "saving": "Guardando...",
-    "error": "Error al crear vínculo"
+    "error": "Error al crear v?nculo."
   },
   "ResetPasswordRequest": {
     "header": "Restablecer contraseña",
     "email": "Correo",
     "submit": "Enviar correo de restablecimiento",
     "success": "Si la cuenta existe, se envió un correo de restablecimiento.",
-    "error": "No se pudo solicitar el restablecimiento"
+    "error": "No se pudo solicitar el restablecimiento."
   },
   "ResetPasswordConfirm": {
     "header": "Definir nueva contraseña",
@@ -397,13 +457,13 @@
     "confirm": "Confirmar contraseña",
     "submit": "Actualizar contraseña",
     "success": "Contraseña actualizada",
-    "error": "No se pudo restablecer la contraseña",
+    "error": "No se pudo restablecer la contrase?a.",
     "mismatch": "Las contraseñas no coinciden"
   },
   "UserList": {
     "header": "Gestión de usuarios",
     "unauthorized": "No autorizado",
-    "error": "Error al cargar usuarios",
+    "error": "Error al cargar usuarios.",
     "loading": "Cargando usuarios...",
     "filterName": "Filtrar por nombre",
     "filterEmail": "Filtrar por correo",
@@ -424,7 +484,9 @@
     "roleSpecialist": "Maestro itinerante",
     "roleParent": "Padre",
     "roleVocal": "Vocal",
-    "create": "Crear usuario"
+    "create": "Crear usuario",
+    "pill": "Usuarios",
+    "subtitle": "Gestiona roles y acceso."
   },
   "UserCreate": {
     "unauthorized": "No autorizado",
@@ -445,7 +507,7 @@
   "StudentList": {
     "header": "Gestión de alumnos",
     "unauthorized": "No autorizado",
-    "error": "Error al cargar alumnos",
+    "error": "Error al cargar alumnos.",
     "loading": "Cargando alumnos...",
     "filterName": "Filtrar por nombre",
     "filterGrade": "Filtrar por grado",
@@ -455,7 +517,9 @@
     "enrollment": "Código de inscripción",
     "actions": "Acciones",
     "edit": "Editar",
-    "create": "Crear alumno"
+    "create": "Crear alumno",
+    "pill": "Alumnos",
+    "subtitle": "Consulta y administra alumnos."
   },
   "StudentCreate": {
     "unauthorized": "No autorizado",
@@ -550,5 +614,73 @@
   "LanguageSwitcher": {
     "english": "Inglés",
     "spanish": "Español"
+  },
+  "Complaints": {
+    "title": "Incidencias",
+    "subtitle": "Seguimiento de casos y comunicaci?n con docentes.",
+    "create": "Nueva incidencia",
+    "pill": "Confidencial",
+    "view": "Ver detalle",
+    "emptyTitle": "Sin incidencias a?n",
+    "emptyBody": "Crea la primera para iniciar el registro.",
+    "noDescription": "Sin descripci?n.",
+    "noGroup": "Grupo sin asignar",
+    "error": "Error al cargar incidencias."
+  },
+  "Surveys": {
+    "title": "Encuestas",
+    "subtitle": "Crea, comparte y vota encuestas activas.",
+    "create": "Nueva encuesta",
+    "vote": "Votar",
+    "pill": "Participaci?n",
+    "group": "Grupo",
+    "school": "Toda la escuela",
+    "votes": "Votos",
+    "voteNow": "Votar ahora",
+    "emptyTitle": "Sin encuestas",
+    "emptyBody": "Crea una para iniciar la participaci?n.",
+    "error": "Error al cargar encuestas."
+  },
+  "AuditLogs": {
+    "pill": "Auditor?a",
+    "subtitle": "Bit?cora de acciones cr?ticas del sistema."
+  },
+  "Announcements": {
+    "header": "Avisos",
+    "subtitle": "Publica comunicados por escuela o por grupo.",
+    "pill": "Comunicados",
+    "create": "Crear aviso",
+    "scopeGroup": "Por grupo",
+    "scopeGlobal": "Global",
+    "groupId": "ID de grupo",
+    "title": "T?tulo",
+    "message": "Mensaje",
+    "publish": "Publicar",
+    "group": "Grupo",
+    "global": "Global",
+    "error": "Error al cargar avisos."
+  },
+  "Homeworks": {
+    "header": "Tareas",
+    "subtitle": "Publica tareas y fechas l?mite por grupo.",
+    "pill": "Tareas",
+    "create": "Crear tarea",
+    "groupId": "ID de grupo",
+    "subject": "Materia",
+    "title": "T?tulo",
+    "description": "Descripci?n",
+    "publish": "Publicar",
+    "group": "Grupo",
+    "due": "Entrega",
+    "error": "Error al cargar tareas."
+  },
+  "Feed": {
+    "header": "Feed",
+    "subtitle": "Avisos y tareas recientes de tus grupos.",
+    "pill": "Novedades",
+    "announcement": "Aviso",
+    "homework": "Tarea",
+    "group": "Grupo",
+    "error": "Error al cargar el feed."
   }
 }

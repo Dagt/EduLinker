@@ -24,10 +24,22 @@ export default function SuggestionDelete({ params }:{ params:{ id:string } }){
   return (
     <>
       <Nav />
-      <main style={{ padding:16, maxWidth:560 }}>
-        <h2>{t('SuggestionDelete.header')}</h2>
-        <button onClick={onDelete}>{t('SuggestionDelete.delete')}</button>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("SuggestionDelete.pill", { defaultValue: "Sugerencias" })}</span>
+            <h2>{t('SuggestionDelete.header')}</h2>
+            <p className="subtle">
+              {t("SuggestionDelete.subtitle", { defaultValue: "Esta accion no se puede deshacer." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <div className="stack">
+            <button className="button" onClick={onDelete}>{t('SuggestionDelete.delete')}</button>
+            {msg && <p className="alert success">{msg}</p>}
+          </div>
+        </section>
       </main>
     </>
   );

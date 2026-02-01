@@ -59,7 +59,7 @@ describe('AnalyticsPage', () => {
     (getEngagementAnalytics as jest.Mock).mockResolvedValue(engagement);
     (getEventAttendanceAnalytics as jest.Mock).mockResolvedValue(attendance);
     render(<AnalyticsPage />);
-    await screen.findByText('Quejas por grupo', { selector: 'h3' });
+    await screen.findByText('Incidencias por grupo', { selector: 'h3' });
     expect(screen.getByText('Recaudación por grupo', { selector: 'h3' })).toBeInTheDocument();
     expect(screen.getByText('Eventos por alcance', { selector: 'h3' })).toBeInTheDocument();
     expect(screen.getByText('Participación en encuestas', { selector: 'h3' })).toBeInTheDocument();

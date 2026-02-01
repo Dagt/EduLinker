@@ -26,6 +26,9 @@ from .views import (
     VocalAssignmentDeactivateView,
     MeView,
     CurrentSchoolView,
+    SchoolListView,
+    SchoolCreateView,
+    SchoolDetailUpdateView,
     SchoolYearRolloverView,
     UserListCreateView,
     UserRoleUpdateView,
@@ -44,6 +47,9 @@ from .views import (
     HomeworkDetailView,
     FeedView,
     RegenerateICSTokenView,
+    SchoolYearListView,
+    SchoolYearSetCurrentView,
+    VocalAssignmentDeleteView,
 )
 
 api_docs_urlpatterns = [
@@ -59,6 +65,15 @@ urlpatterns = [
     path("me/", MeView.as_view(), name="me"),
     path("me/regenerate-ics/", RegenerateICSTokenView.as_view(), name="me-regenerate-ics"),
     path("schools/current/", CurrentSchoolView.as_view(), name="current-school"),
+    path("schools/", SchoolListView.as_view(), name="school-list"),
+    path("schools/create/", SchoolCreateView.as_view(), name="school-create"),
+    path("schools/<int:pk>/", SchoolDetailUpdateView.as_view(), name="school-detail-update"),
+    path("school-years/", SchoolYearListView.as_view(), name="school-year-list"),
+    path(
+        "school-years/<int:pk>/set-current/",
+        SchoolYearSetCurrentView.as_view(),
+        name="school-year-set-current",
+    ),
     path("users/", UserListCreateView.as_view(), name="user-list-create"),
     path("users/<int:pk>/role/", UserRoleUpdateView.as_view(), name="user-role-update"),
     path("users/<int:pk>/deactivate/", UserDeactivateView.as_view(), name="user-deactivate"),
@@ -110,6 +125,11 @@ urlpatterns = [
         "groups/vocal-assignments/<int:pk>/deactivate/",
         VocalAssignmentDeactivateView.as_view(),
         name="vocal-assignment-deactivate",
+    ),
+    path(
+        "vocals/<int:pk>/",
+        VocalAssignmentDeleteView.as_view(),
+        name="vocal-assignment-delete",
     ),
     path("complaints/", ComplaintCreateView.as_view(), name="complaint-create"),
     path("complaints/<int:pk>/", ComplaintDetailView.as_view(), name="complaint-detail"),

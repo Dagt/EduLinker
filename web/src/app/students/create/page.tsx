@@ -39,36 +39,56 @@ export default function StudentCreate() {
   return (
     <RequireRole allowed={["admin", "director"]}>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("StudentCreate.header")}</h2>
-        <form onSubmit={submit} style={{ maxWidth: 480 }}>
-          <input
-            placeholder={t("StudentCreate.firstName")}
-            value={form.first_name}
-            onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("StudentCreate.lastName")}
-            value={form.last_name}
-            onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("StudentCreate.grade")}
-            value={form.grade_level}
-            onChange={(e) => setForm({ ...form, grade_level: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <input
-            placeholder={t("StudentCreate.enrollment")}
-            value={form.enrollment_code}
-            onChange={(e) => setForm({ ...form, enrollment_code: e.target.value })}
-            style={{ display: "block", margin: "8px 0", padding: 8, width: "100%" }}
-          />
-          <button>{t("StudentCreate.create")}</button>
-        </form>
-        {msg && <p>{msg}</p>}
+      <main className="page narrow">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("StudentCreate.pill", { defaultValue: "Estudiantes" })}</span>
+            <h2>{t("StudentCreate.header")}</h2>
+            <p className="subtle">
+              {t("StudentCreate.subtitle", { defaultValue: "Registra estudiantes y genera su codigo de inscripcion." })}
+            </p>
+          </div>
+        </header>
+        <section className="card">
+          <form className="form" onSubmit={submit}>
+            <label>
+              {t("StudentCreate.firstName")}
+              <input
+                placeholder={t("StudentCreate.firstName")}
+                value={form.first_name}
+                onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+              />
+            </label>
+            <label>
+              {t("StudentCreate.lastName")}
+              <input
+                placeholder={t("StudentCreate.lastName")}
+                value={form.last_name}
+                onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+              />
+            </label>
+            <label>
+              {t("StudentCreate.grade")}
+              <input
+                placeholder={t("StudentCreate.grade")}
+                value={form.grade_level}
+                onChange={(e) => setForm({ ...form, grade_level: e.target.value })}
+              />
+            </label>
+            <label>
+              {t("StudentCreate.enrollment")}
+              <input
+                placeholder={t("StudentCreate.enrollment")}
+                value={form.enrollment_code}
+                onChange={(e) => setForm({ ...form, enrollment_code: e.target.value })}
+              />
+            </label>
+            <div className="form-actions">
+              <button className="button" type="submit">{t("StudentCreate.create")}</button>
+            </div>
+          </form>
+        </section>
+        {msg && <p className="alert success">{msg}</p>}
       </main>
     </RequireRole>
   );

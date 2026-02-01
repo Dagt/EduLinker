@@ -38,24 +38,30 @@ export default function ChatAuditPage({ params }: { params: { groupId: string } 
   return (
     <>
       <Nav />
-      <main style={{ padding: 16 }}>
-        <h2>{t("ChatAudit.header")}</h2>
-        {error && <p>{error}</p>}
-        <ul style={{ listStyle: "none", padding: 0 }}>
+      <main className="page">
+        <header className="page-header compact">
+          <div>
+            <span className="pill">{t("ChatAudit.pill", { defaultValue: "Auditoria" })}</span>
+            <h2>{t("ChatAudit.header")}</h2>
+            <p className="subtle">
+              {t("ChatAudit.subtitle", { defaultValue: "Mensajes enviados en el grupo." })}
+            </p>
+          </div>
+        </header>
+        {error && <p className="alert error">{error}</p>}
+        <ul className="messages">
           {msgs.map((m) => (
-            <li key={m.id} style={{ marginBottom: 12 }}>
-              <div>
+            <li key={m.id}>
+              <div className="card-header">
                 <strong>{m.author_display}</strong>
-                {m.author_role && (
-                  <span style={{ marginLeft: 4, fontSize: 12 }}>({m.author_role})</span>
-                )}
+                {m.author_role && <span className="meta">{m.author_role}</span>}
               </div>
               {m.attachment_url && (
-                <div>
-                  <img src={m.attachment_url} alt="" style={{ maxWidth: 200 }} />
+                <div className="media-card" style={{ maxWidth: 240 }}>
+                  <img src={m.attachment_url} alt="" />
                 </div>
               )}
-              {m.message_text && <p>{m.message_text}</p>}
+              {m.message_text && <p className="subtle">{m.message_text}</p>}
             </li>
           ))}
         </ul>

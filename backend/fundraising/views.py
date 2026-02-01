@@ -56,7 +56,15 @@ class FundraisingEventListCreateView(generics.ListCreateAPIView):
         school_year = SchoolYear.objects.filter(
             school_id=self.request.school_id, is_current=True
         ).first()
-        serializer.save(school_id=self.request.school_id, school_year=school_year)
+        event = serializer.save(school_id=self.request.school_id, school_year=school_year)
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="create",
+            entity_type="fundraising_event",
+            entity_id=event.id,
+        )
 
 
 class FundraisingEventDetailView(generics.RetrieveDestroyAPIView):
@@ -66,6 +74,17 @@ class FundraisingEventDetailView(generics.RetrieveDestroyAPIView):
     def get_queryset(self):
         return FundraisingEvent.objects.filter(school_id=self.request.school_id)
 
+    def perform_destroy(self, instance):
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="delete",
+            entity_type="fundraising_event",
+            entity_id=instance.id,
+        )
+        instance.delete()
+
 
 class FundraisingEventUpdateView(generics.UpdateAPIView):
     serializer_class = FundraisingEventSerializer
@@ -73,6 +92,24 @@ class FundraisingEventUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         return FundraisingEvent.objects.filter(school_id=self.request.school_id)
+
+    def perform_update(self, serializer):
+        event = self.get_object()
+        changes = {}
+        for field, value in serializer.validated_data.items():
+            old_value = getattr(event, field)
+            if old_value != value:
+                changes[field] = {"from": str(old_value), "to": str(value)}
+        event = serializer.save()
+        from audit.models import AuditLog
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=self.request.user,
+            action="update",
+            entity_type="fundraising_event",
+            entity_id=event.id,
+            metadata={"changes": changes},
+        )
 
 
 class FundraisingEventSummaryView(generics.RetrieveAPIView):

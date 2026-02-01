@@ -18,13 +18,13 @@ describe('ComplaintCreate', () => {
     fireEvent.change(screen.getByPlaceholderText('ID de maestro'), { target: { value: '2' } });
     fireEvent.change(screen.getByPlaceholderText('ID de estudiante (opcional)'), { target: { value: '3' } });
     fireEvent.change(screen.getByPlaceholderText('Descripción'), { target: { value: 'Hi' } });
-    fireEvent.click(screen.getByText('Crear queja'));
+    fireEvent.click(screen.getByText('Crear incidencia'));
     await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/complaints/', {
       group_id: 1,
       target_teacher_id: 2,
       about_student_id: 3,
       description: 'Hi',
     }, 'token'));
-    expect(await screen.findByText('Queja creada #5')).toBeInTheDocument();
+    expect(await screen.findByText('Incidencia creada #5')).toBeInTheDocument();
   });
 });
