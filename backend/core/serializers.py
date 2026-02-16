@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -20,8 +21,10 @@ from .models import (
     EventPhoto,
     EventRSVP,
     Announcement,
+    AnnouncementRead,
     Homework,
     ActivityPhoto,
+    Invitation,
 )
 from .roles import Roles as UserRoles
 
@@ -533,6 +536,9 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             "title",
             "message",
             "attachments",
+            "requires_ack",
+            "ack_deadline",
+            "locked",
             "created_at",
         ]
         read_only_fields = ["teacher", "created_at"]
@@ -549,6 +555,55 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"group": "Group required for group scope"})
         if scope == Announcement.Scope.GLOBAL:
             attrs["group"] = None
+        return attrs
+
+
+class AnnouncementReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnnouncementRead
+        fields = ["id", "announcement", "user", "read_at"]
+        read_only_fields = ["user", "read_at"]
+
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = [
+            "id",
+            "token",
+            "role",
+            "group",
+            "expires_at",
+            "max_uses",
+            "uses_count",
+            "created_by",
+            "revoked_at",
+            "metadata",
+            "created_at",
+            "is_active",
+        ]
+        read_only_fields = ["token", "uses_count", "created_by", "revoked_at", "created_at", "is_active"]
+
+    def validate(self, attrs):
+        group = attrs.get("group")
+        role = attrs.get("role")
+        request = self.context.get("request")
+        school_id = getattr(request, "school_id", None)
+
+        if group is not None and school_id is not None and group.school_id != school_id:
+            raise serializers.ValidationError({"group": "Group mismatch for school"})
+
+        if role in {User.Roles.PADRE, User.Roles.VOCAL, User.Roles.MAESTRO_TITULAR, User.Roles.MAESTRO_ITINERANTE} and group is None:
+            raise serializers.ValidationError({"group": "Group required for selected role"})
+
+        expires_at = attrs.get("expires_at")
+        if expires_at and expires_at <= timezone.now():
+            raise serializers.ValidationError({"expires_at": "Must be in the future"})
+
+        max_uses = attrs.get("max_uses", 1)
+        if max_uses < 1:
+            raise serializers.ValidationError({"max_uses": "Must be >= 1"})
+
         return attrs
 
 

@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime, parse_date
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +21,9 @@ from core.filters import ComplaintFilter, EventFilter, StudentFilter, UserFilter
 
 from .models import (
     Announcement,
+    AnnouncementRead,
     Homework,
+    Invitation,
     Group,
     Complaint,
     ComplaintMessage,
@@ -56,7 +58,9 @@ from .serializers import (
     SchoolCreateSerializer,
     SchoolYearSerializer,
     AnnouncementSerializer,
+    AnnouncementReadSerializer,
     HomeworkSerializer,
+    InvitationSerializer,
     ComplaintMessageSerializer,
     ComplaintParticipantSerializer,
     ComplaintSerializer,
@@ -106,6 +110,13 @@ def _visible_group_ids(user):
             "group_id", flat=True
         )
     return Group.objects.none().values_list("id", flat=True)
+
+
+def _resolve_school_by_invitation_token(token: str):
+    invitation = Invitation.objects.select_related("school").filter(token=token).first()
+    if not invitation:
+        return None, None
+    return invitation.school_id, invitation
 
 
 def _can_manage_group(user, group):
@@ -1429,6 +1440,215 @@ class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
             entity_id=instance.id,
         )
         instance.delete()
+
+
+class InvitationListCreateView(generics.ListCreateAPIView):
+    serializer_class = InvitationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not (is_director(user) or is_admin_tenant(user)):
+            raise PermissionDenied("Only directors/admin can view invitations")
+        qs = Invitation.objects.filter(school_id=self.request.school_id)
+        role = self.request.query_params.get("role")
+        group_id = self.request.query_params.get("group")
+        state = self.request.query_params.get("state")
+        if role:
+            qs = qs.filter(role=role)
+        if group_id:
+            qs = qs.filter(group_id=group_id)
+        now = timezone.now()
+        if state == "active":
+            qs = [i.id for i in qs if i.is_active]
+            return Invitation.objects.filter(id__in=qs)
+        elif state == "expired":
+            qs = qs.filter(expires_at__lte=now)
+        elif state == "revoked":
+            qs = qs.filter(revoked_at__isnull=False)
+        return qs
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if not (is_director(user) or is_admin_tenant(user)):
+            raise PermissionDenied("Only directors/admin can create invitations")
+        inv = serializer.save(school_id=self.request.school_id, created_by=user)
+        AuditLog.objects.create(
+            school_id=self.request.school_id,
+            actor=user,
+            action="invitation_create",
+            entity_type="invitation",
+            entity_id=inv.id,
+            metadata={"role": inv.role, "group_id": inv.group_id},
+        )
+
+
+class InvitationRevokeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, token):
+        if not (is_director(request.user) or is_admin_tenant(request.user)):
+            raise PermissionDenied("Only directors/admin can revoke invitations")
+        invitation = get_object_or_404(Invitation, token=token, school_id=request.school_id)
+        if invitation.revoked_at is None:
+            invitation.revoked_at = timezone.now()
+            invitation.save(update_fields=["revoked_at"])
+            AuditLog.objects.create(
+                school_id=request.school_id,
+                actor=request.user,
+                action="invitation_revoke",
+                entity_type="invitation",
+                entity_id=invitation.id,
+            )
+        return Response({"detail": "revoked"})
+
+
+class InvitationAcceptView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def _create_user(self, request, school_id, role):
+        data = request.data
+        email = (data.get("email") or "").strip().lower()
+        password = data.get("password")
+        name = (data.get("name") or "").strip()
+        if not email or not password:
+            raise serializers.ValidationError("email and password are required")
+        first_name, _, last_name = name.partition(" ")
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            role=role,
+            school_id=school_id,
+        )
+        return user
+
+    def post(self, request, token):
+        school_id_by_token, invitation = _resolve_school_by_invitation_token(token)
+        if not invitation:
+            return Response({"detail": "Invalid invitation token"}, status=400)
+
+        if getattr(request, "school_id", None) is not None and request.school_id != school_id_by_token:
+            return Response({"detail": "Token school mismatch"}, status=400)
+
+        if invitation.revoked_at is not None or invitation.expires_at <= timezone.now() or invitation.uses_count >= invitation.max_uses:
+            return Response({"detail": "Invitation is not active"}, status=400)
+
+        user = request.user if request.user.is_authenticated else self._create_user(request, school_id_by_token, invitation.role)
+
+        if user.school_id != school_id_by_token:
+            return Response({"detail": "Cross-tenant acceptance is forbidden"}, status=403)
+
+        group = invitation.group
+        metadata = invitation.metadata or {}
+
+        if invitation.role == User.Roles.PADRE:
+            enrollment_code = metadata.get("enrollment_code")
+            if enrollment_code:
+                student = Student.objects.filter(school_id=school_id_by_token, enrollment_code=enrollment_code).first()
+                if not student:
+                    return Response({"detail": "Student not found for enrollment_code"}, status=400)
+                ParentStudent.objects.get_or_create(
+                    school_id=school_id_by_token,
+                    parent=user,
+                    student=student,
+                    defaults={"relationship": metadata.get("relationship", "parent")},
+                )
+
+        if invitation.role == User.Roles.VOCAL and group is not None:
+            VocalAssignment.objects.get_or_create(
+                school_id=school_id_by_token,
+                group=group,
+                parent=user,
+                defaults={"assigned_by": invitation.created_by},
+            )
+
+        if invitation.role == User.Roles.MAESTRO_ITINERANTE and group is not None:
+            SpecialistAssignment.objects.get_or_create(
+                school_id=school_id_by_token,
+                group=group,
+                teacher=user,
+                subject=metadata.get("subject", "General"),
+            )
+
+        if invitation.role == User.Roles.MAESTRO_TITULAR and group is not None:
+            if group.homeroom_teacher_id is None:
+                group.homeroom_teacher = user
+                group.save(update_fields=["homeroom_teacher"])
+
+        invitation.uses_count += 1
+        invitation.save(update_fields=["uses_count"])
+
+        AuditLog.objects.create(
+            school_id=school_id_by_token,
+            actor=user,
+            action="invitation_accept",
+            entity_type="invitation",
+            entity_id=invitation.id,
+            metadata={"role": invitation.role, "group_id": invitation.group_id},
+        )
+
+        return Response({"detail": "accepted", "role": user.role, "user_id": user.id})
+
+
+class AnnouncementAckView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        announcement = get_object_or_404(Announcement, id=pk, school_id=request.school_id)
+        group_ids = set(_visible_group_ids(request.user))
+        if announcement.scope == Announcement.Scope.GRUPO and announcement.group_id not in group_ids:
+            raise PermissionDenied("Cannot acknowledge this announcement")
+        read, _ = AnnouncementRead.objects.update_or_create(
+            announcement=announcement,
+            user=request.user,
+            defaults={"read_at": timezone.now()},
+        )
+        return Response(AnnouncementReadSerializer(read).data)
+
+
+class AnnouncementAckStatsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        if not (is_director(request.user) or is_admin_tenant(request.user)):
+            raise PermissionDenied("Only directors/admin can view acknowledgment stats")
+
+        announcement = get_object_or_404(Announcement, id=pk, school_id=request.school_id)
+
+        if announcement.scope == Announcement.Scope.GLOBAL:
+            audience = User.objects.filter(school_id=request.school_id, is_active=True)
+        else:
+            g = announcement.group
+            parent_ids = ParentStudent.objects.filter(
+                school_id=request.school_id,
+                student_id__in=GroupMembership.objects.filter(group=g).values_list("student_id", flat=True),
+            ).values_list("parent_id", flat=True)
+            vocal_ids = VocalAssignment.objects.filter(
+                school_id=request.school_id, group=g, active=True
+            ).values_list("parent_id", flat=True)
+            specialist_ids = SpecialistAssignment.objects.filter(
+                school_id=request.school_id, group=g
+            ).values_list("teacher_id", flat=True)
+            teacher_ids = [g.homeroom_teacher_id] if g.homeroom_teacher_id else []
+            audience = User.objects.filter(
+                school_id=request.school_id,
+                id__in=set(parent_ids) | set(vocal_ids) | set(specialist_ids) | set(teacher_ids),
+                is_active=True,
+            )
+
+        read_ids = set(AnnouncementRead.objects.filter(announcement=announcement).values_list("user_id", flat=True))
+        unread = audience.exclude(id__in=read_ids).values("id", "email", "first_name", "last_name")
+
+        return Response({
+            "announcement_id": announcement.id,
+            "total": audience.count(),
+            "read": len(read_ids),
+            "unread": audience.count() - len(read_ids),
+            "unread_users": list(unread),
+        })
 
 
 class HomeworkListCreateView(generics.ListCreateAPIView):
