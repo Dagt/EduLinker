@@ -1,34 +1,23 @@
-# Anuncios
+# Announcements API
+
+Comunicación estructurada con acuse de lectura para dirección y docentes.
+
+## Modelo
+
+`Announcement` ahora incluye:
+
+- `requires_ack` (bool)
+- `ack_deadline` (datetime nullable)
+- `locked` (bool)
+
+Nuevo modelo `AnnouncementRead` con unicidad `(announcement, user)`.
 
 ## Endpoints
 
-- `GET /api/v1/announcements/` – Lista anuncios con paginación.
-- `POST /api/v1/announcements/` – Crea un anuncio (directores y maestros titulares según alcance).
-- `GET /api/v1/announcements/{id}/` – Obtiene el detalle de un anuncio.
-- `PUT /api/v1/announcements/{id}/` – Actualiza un anuncio existente.
-- `DELETE /api/v1/announcements/{id}/` – Elimina un anuncio.
+- `POST /api/v1/announcements/{id}/ack/`: confirma lectura.
+- `GET /api/v1/announcements/{id}/ack-stats/` (DIRECTOR, ADMIN_TENANT): métricas de lectura y no leídos.
 
-## Ejemplo de solicitud
+## Multi-tenant
 
-```json
-POST /api/v1/announcements/
-{
-  "title": "Recordatorio",
-  "message": "Mañana hay reunión",
-  "scope": "GROUP",
-  "group": 12
-}
-```
-
-## Ejemplo de respuesta
-
-```json
-{
-  "id": 45,
-  "title": "Recordatorio",
-  "message": "Mañana hay reunión",
-  "scope": "GROUP",
-  "group": 12,
-  "created_at": "2024-05-01T18:00:00Z"
-}
-```
+- Todos los accesos filtran por `school_id`.
+- `ack-stats` solo devuelve audiencia del tenant actual.

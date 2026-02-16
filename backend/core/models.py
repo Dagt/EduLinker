@@ -441,7 +441,54 @@ class Announcement(models.Model):
     title = models.CharField(max_length=255)
     message = models.TextField(blank=True)
     attachments = models.JSONField(blank=True, default=list)
+    requires_ack = models.BooleanField(default=False)
+    ack_deadline = models.DateTimeField(null=True, blank=True)
+    locked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class AnnouncementRead(models.Model):
+    announcement = models.ForeignKey(
+        Announcement, on_delete=models.CASCADE, related_name="reads"
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="announcement_reads")
+    read_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["announcement", "user"],
+                name="unique_announcement_read",
+            )
+        ]
+
+
+class Invitation(models.Model):
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="invitations")
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    role = models.CharField(max_length=20, choices=UserRoles.choices)
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+        related_name="invitations",
+        null=True,
+        blank=True,
+    )
+    expires_at = models.DateTimeField()
+    max_uses = models.PositiveIntegerField(default=1)
+    uses_count = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_invitations")
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(blank=True, default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    @property
+    def is_active(self):
+        now = timezone.now()
+        return self.revoked_at is None and self.expires_at > now and self.uses_count < self.max_uses
 
 
 class Homework(models.Model):
